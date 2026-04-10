@@ -1,136 +1,291 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meus Sites - Lauro86</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e3a8a);
-            color: #e0f2fe;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 40px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 25px 20px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .card:hover {
-            transform: translateY(-8px);
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            margin: 0 0 15px 0;
-            color: #60a5fa;
-            font-size: 1.5rem;
-        }
-        .card p {
-            opacity: 0.85;
-            margin-bottom: 20px;
-        }
-        .btn {
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            padding: 12px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .btn:hover {
-            background: #2563eb;
-            transform: scale(1.05);
-        }
-        footer {
-            margin-top: 60px;
-            opacity: 0.7;
-            font-size: 0.95rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Favoritos Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; }
+    .category { transition: all 0.3s; }
+    li { transition: all 0.2s; }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🚀 Meus Sites</h1>
-        <p>Escolha o site que deseja acessar</p>
-
-        <div class="grid">
-
-            <div class="card">
-                <h2>FLAVIA-SITE</h2>
-                <p>Site teste gerado</p>
-                <a href="/FLAVIA-SITE/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>favoritos</h2>
-                <p>Meus favoritos rápidos</p>
-                <a href="/favoritos-main/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>fav2</h2>
-                <p>Versão 2</p>
-                <a href="/fav2-main/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>fav3</h2>
-                <p>Versão 3</p>
-                <a href="/fav3-main/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>favQWEN</h2>
-                <p>Versão QWEN</p>
-                <a href="/favQWEN-main/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>favQWEN2</h2>
-                <p>Versão QWEN 2</p>
-                <a href="/favQWEN2-main/" class="btn">Acessar →</a>
-            </div>
-
-            <div class="card">
-                <h2>favQWEN3</h2>
-                <p>Versão QWEN 3</p>
-                <a href="/favQWEN3-main/" class="btn">Acessar →</a>
-            </div>
-
-        </div>
-
-        <footer>
-            Todos os sites hospedados no GitHub Pages • lauro86-oss
-        </footer>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen pb-12">
+  <div class="max-w-5xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-4xl font-bold flex items-center gap-3">📌 Meus Favoritos Pro</h1>
+        <p class="text-emerald-400 mt-1">Sincronizado com Supabase • Funciona em qualquer dispositivo</p>
+      </div>
+      <div class="flex gap-3 flex-wrap">
+        <button onclick="addCategory()" 
+                class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-2xl flex items-center gap-2 font-medium">
+          <i class="fas fa-plus"></i> Nova Categoria
+        </button>
+        <button onclick="clearAll()" 
+                class="px-5 py-3 bg-red-600/80 hover:bg-red-600 rounded-2xl flex items-center gap-2">
+          🗑️ Limpar Tudo
+        </button>
+      </div>
     </div>
+
+    <input id="search" type="text" placeholder="🔎 Buscar link ou categoria..." 
+           class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl px-6 py-5 mb-10 focus:outline-none focus:border-emerald-500 text-lg"
+           onkeyup="filterLinks()">
+
+    <div id="categories" class="space-y-10"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md mx-4">
+      <h2 class="text-2xl font-bold mb-6" id="modalTitle">Adicionar Link</h2>
+      <input id="linkTitle" type="text" placeholder="Título do link" class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-4 focus:outline-none">
+      <input id="linkUrl" type="text" placeholder="https://exemplo.com" class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-4 focus:outline-none">
+      <input id="linkTag" type="text" placeholder="Tag (opcional)" class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-6 focus:outline-none">
+
+      <div class="flex gap-3">
+        <button onclick="hideModal()" class="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-medium">Cancelar</button>
+        <button onclick="saveLink()" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-medium">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================== SUAS CHAVES CORRETAS ==================
+    const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
+
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let data = { categories: [] };
+    let currentCatIndex = null;
+    let currentLinkIndex = null;
+
+    // Carregar dados do Supabase
+    async function loadData() {
+      const { data: result, error } = await supabase
+        .from('favoritos')
+        .select('categories')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error("Erro Supabase:", error);
+        alert("Erro ao conectar com o Supabase. Verifique se a tabela 'favoritos' existe.");
+        return;
+      }
+
+      if (result && result.length > 0 && result[0].categories) {
+        data = result[0].categories;
+      } else {
+        // Dados iniciais
+        data = {
+          categories: [
+            { name: "Google & Conta", links: [] },
+            { name: "IA & Chatbots", links: [] },
+            { name: "Comunicação", links: [] },
+            { name: "Entretenimento", links: [] },
+            { name: "Tech & Benchmarks", links: [] },
+            { name: "Estudos", links: [] },
+            { name: "Finanças", links: [] },
+            { name: "Utilitários", links: [] }
+          ]
+        };
+        await saveToSupabase();
+      }
+      render();
+    }
+
+    // Salvar no Supabase
+    async function saveToSupabase() {
+      try {
+        const { data: existing } = await supabase.from('favoritos').select('id').limit(1);
+        if (existing && existing.length > 0) {
+          await supabase.from('favoritos').update({ categories: data }).eq('id', existing[0].id);
+        } else {
+          await supabase.from('favoritos').insert([{ categories: data }]);
+        }
+      } catch (e) {
+        console.error("Erro ao salvar:", e);
+      }
+    }
+
+    function render() {
+      const container = document.getElementById("categories");
+      container.innerHTML = "";
+
+      data.categories.forEach((cat, catIndex) => {
+        const div = document.createElement("div");
+        div.className = "category bg-zinc-900 rounded-3xl p-6 border border-zinc-800";
+        div.innerHTML = `
+          <div class="flex items-center justify-between mb-5">
+            <h2 onclick="editCategory(${catIndex})" class="text-2xl font-semibold cursor-pointer hover:text-emerald-400">
+              ${cat.name}
+            </h2>
+            <div class="flex gap-2">
+              <button onclick="addLink(${catIndex}); event.stopImmediatePropagation()" 
+                      class="px-4 py-2 text-emerald-400 hover:text-emerald-300 flex items-center gap-1 text-sm">
+                <i class="fas fa-plus"></i> Adicionar
+              </button>
+              <button onclick="deleteCategory(${catIndex}); event.stopImmediatePropagation()" 
+                      class="px-3 py-2 text-red-400 hover:text-red-300">🗑️</button>
+            </div>
+          </div>
+          <ul id="list-${catIndex}" class="space-y-2 min-h-[60px]"></ul>
+        `;
+        container.appendChild(div);
+
+        const ul = div.querySelector(`#list-${catIndex}`);
+        
+        cat.links.forEach((link, linkIndex) => {
+          const li = document.createElement("li");
+          li.className = "group flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 px-5 py-4 rounded-2xl cursor-grab active:cursor-grabbing";
+          li.innerHTML = `
+            <div class="flex-1 flex items-center gap-4">
+              <span class="text-2xl">🔗</span>
+              <div class="flex-1 min-w-0">
+                <a href="${link.url}" target="_blank" class="block text-lg hover:underline truncate font-medium">${link.title}</a>
+                ${link.tag ? `<span class="inline-block mt-1 text-xs px-3 py-1 bg-zinc-700 rounded-full">${link.tag}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex gap-4 opacity-0 group-hover:opacity-100">
+              <button onclick="editLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-blue-400 hover:text-blue-300">✏️</button>
+              <button onclick="deleteLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-red-400 hover:text-red-300">🗑️</button>
+            </div>
+          `;
+          ul.appendChild(li);
+        });
+
+        // Drag and Drop entre categorias
+        new Sortable(ul, {
+          group: "links",
+          animation: 180,
+          onEnd: async (evt) => {
+            const fromIndex = parseInt(evt.from.id.split('-')[1]);
+            const toIndex = parseInt(evt.to.id.split('-')[1]);
+            const moved = data.categories[fromIndex].links.splice(evt.oldIndex, 1)[0];
+            data.categories[toIndex].links.splice(evt.newIndex, 0, moved);
+            render();
+            await saveToSupabase();
+          }
+        });
+      });
+    }
+
+    // Funções restantes
+    function addCategory() {
+      const name = prompt("Nome da nova categoria:");
+      if (!name || name.trim() === "") return;
+      data.categories.push({ name: name.trim(), links: [] });
+      render();
+      saveToSupabase();
+    }
+
+    function editCategory(index) {
+      const newName = prompt("Editar nome da categoria:", data.categories[index].name);
+      if (newName && newName.trim() !== "") {
+        data.categories[index].name = newName.trim();
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function deleteCategory(index) {
+      if (confirm(`Excluir "${data.categories[index].name}" e todos os links?`)) {
+        data.categories.splice(index, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function addLink(catIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = null;
+      document.getElementById("modalTitle").textContent = "Novo Link";
+      document.getElementById("linkTitle").value = "";
+      document.getElementById("linkUrl").value = "";
+      document.getElementById("linkTag").value = "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function editLink(catIndex, linkIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = linkIndex;
+      const link = data.categories[catIndex].links[linkIndex];
+      document.getElementById("modalTitle").textContent = "Editar Link";
+      document.getElementById("linkTitle").value = link.title || "";
+      document.getElementById("linkUrl").value = link.url || "";
+      document.getElementById("linkTag").value = link.tag || "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    async function saveLink() {
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkUrl").value.trim();
+      const tag = document.getElementById("linkTag").value.trim();
+
+      if (!title || !url) {
+        alert("Título e URL são obrigatórios!");
+        return;
+      }
+
+      if (currentLinkIndex === null) {
+        data.categories[currentCatIndex].links.push({ title, url, tag });
+      } else {
+        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag };
+      }
+
+      hideModal();
+      render();
+      await saveToSupabase();
+    }
+
+    function deleteLink(catIndex, linkIndex) {
+      if (confirm("Excluir este link?")) {
+        data.categories[catIndex].links.splice(linkIndex, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function hideModal() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function clearAll() {
+      if (confirm("⚠️ Apagar TODOS os favoritos permanentemente?")) {
+        data = { categories: [] };
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function filterLinks() {
+      const term = document.getElementById("search").value.toLowerCase().trim();
+      document.querySelectorAll(".category").forEach(cat => {
+        const catName = cat.querySelector("h2").textContent.toLowerCase();
+        const links = cat.querySelectorAll("li");
+        let visible = catName.includes(term);
+
+        links.forEach(li => {
+          if (li.textContent.toLowerCase().includes(term)) {
+            li.style.display = "flex";
+            visible = true;
+          } else {
+            li.style.display = "none";
+          }
+        });
+        cat.style.display = visible ? "block" : "none";
+      });
+    }
+
+    // Inicializar
+    window.onload = loadData;
+  </script>
 </body>
 </html>
