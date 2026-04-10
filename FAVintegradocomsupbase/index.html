@@ -22,12 +22,8 @@
     </div>
 
     <div class="flex flex-wrap gap-4 justify-center mb-10">
-      <button onclick="addCategory()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-medium">
-        Nova Categoria
-      </button>
-      <button onclick="clearAll()" class="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-2xl font-medium">
-        🗑️ Limpar Tudo
-      </button>
+      <button onclick="addCategory()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-medium">Nova Categoria</button>
+      <button onclick="clearAll()" class="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-2xl font-medium">🗑️ Limpar Tudo</button>
     </div>
 
     <input id="search" type="text" placeholder="🔎 Buscar..." 
@@ -51,7 +47,6 @@
     </div>
   </div>
 
-  <!-- SCRIPT PRINCIPAL (type="module") -->
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -64,43 +59,63 @@
     let currentCatIndex = null;
     let currentLinkIndex = null;
 
-    // Seus links originais já incluídos
+    // Seus links reais organizados
     data = {
       categories: [
-        { name: "Comunicação", emoji: "💬", links: [
-          { title: "Gmail", url: "https://mail.google.com" },
-          { title: "Google Account", url: "https://accounts.google.com" },
+        { name: "Google & Comunicação", emoji: "📧", links: [
+          { title: "Gmail / Google Account", url: "https://accounts.google.com" },
           { title: "WhatsApp Web", url: "https://web.whatsapp.com" },
-          { title: "Slack", url: "https://slack.com" }
+          { title: "Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
         ]},
         { name: "Armazenamento e Senhas", emoji: "☁️", links: [
           { title: "OneDrive", url: "https://onedrive.live.com" },
           { title: "Google Passwords", url: "https://passwords.google.com" },
           { title: "Feedly", url: "https://feedly.com" }
         ]},
-        { name: "Entretenimento & IA", emoji: "🎮", links: [
-          { title: "YouTube", url: "https://youtube.com" },
-          { title: "Twitter / X", url: "https://x.com" },
-          { title: "Grok", url: "https://grok.x.ai" },
+        { name: "Entretenimento & IA", emoji: "🎥", links: [
+          { title: "YouTube", url: "https://www.youtube.com" },
+          { title: "Twitter / X", url: "https://twitter.com/home" },
+          { title: "Twitch Following", url: "https://www.twitch.tv/directory/following" },
+          { title: "Grok", url: "https://grok.com" },
           { title: "ChatGPT", url: "https://chat.openai.com" },
-          { title: "Gemini", url: "https://gemini.google.com" }
+          { title: "Gemini", url: "https://gemini.google.com" },
+          { title: "Venice AI", url: "https://venice.ai" },
+          { title: "Chat Qwen", url: "https://chat.qwen.ai" },
+          { title: "Chat Zai", url: "https://chat.z.ai" }
         ]},
         { name: "Trabalho e Cursos", emoji: "💼", links: [
-          { title: "Smry.ai", url: "https://smry.ai" },
-          { title: "Estratégia Concursos", url: "https://estrategiaconcursos.com.br" },
-          { title: "Hotmart Club", url: "https://hotmart.com" }
+          { title: "Smry.ai", url: "https://www.smry.ai" },
+          { title: "Bolha Tools", url: "https://open.bolha.tools" },
+          { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
+          { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304" }
         ]},
         { name: "Benchmarks e Tech", emoji: "🔧", links: [
-          { title: "CPU Benchmark", url: "https://cpu.userbenchmark.com" },
-          { title: "ImgBB", url: "https://imgbb.com" }
+          { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php" },
+          { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
+          { title: "ImgBB", url: "https://imgbb.com" },
+          { title: "Twitter Video Downloader", url: "https://twittervideodownloader.com" }
         ]},
         { name: "Trading e Finanças", emoji: "📈", links: [
-          { title: "TradingView", url: "https://tradingview.com" }
+          { title: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
         ]},
         { name: "Compras e Farmácia", emoji: "🛒", links: [
-          { title: "Drogasil", url: "https://drogasil.com.br" }
+          { title: "Drogasil", url: "https://www.drogasil.com.br" },
+          { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site" },
+          { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com" }
         ]},
-        { name: "Adulto / Fetish", emoji: "🔞", links: [] }
+        { name: "Adulto / Fetish", emoji: "🔞", links: [
+          { title: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
+          { title: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
+          { title: "Pirataria Explicito", url: "https://pirataria.link/explicito" },
+          { title: "Reddit Armpit Fetish", url: "https://old.reddit.com/r/armpitfetish" }
+        ]},
+        { name: "Outros", emoji: "🔗", links: [
+          { title: "Wish List", url: "#" },
+          { title: "HLTV", url: "https://www.hltv.org/matches" },
+          { title: "AES", url: "#" },
+          { title: "News Google", url: "https://news.google.com" },
+          { title: "OpenRouter Qwen", url: "https://openrouter.ai/models" }
+        ]}
       ]
     };
 
@@ -171,25 +186,83 @@
       });
     }
 
-    // Funções restantes
-    function addCategory() { const name = prompt("Nome da nova categoria:"); if (!name) return; const emoji = prompt("Emoji:", "📁"); data.categories.push({ name: name.trim(), emoji: emoji || "📁", links: [] }); render(); saveToSupabase(); }
-    function deleteCategory(i) { if (confirm("Excluir categoria?")) { data.categories.splice(i, 1); render(); saveToSupabase(); } }
-    function addLink(i) { currentCatIndex = i; currentLinkIndex = null; document.getElementById("modalTitle").textContent = "Novo Link"; document.getElementById("linkTitle").value = ""; document.getElementById("linkUrl").value = ""; document.getElementById("linkTag").value = ""; document.getElementById("modal").classList.remove("hidden"); }
-    function editLink(c, l) { currentCatIndex = c; currentLinkIndex = l; const link = data.categories[c].links[l]; document.getElementById("modalTitle").textContent = "Editar Link"; document.getElementById("linkTitle").value = link.title || ""; document.getElementById("linkUrl").value = link.url || ""; document.getElementById("linkTag").value = link.tag || ""; document.getElementById("modal").classList.remove("hidden"); }
+    // Funções CRUD
+    function addCategory() {
+      const name = prompt("Nome da nova categoria:");
+      if (!name) return;
+      const emoji = prompt("Emoji da categoria:", "📁");
+      data.categories.push({ name: name.trim(), emoji: emoji || "📁", links: [] });
+      render();
+      saveToSupabase();
+    }
+
+    function deleteCategory(index) {
+      if (confirm("Excluir esta categoria e todos os links?")) {
+        data.categories.splice(index, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function addLink(catIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = null;
+      document.getElementById("modalTitle").textContent = "Novo Link";
+      document.getElementById("linkTitle").value = "";
+      document.getElementById("linkUrl").value = "";
+      document.getElementById("linkTag").value = "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function editLink(catIndex, linkIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = linkIndex;
+      const link = data.categories[catIndex].links[linkIndex];
+      document.getElementById("modalTitle").textContent = "Editar Link";
+      document.getElementById("linkTitle").value = link.title || "";
+      document.getElementById("linkUrl").value = link.url || "";
+      document.getElementById("linkTag").value = link.tag || "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
     async function saveLink() {
       const title = document.getElementById("linkTitle").value.trim();
       const url = document.getElementById("linkUrl").value.trim();
       const tag = document.getElementById("linkTag").value.trim();
-      if (!title || !url) return alert("Título e URL obrigatórios!");
-      if (currentLinkIndex === null) data.categories[currentCatIndex].links.push({ title, url, tag });
-      else data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag };
+
+      if (!title || !url) return alert("Título e URL são obrigatórios!");
+
+      if (currentLinkIndex === null) {
+        data.categories[currentCatIndex].links.push({ title, url, tag });
+      } else {
+        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag };
+      }
+
       hideModal();
       render();
       await saveToSupabase();
     }
-    function deleteLink(c, l) { if (confirm("Excluir link?")) { data.categories[c].links.splice(l, 1); render(); saveToSupabase(); } }
-    function hideModal() { document.getElementById("modal").classList.add("hidden"); }
-    function clearAll() { if (confirm("Apagar tudo?")) { data = { categories: [] }; render(); saveToSupabase(); } }
+
+    function deleteLink(catIndex, linkIndex) {
+      if (confirm("Excluir este link?")) {
+        data.categories[catIndex].links.splice(linkIndex, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function hideModal() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function clearAll() {
+      if (confirm("Apagar TODOS os favoritos permanentemente?")) {
+        data = { categories: [] };
+        render();
+        saveToSupabase();
+      }
+    }
+
     function filterLinks() {
       const term = document.getElementById("search").value.toLowerCase().trim();
       document.querySelectorAll(".card").forEach(card => {
@@ -197,8 +270,12 @@
         const items = card.querySelectorAll(".link-item");
         let visible = title.includes(term);
         items.forEach(item => {
-          if (item.textContent.toLowerCase().includes(term)) { item.style.display = "flex"; visible = true; }
-          else item.style.display = "none";
+          if (item.textContent.toLowerCase().includes(term)) {
+            item.style.display = "flex";
+            visible = true;
+          } else {
+            item.style.display = "none";
+          }
         });
         card.style.display = visible ? "block" : "none";
       });
