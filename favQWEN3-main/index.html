@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📌 Meus Favoritos Pro</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Meus%20Favoritos%22,%22short_name%22:%22Favoritos%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8f9fa%22,%22theme_color%22:%22%232563eb%22,%22icons%22:[{%22src%22:%22https://www.google.com/s2/favicons?domain=google.com%22,%22sizes%22:%2264x64%22,%22type%22:%22image/png%22}]}">
+    
+    <style>
+        :root {
+            /* Light Theme */
+            --bg: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --text-muted: #9ca3af;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --adult-bg: #fef2f2;
+            --adult-border: #fecaca;
+            --adult-text: #b91c1c;
+            --pin-bg: #fef3c7;
+            --pin-border: #f59e0b;
+            --tag-bg: #e0e7ff;
+            --tag-text: #3730a3;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --primary-light: #1e3a5f;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4);
+            --adult-bg: #450a0a;
+            --adult-border: #7f1d1d;
+            --adult-text: #fca5a5;
+            --pin-bg: #422006;
+            --pin-border: #d97706;
+            --tag-bg: #312e81;
+            --tag-text: #c7d2fe;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 16px;
+            transition: var(--transition);
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            border-radius: 16px;
+            color: white;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .header-content { position: relative; z-index: 1; }
+        h1 { font-size: 1.6rem; margin-bottom: 0.25rem; font-weight: 700; }
+        .subtitle { opacity: 0.95; font-size: 0.9rem; }
+
+        /* ===== CONTROLES ===== */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: var(--bg-secondary);
+            color: var(--text);
+            transition: var(--transition);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            padding: 0;
+        }
+
+        /* ===== PINNED FAVORITES ===== */
+        .pinned-section {
+            background: var(--pin-bg);
+            border: 2px solid var(--pin-border);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        
+        .pinned-section.visible { display: block; }
+        
+        .pinned-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text);
+        }
+        
+        .pinned-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .pinned-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+        
+        .pinned-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .pinned-item img {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        .pinned-shortcut {
+            font-size: 0.7rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            margin-left: 0.3rem;
+            font-weight: 600;
+        }
+
+        /* ===== CATEGORIES ===== */
+        .category {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        
+        .category.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.01);
+        }
+        
+        .category.adult {
+            background: var(--adult-bg);
+            border-color: var(--adult-border);
+            display: none;
+        }
+        
+        .category.adult.visible { display: block; }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            cursor: grab;
+        }
+        
+        .category-header:active { cursor: grabbing; }
+        
+        .category-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+        
+        .category.adult .category-title {
+            border-bottom-color: var(--adult-border);
+            color: var(--adult-text);
+        }
+        
+        .category-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+        
+        .category-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            padding: 0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+        }
+
+        /* ===== LINKS ===== */
+        .links {
+            list-style: none;
+            display: grid;
+            gap: 0.4rem;
+        }
+        
+        @media (min-width: 600px) {
+            .links { grid-template-columns: 1fr 1fr; }
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.7rem;
+            border-radius: 10px;
+            transition: var(--transition);
+            background: var(--bg-tertiary);
+            border: 1px solid transparent;
+            cursor: grab;
+        }
+        
+        .link-item:active { cursor: grabbing; }
+        
+        .link-item:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+        
+        .link-item.dragging {
+            opacity: 0.7;
+            transform: scale(1.02);
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+        }
+        
+        .link-item img {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            object-fit: contain;
+            flex-shrink: 0;
+            background: var(--bg-secondary);
+            padding: 2px;
+        }
+        
+        .link-item a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .link-item a:hover { color: var(--primary); }
+        
+        .link-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+        
+        .link-count {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            background: var(--bg-secondary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            min-width: 28px;
+            text-align: center;
+        }
+        
+        .link-pin-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: var(--transition);
+            background: var(--warning);
+            color: white;
+            border: none;
+        }
+        
+        .link-item:hover .link-pin-btn { opacity: 1; }
+        .link-item.pinned .link-pin-btn {
+            opacity: 1;
+            background: var(--primary);
+        }
+
+        /* ===== TAGS ===== */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-left: auto;
+        }
+        
+        .tag {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            background: var(--tag-bg);
+            color: var(--tag-text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .tag:hover {
+            transform: scale(1.05);
+            filter: brightness(0.95);
+        }
+        
+        .tag.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ===== SETTINGS PANEL ===== */
+        .settings-panel {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: none;
+        }
+        
+        .settings-panel.visible { display: block; }
+        
+        .settings-grid {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .setting-item label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .setting-item select,
+        .setting-item input[type="number"] {
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .toast {
+            background: var(--bg-secondary);
+            color: var(--text);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            max-width: 300px;
+            font-size: 0.9rem;
+        }
+        
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            margin: 2rem 0 1rem;
+            color: var(--text-light);
+            font-size: 0.8rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .keyboard-hints {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .key-hint {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        /* ===== UTILS ===== */
+        .hidden { display: none !important; }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            h1 { font-size: 1.3rem; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .search-box { max-width: 100%; }
+            .links { grid-template-columns: 1fr; }
+            .link-meta { display: none; }
+            .settings-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            .controls, .settings-panel, .pinned-section, footer { display: none; }
+            body { background: white; color: black; }
+            .category { break-inside: avoid; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>📌 Meus Favoritos Pro</h1>
+                <p class="subtitle">Organização inteligente • Atalhos • Backup</p>
+            </div>
+        </header>
+
+        <!-- Controles -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar favoritos ou tags..." aria-label="Buscar">
+            </div>
+            <button class="btn theme-toggle" id="themeToggle" title="Alternar tema (D)">🌙</button>
+            <button class="btn" id="settingsToggle">⚙️ Config</button>
+            <button class="btn" id="exportBtn">💾 Exportar</button>
+            <button class="btn" id="importBtn">📁 Importar</button>
+            <button class="btn btn-danger" id="toggleAdult">🔞 Conteúdo</button>
+        </div>
+
+        <!-- Painel de Configurações -->
+        <div class="settings-panel" id="settingsPanel">
+            <h3 style="margin-bottom:0.75rem;font-size:1.1rem">⚙️ Preferências</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label>Tema</label>
+                    <select id="themeSelect">
+                        <option value="auto">🔄 Automático (sistema)</option>
+                        <option value="light">☀️ Claro</option>
+                        <option value="dark">🌙 Escuro</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Itens fixados máx.</label>
+                    <input type="number" id="maxPinned" min="0" max="10" value="5">
+                </div>
+                <div class="setting-item">
+                    <label>Ordenar por</label>
+                    <select id="sortOrder">
+                        <option value="default">📋 Original</option>
+                        <option value="clicks">📊 Mais acessados</option>
+                        <option value="name">🔤 Nome (A-Z)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Resetar contadores</label>
+                    <button class="btn btn-danger" id="resetCounters" style="width:100%">🗑️ Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favoritos Fixados -->
+        <div class="pinned-section" id="pinnedSection">
+            <div class="pinned-title">📌 Fixados <span class="sr-only">(atalhos Ctrl+1 a Ctrl+5)</span></div>
+            <div class="pinned-grid" id="pinnedGrid"></div>
+        </div>
+
+        <!-- Categorias de Links -->
+        <div id="categoriesContainer">
+            <!-- 🔐 Google & Conta -->
+            <div class="category" data-category="google">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🔐 Google & Conta</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn" title="Recolher">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://accounts.google.com" data-tags="email,conta,google" data-name="Gmail">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w" target="_blank" rel="noopener">Gmail / Conta Google</a>
+                        <div class="link-meta">
+                            <span class="link-count" title="Cliques">0</span>
+                            <button class="link-pin-btn" title="Fixar">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="email">email</span>
+                            <span class="tag" data-tag="google">google</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://passwords.google.com" data-tags="senhas,seguranca,google" data-name="Google Passwords">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://passwords.google.com/" target="_blank" rel="noopener">Google Passwords</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="senhas">senhas</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://news.google.com" data-tags="noticias,google,feed" data-name="Google Notícias">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" target="_blank" rel="noopener">Google Notícias</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="noticias">notícias</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://gemini.google.com" data-tags="ia,google,gemini" data-name="Gemini AI">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://gemini.google.com/gem/361063ffb92e" target="_blank" rel="noopener">Gemini AI</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ia">IA</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 💬 Comunicação -->
+            <div class="category" data-category="comunicacao">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">💬 Comunicação</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://slack.com" data-tags="trabalho,equipe,chat" data-name="Slack">
+                        <img src="" alt="" class="favicon" data-domain="slack.com">
+                        <a href="https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" target="_blank" rel="noopener">Slack</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="trabalho">trabalho</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://web.whatsapp.com" data-tags="mensagens,whatsapp,chat" data-name="WhatsApp Web">
+                        <img src="" alt="" class="favicon" data-domain="whatsapp.com">
+                        <a href="https://web.whatsapp.com/" target="_blank" rel="noopener">WhatsApp Web</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="mensagens">mensagens</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ☁️ Nuvem & Ferramentas -->
+            <div class="category" data-category="ferramentas">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">☁️ Nuvem & Ferramentas</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://onedrive.live.com" data-tags="nuvem,arquivos,microsoft" data-name="OneDrive">
+                        <img src="" alt="" class="favicon" data-domain="onedrive.live.com">
+                        <a href="https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" target="_blank" rel="noopener">OneDrive</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="nuvem">nuvem</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://feedly.com" data-tags="rss,feeds,leitura" data-name="Feedly">
+                        <img src="" alt="" class="favicon" data-domain="feedly.com">
+                        <a href="https://feedly.com/" target="_blank" rel="noopener">Feedly</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="rss">RSS</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://imgbb.com" data-tags="imagens,upload,hospedagem" data-name="ImgBB">
+                        <img src="" alt="" class="favicon" data-domain="imgbb.com">
+                        <a href="https://imgbb.com/" target="_blank" rel="noopener">ImgBB</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="imagens">imagens</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://twittervideodownloader.com" data-tags="video,download,utilitario" data-name="Twitter Video Downloader">
+                        <img src="" alt="" class="favicon" data-domain="twittervideodownloader.com">
+                        <a href="https://twittervideodownloader.com/" target="_blank" rel="noopener">Twitter Video Downloader</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="download">download</span>
+                        </div>
+                    </li>
+                    <!-- SnapTik -->
+                    <li class="link-item" draggable="true" data-url="https://snaptik.app" data-tags="tiktok,download,video,social" data-name="SnapTik">
+                        <img src="" alt="" class="favicon" data-domain="snaptik.app">
+                        <a href="https://snaptik.app/pt" target="_blank" rel="noopener">SnapTik</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="tiktok">TikTok</span>
+                            <span class="tag" data-tag="download">download</span>
+                        </div>
+                    </li>
+                    <!-- Snapins.ai -->
+                    <li class="link-item" draggable="true" data-url="https://snapins.ai" data-tags="ia,social,marketing,instagram" data-name="Snapins.ai">
+                        <img src="" alt="" class="favicon" data-domain="snapins.ai">
+                        <a href="https://snapins.ai/" target="_blank" rel="noopener">Snapins.ai</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ia">IA</span>
+                            <span class="tag" data-tag="marketing">marketing</span>
+                        </div>
+                    </li>
+                    <!-- X-Downloader -->
+                    <li class="link-item" draggable="true" data-url="https://x-downloader.com" data-tags="twitter,x,download,video" data-name="X-Downloader">
+                        <img src="" alt="" class="favicon" data-domain="x-downloader.com">
+                        <a href="https://x-downloader.com/" target="_blank" rel="noopener">X-Downloader</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="twitter">X/Twitter</span>
+                            <span class="tag" data-tag="download">download</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🤖 Inteligência Artificial -->
+            <div class="category" data-category="ia">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🤖 IA & Chatbots</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://grok.com" data-tags="ia,xai,grok,chat" data-name="Grok">
+                        <img src="" alt="" class="favicon" data-domain="grok.com">
+                        <a href="https://grok.com/" target="_blank" rel="noopener">Grok</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ia">IA</span>
+                            <span class="tag" data-tag="chat">chat</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://grok.com/tasks" data-tags="ia,tarefas,grok" data-name="Grok Tasks">
+                        <img src="" alt="" class="favicon" data-domain="grok.com">
+                        <a href="https://grok.com/tasks" target="_blank" rel="noopener">Grok Tasks</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="tarefas">tarefas</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://chat.openai.com" data-tags="ia,chatgpt,openai" data-name="ChatGPT">
+                        <img src="" alt="" class="favicon" data-domain="chat.openai.com">
+                        <a href="https://chat.openai.com/" target="_blank" rel="noopener">ChatGPT</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ia">IA</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://venice.ai" data-tags="ia,privacidade,chat" data-name="Venice.ai">
+                        <img src="" alt="" class="favicon" data-domain="venice.ai">
+                        <a href="https://venice.ai/" target="_blank" rel="noopener">Venice.ai</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="privacidade">privado</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://openrouter.ai" data-tags="ia,modelos,api" data-name="OpenRouter">
+                        <img src="" alt="" class="favicon" data-domain="openrouter.ai">
+                        <a href="https://openrouter.ai/models?max_price=0&q=qwen" target="_blank" rel="noopener">OpenRouter</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="modelos">modelos</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://chat.z.ai" data-tags="ia,assistente,chat" data-name="Chat Z.ai">
+                        <img src="" alt="" class="favicon" data-domain="chat.z.ai">
+                        <a href="https://chat.z.ai/" target="_blank" rel="noopener">Chat Z.ai</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://www.smry.ai" data-tags="ia,resumo,produtividade" data-name="SMRY.ai">
+                        <img src="" alt="" class="favicon" data-domain="smry.ai">
+                        <a href="https://www.smry.ai/" target="_blank" rel="noopener">SMRY.ai</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="resumo">resumos</span>
+                        </div>
+                    </li>
+                    <!-- Chat Qwen (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="https://chat.qwen.ai" data-tags="ia,qwen,chat,alibaba" data-name="Chat Qwen">
+                        <img src="" alt="" class="favicon" data-domain="chat.qwen.ai">
+                        <a href="https://chat.qwen.ai/" target="_blank" rel="noopener">Chat Qwen ✨</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ia">IA</span>
+                            <span class="tag" data-tag="qwen">Qwen</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🎬 Entretenimento -->
+            <div class="category" data-category="entretenimento">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🎬 Entretenimento</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://youtube.com" data-tags="video,musica,entretenimento" data-name="YouTube">
+                        <img src="" alt="" class="favicon" data-domain="youtube.com">
+                        <a href="https://www.youtube.com/" target="_blank" rel="noopener">YouTube</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="video">vídeo</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://twitter.com" data-tags="social,noticias,x" data-name="X (Twitter)">
+                        <img src="" alt="" class="favicon" data-domain="twitter.com">
+                        <a href="https://twitter.com/home" target="_blank" rel="noopener">X (Twitter)</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="social">social</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://twitch.tv" data-tags="live,games,streaming" data-name="Twitch">
+                        <img src="" alt="" class="favicon" data-domain="twitch.tv">
+                        <a href="https://www.twitch.tv/directory/following" target="_blank" rel="noopener">Twitch</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="live">lives</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://hltv.org" data-tags="esports,csgo,games" data-name="HLTV">
+                        <img src="" alt="" class="favicon" data-domain="hltv.org">
+                        <a href="https://www.hltv.org/matches" target="_blank" rel="noopener">HLTV</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="esports">e-sports</span>
+                        </div>
+                    </li>
+                    <!-- MyInstants (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="https://www.myinstants.com" data-tags="sons,memes,audio,brasil" data-name="MyInstants">
+                        <img src="" alt="" class="favicon" data-domain="myinstants.com">
+                        <a href="https://www.myinstants.com/pt/index/br/" target="_blank" rel="noopener">MyInstants 🔊</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="memes">memes</span>
+                            <span class="tag" data-tag="audio">áudio</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 💻 Tech & Benchmarks -->
+            <div class="category" data-category="tech">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">💻 Tech & Benchmarks</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://cpubenchmark.net/singleCompare.php" data-tags="cpu,benchmark,hardware" data-name="CPU Benchmark">
+                        <img src="" alt="" class="favicon" data-domain="cpubenchmark.net">
+                        <a href="https://www.cpubenchmark.net/singleCompare.php" target="_blank" rel="noopener">CPU Benchmark (Single)</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="hardware">hardware</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://cpubenchmark.net/compare" data-tags="cpu,comparacao,benchmark" data-name="CPU Compare">
+                        <img src="" alt="" class="favicon" data-domain="cpubenchmark.net">
+                        <a href="https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" target="_blank" rel="noopener">CPU Benchmark (Compare)</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="comparacao">comparar</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://videocardbenchmark.net" data-tags="gpu,video,benchmark" data-name="VideoCard Benchmark">
+                        <img src="" alt="" class="favicon" data-domain="videocardbenchmark.net">
+                        <a href="https://www.videocardbenchmark.net/singleCompare.php" target="_blank" rel="noopener">VideoCard Benchmark</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="gpu">GPU</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="http://localhost:3000" data-tags="dev,local,desenvolvimento" data-name="localhost:3000">
+                        <img src="" alt="" class="favicon" data-domain="localhost" onerror="this.parentElement.querySelector('img').style.display='none';this.parentElement.insertAdjacentHTML('afterbegin','<span style=\'width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:#64748b;color:white;border-radius:5px;font-size:14px\'>🔧</span>')">
+                        <a href="http://localhost:3000/" target="_blank" rel="noopener">localhost:3000</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="dev">dev</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🎓 Estudos & Cursos -->
+            <div class="category" data-category="estudos">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🎓 Estudos & Cursos</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://estrategiaconcursos.com.br" data-tags="concursos,estudos,educacao" data-name="Estratégia Concursos">
+                        <img src="" alt="" class="favicon" data-domain="estrategiaconcursos.com.br">
+                        <a href="https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" target="_blank" rel="noopener">Estratégia Concursos</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="concursos">concursos</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://hotmart.com" data-tags="cursos,negocios,hotmart" data-name="Hotmart - Excelência">
+                        <img src="" alt="" class="favicon" data-domain="hotmart.com">
+                        <a href="https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user" target="_blank" rel="noopener">Hotmart - Excelência</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="negocios">negócios</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://kyte.site" data-tags="medico,catalogo,sauda" data-name="Medical Brasil">
+                        <img src="" alt="" class="favicon" data-domain="kyte.site">
+                        <a href="https://medical-brasil.catalog.kyte.site/" target="_blank" rel="noopener">Medical Brasil Catalog</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="medico">médico</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 💰 Finanças & Trading -->
+            <div class="category" data-category="financas">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">💰 Finanças & Trading</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://tradingview.com" data-tags="trading,graficos,investimentos" data-name="TradingView">
+                        <img src="" alt="" class="favicon" data-domain="tradingview.com">
+                        <a href="https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" target="_blank" rel="noopener">TradingView</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="trading">trading</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🛒 Compras -->
+            <div class="category" data-category="compras">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🛒 Compras</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://drogasil.com.br" data-tags="farmacia,saude,compras" data-name="Drogasil">
+                        <img src="" alt="" class="favicon" data-domain="drogasil.com.br">
+                        <a href="https://www.drogasil.com.br/" target="_blank" rel="noopener">Drogasil</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="farmacia">farmácia</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://paraguaypharmaceuticals.com" data-tags="importados,farmacia,paraguai" data-name="Paraguay Pharmaceuticals">
+                        <img src="" alt="" class="favicon" data-domain="paraguaypharmaceuticals.com">
+                        <a href="https://paraguaypharmaceuticals.com/" target="_blank" rel="noopener">Paraguay Pharmaceuticals</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="importados">importados</span>
+                        </div>
+                    </li>
+                    <!-- Oferta Esperta (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="http://www.ofertaesperta.com" data-tags="ofertas,compras,descontos" data-name="Oferta Esperta">
+                        <img src="" alt="" class="favicon" data-domain="ofertaesperta.com">
+                        <a href="http://www.ofertaesperta.com/" target="_blank" rel="noopener">Oferta Esperta 💰</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ofertas">ofertas</span>
+                            <span class="tag" data-tag="descontos">descontos</span>
+                        </div>
+                    </li>
+                    <!-- Hardmob Promoções (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="https://www.hardmob.com.br" data-tags="forum,promocoes,comunidade,brasil" data-name="Hardmob Promoções">
+                        <img src="" alt="" class="favicon" data-domain="hardmob.com.br">
+                        <a href="https://www.hardmob.com.br/forums/407-Promocoes" target="_blank" rel="noopener">Hardmob - Promoções 🔥</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="forum">fórum</span>
+                            <span class="tag" data-tag="promocoes">promoções</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="#" data-tags="wishlist,compras,desejos" data-name="Wish List">
+                        <span style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:#fbbf24;color:#78350f;border-radius:5px;font-size:14px">🎁</span>
+                        <a href="#" onclick="showToast('⚠️ Adicione o link da sua Wish List nas configurações!','warning');return false;">Wish List</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🔧 Utilitários -->
+            <div class="category" data-category="utilitarios">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🔧 Utilitários</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://open.bolha.tools" data-tags="ferramentas,utilitarios,bolha" data-name="Bolha Tools">
+                        <img src="" alt="" class="favicon" data-domain="bolha.tools">
+                        <a href="https://open.bolha.tools/" target="_blank" rel="noopener">Bolha Tools</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="ferramentas">ferramentas</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="#" data-tags="criptografia,seguranca,aes" data-name="AES">
+                        <span style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:#8b5cf6;color:white;border-radius:5px;font-size:14px">🔐</span>
+                        <a href="#" onclick="showToast('⚠️ Adicione o link do AES nas configurações!','warning');return false;">AES</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="seguranca">segurança</span>
+                        </div>
+                    </li>
+                    <!-- Calc InjectionShop (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="https://calc.injectionshop.com" data-tags="calculadora,ferramenta,utilitario" data-name="Calc InjectionShop">
+                        <img src="" alt="" class="favicon" data-domain="calc.injectionshop.com">
+                        <a href="https://calc.injectionshop.com/" target="_blank" rel="noopener">Calc InjectionShop 🧮</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="calculadora">calculadora</span>
+                            <span class="tag" data-tag="ferramenta">ferramenta</span>
+                        </div>
+                    </li>
+                    <!-- WhatsMyName (NOVO!) -->
+                    <li class="link-item" draggable="true" data-url="https://whatsmyname.me" data-tags="username,busca,osint,seguranca" data-name="WhatsMyName">
+                        <img src="" alt="" class="favicon" data-domain="whatsmyname.me">
+                        <a href="https://whatsmyname.me/" target="_blank" rel="noopener">WhatsMyName 🔍</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="osint">OSINT</span>
+                            <span class="tag" data-tag="busca">busca</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 🔞 Conteúdo Sensível (oculto por padrão) -->
+            <div class="category adult" data-category="adulto" id="adultSection">
+                <div class="category-header" draggable="true">
+                    <div class="category-title">🔞 Conteúdo Sensível</div>
+                    <div class="category-actions">
+                        <button class="category-btn collapse-btn">−</button>
+                    </div>
+                </div>
+                <ul class="links" data-sortable="true">
+                    <li class="link-item" draggable="true" data-url="https://photoacompanhantes.com" data-tags="adulto,busca,local" data-name="PhotoAcompanhantes">
+                        <img src="" alt="" class="favicon" data-domain="photoacompanhantes.com">
+                        <a href="https://www.photoacompanhantes.com/acompanhantes/indaiatuba" target="_blank" rel="noopener">PhotoAcompanhantes - Indaiatuba</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="busca">busca</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://coomer.st" data-tags="adulto,archive,onlyfans" data-name="Coomer">
+                        <img src="" alt="" class="favicon" data-domain="coomer.st">
+                        <a href="https://coomer.st/onlyfans/user/erikasbulbasaur" target="_blank" rel="noopener">Coomer - Erika's Bulbasaur</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="archive">archive</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://pirataria.link" data-tags="adulto,conteudo,links" data-name="Pirataria.link">
+                        <img src="" alt="" class="favicon" data-domain="pirataria.link">
+                        <a href="https://pirataria.link/explicito" target="_blank" rel="noopener">Pirataria.link - Explícito</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://old.reddit.com" data-tags="adulto,reddit,armpit" data-name="Reddit - Armpit">
+                        <img src="" alt="" class="favicon" data-domain="reddit.com">
+                        <a href="https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all" target="_blank" rel="noopener">Reddit - Armpit Fetish (Stubble)</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="reddit">Reddit</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://google.com/search" data-tags="adulto,reddit,busca" data-name="Google - Reddit Armpit">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble" target="_blank" rel="noopener">Google - Reddit Armpit Search</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="busca">busca</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://google.com/search" data-tags="adulto,reddit,orgasm" data-name="Google - Reddit Orgasm">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt" target="_blank" rel="noopener">Google - Reddit Orgasm Search</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="busca">busca</span>
+                        </div>
+                    </li>
+                    <li class="link-item" draggable="true" data-url="https://google.com/search" data-tags="adulto,reddit,contractions" data-name="Google - Contractions">
+                        <img src="" alt="" class="favicon" data-domain="google.com">
+                        <a href="https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1" target="_blank" rel="noopener">Google - Contractions Search</a>
+                        <div class="link-meta">
+                            <span class="link-count">0</span>
+                            <button class="link-pin-btn">📌</button>
+                        </div>
+                        <div class="tags">
+                            <span class="tag" data-tag="busca">busca</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🔗 Favoritos Pro • Clique para abrir • Arraste para reordenar</p>
+            <div class="keyboard-hints">
+                <span class="key-hint">Ctrl+K: Buscar</span>
+                <span class="key-hint">Ctrl+1-5: Fixados</span>
+                <span class="key-hint">D: Tema</span>
+                <span class="key-hint">E: Exportar</span>
+                <span class="key-hint">S: Config</span>
+            </div>
+            <p style="margin-top:0.5rem;font-size:0.75rem">💡 Dados salvos no seu navegador • Exporte regularmente para backup</p>
+        </footer>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Input file oculto para importação -->
+    <input type="file" id="importFile" accept=".json" class="sr-only">
+
+    <script>
+        // ===== ESTADO GLOBAL =====
+        const AppState = {
+            theme: localStorage.getItem('favorites_theme') || 'auto',
+            pinned: JSON.parse(localStorage.getItem('favorites_pinned') || '[]'),
+            clickCounts: JSON.parse(localStorage.getItem('favorites_clicks') || '{}'),
+            adultVisible: localStorage.getItem('favorites_adult') === 'true',
+            settings: {
+                maxPinned: parseInt(localStorage.getItem('favorites_maxPinned') || '5'),
+                sortOrder: localStorage.getItem('favorites_sortOrder') || 'default'
+            }
+        };
+
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initFavicons();
+            initClickCounters();
+            initPinned();
+            initAdultToggle();
+            initSearch();
+            initKeyboardShortcuts();
+            initDragAndDrop();
+            initSettings();
+            initExportImport();
+            initCollapsibles();
+            renderPinned();
+            applySortOrder();
+            showToast('🎉 Favoritos Pro carregado! Pressione Ctrl+K para buscar', 'success');
+        });
+
+        // ===== TEMA (CLARO/ESCURO) =====
+        function initTheme() {
+            applyTheme(AppState.theme);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('themeSelect').value = AppState.theme;
+            document.getElementById('themeSelect').addEventListener('change', (e) => {
+                AppState.theme = e.target.value;
+                localStorage.setItem('favorites_theme', AppState.theme);
+                applyTheme(AppState.theme);
+            });
+        }
+
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+                document.querySelector('#themeToggle').textContent = '☀️';
+            } else if (theme === 'light') {
+                root.removeAttribute('data-theme');
+                document.querySelector('#themeToggle').textContent = '🌙';
+            } else {
+                // Auto: segue preferência do sistema
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                root.setAttribute('data-theme', isDark ? 'dark' : '');
+                document.querySelector('#themeToggle').textContent = isDark ? '☀️' : '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            const current = AppState.theme;
+            const next = current === 'dark' ? 'light' : current === 'light' ? 'auto' : 'dark';
+            AppState.theme = next;
+            localStorage.setItem('favorites_theme', next);
+            applyTheme(next);
+            document.getElementById('themeSelect').value = next;
+            showToast(`🎨 Tema: ${next === 'auto' ? 'Automático' : next === 'dark' ? 'Escuro' : 'Claro'}`, 'success');
+        }
+
+        // ===== FAVICONS COM FALLBACK =====
+        function initFavicons() {
+            document.querySelectorAll('.favicon').forEach(img => {
+                const domain = img.dataset.domain;
+                const sources = [
+                    `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
+                    `https://icon.horse/icon/${domain}`,
+                    `https://icons.duckduckgo.com/ip3/${domain}.ico`
+                ];
+                
+                let loaded = false;
+                const trySource = (index) => {
+                    if (index >= sources.length) {
+                        // Fallback final: emoji baseado no domínio
+                        if (!loaded) {
+                            img.style.display = 'none';
+                            const emoji = getDomainEmoji(domain);
+                            img.insertAdjacentHTML('beforebegin', 
+                                `<span style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-secondary);border-radius:5px;font-size:14px">${emoji}</span>`
+                            );
+                        }
+                        return;
+                    }
+                    img.src = sources[index];
+                    img.onerror = () => trySource(index + 1);
+                    img.onload = () => { loaded = true; };
+                };
+                trySource(0);
+            });
+        }
+
+        function getDomainEmoji(domain) {
+            const map = {
+                'google': '🔍', 'gmail': '📧', 'youtube': '🎬', 'twitter': '🐦',
+                'slack': '💬', 'whatsapp': '💚', 'github': '🐙', 'reddit': '🤖',
+                'twitch': '🎮', 'spotify': '🎵', 'linkedin': '💼', 'facebook': '📘',
+                'instagram': '📷', 'tiktok': '🎭', 'discord': '🎮', 'telegram': '📱',
+                'localhost': '🔧', '127.0.0.1': '🔧', 'qwen': '✨', 'ofertaesperta': '💰',
+                'hardmob': '🔥', 'myinstants': '🔊', 'whatsmyname': '🔍'
+            };
+            for (const [key, emoji] of Object.entries(map)) {
+                if (domain.toLowerCase().includes(key)) return emoji;
+            }
+            return '🌐';
+        }
+
+        // ===== CONTADOR DE CLIQUES =====
+        function initClickCounters() {
+            // Restaurar contadores salvos
+            document.querySelectorAll('.link-count').forEach(el => {
+                const link = el.closest('.link-item');
+                const url = link.dataset.url;
+                if (AppState.clickCounts[url]) {
+                    el.textContent = AppState.clickCounts[url];
+                }
+            });
+
+            // Registrar cliques
+            document.querySelectorAll('.link-item a[target="_blank"]').forEach(link => {
+                link.addEventListener('click', () => {
+                    const url = link.closest('.link-item').dataset.url;
+                    AppState.clickCounts[url] = (AppState.clickCounts[url] || 0) + 1;
+                    localStorage.setItem('favorites_clicks', JSON.stringify(AppState.clickCounts));
+                    
+                    // Atualizar display
+                    const counter = link.closest('.link-item').querySelector('.link-count');
+                    if (counter) counter.textContent = AppState.clickCounts[url];
+                    
+                    // Feedback visual sutil
+                    counter.style.transform = 'scale(1.2)';
+                    counter.style.color = 'var(--success)';
+                    setTimeout(() => {
+                        counter.style.transform = '';
+                        counter.style.color = '';
+                    }, 200);
+                });
+            });
+        }
+
+        // ===== FAVORITOS FIXADOS =====
+        function initPinned() {
+            // Botões de fixar
+            document.querySelectorAll('.link-pin-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePin(btn.closest('.link-item'));
+                });
+            });
+        }
+
+        function togglePin(linkItem) {
+            const url = linkItem.dataset.url;
+            const name = linkItem.dataset.name;
+            const icon = linkItem.querySelector('.favicon')?.src || linkItem.querySelector('span')?.outerHTML || '📌';
+            const index = AppState.pinned.findIndex(p => p.url === url);
+            
+            if (index === -1) {
+                // Adicionar
+                if (AppState.pinned.length >= AppState.settings.maxPinned) {
+                    showToast(`⚠️ Máximo de ${AppState.settings.maxPinned} fixados atingido`, 'warning');
+                    return;
+                }
+                AppState.pinned.push({ url, name, icon, added: Date.now() });
+                linkItem.classList.add('pinned');
+                showToast(`📌 ${name} fixado! (Ctrl+${AppState.pinned.length})`, 'success');
+            } else {
+                // Remover
+                AppState.pinned.splice(index, 1);
+                linkItem.classList.remove('pinned');
+                showToast(`📍 ${name} desfixado`, 'success');
+            }
+            
+            localStorage.setItem('favorites_pinned', JSON.stringify(AppState.pinned));
+            renderPinned();
+        }
+
+        function renderPinned() {
+            const grid = document.getElementById('pinnedGrid');
+            const section = document.getElementById('pinnedSection');
+            
+            if (AppState.pinned.length === 0) {
+                section.classList.remove('visible');
+                return;
+            }
+            
+            section.classList.add('visible');
+            grid.innerHTML = AppState.pinned.slice(0, AppState.settings.maxPinned).map((pin, i) => `
+                <a href="${pin.url}" target="_blank" rel="noopener" class="pinned-item" title="${pin.name}">
+                    ${pin.icon?.includes('<') ? pin.icon : `<img src="${pin.icon}" alt="">`}
+                    <span>${pin.name}</span>
+                    <span class="pinned-shortcut">Ctrl+${i+1}</span>
+                </a>
+            `).join('');
+        }
+
+        // ===== CONTEÚDO SENSÍVEL =====
+        function initAdultToggle() {
+            const btn = document.getElementById('toggleAdult');
+            const section = document.getElementById('adultSection');
+            
+            // Estado inicial
+            if (AppState.adultVisible) {
+                section.classList.add('visible');
+                btn.textContent = '🔞 Ocultar';
+                btn.classList.add('btn-primary');
+            }
+            
+            btn.addEventListener('click', () => {
+                AppState.adultVisible = !AppState.adultVisible;
+                localStorage.setItem('favorites_adult', AppState.adultVisible);
+                
+                if (AppState.adultVisible) {
+                    section.classList.add('visible');
+                    btn.textContent = '🔞 Ocultar';
+                    btn.classList.add('btn-primary');
+                    showToast('🔞 Conteúdo sensível visível', 'warning');
+                } else {
+                    section.classList.remove('visible');
+                    btn.textContent = '🔞 Conteúdo';
+                    btn.classList.remove('btn-primary');
+                    showToast('🔒 Conteúdo sensível ocultado', 'success');
+                }
+            });
+        }
+
+        // ===== BUSCA COM TAGS =====
+        function initSearch() {
+            const input = document.getElementById('searchInput');
+            
+            // Busca em tempo real
+            input.addEventListener('input', filterLinks);
+            
+            // Filtro por tag ao clicar
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag')) {
+                    const tag = e.target.dataset.tag;
+                    input.value = `tag:${tag}`;
+                    filterLinks();
+                    input.focus();
+                }
+            });
+        }
+
+        function filterLinks() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const isTagSearch = query.startsWith('tag:');
+            const searchTag = isTagSearch ? query.slice(4) : null;
+            
+            document.querySelectorAll('.link-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const tags = item.dataset.tags?.split(',') || [];
+                const name = item.dataset.name?.toLowerCase() || '';
+                
+                let match = false;
+                if (isTagSearch && searchTag) {
+                    match = tags.some(t => t.toLowerCase().includes(searchTag));
+                } else if (query) {
+                    match = text.includes(query) || name.includes(query) || tags.some(t => t.includes(query));
+                } else {
+                    match = true;
+                }
+                
+                item.style.display = match ? 'flex' : 'none';
+            });
+            
+            // Mostrar/ocultar categorias vazias
+            document.querySelectorAll('.category').forEach(cat => {
+                const visibleLinks = cat.querySelectorAll('.link-item[style="display: flex"], .link-item:not([style])');
+                const hasVisible = Array.from(visibleLinks).some(l => l.style.display !== 'none');
+                cat.style.display = (hasVisible || cat.classList.contains('adult') && !AppState.adultVisible) ? '' : 'none';
+            });
+        }
+
+        // ===== ATALHOS DE TECLADO =====
+        function initKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ignorar se estiver digitando em input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                // Ctrl+K: focar busca
+                if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                    document.getElementById('searchInput').select();
+                    showToast('🔍 Digite para buscar...', 'success');
+                }
+                
+                // Ctrl+1 a Ctrl+5: abrir fixados
+                if (e.ctrlKey && /^[1-5]$/.test(e.key)) {
+                    e.preventDefault();
+                    const index = parseInt(e.key) - 1;
+                    if (AppState.pinned[index]) {
+                        window.open(AppState.pinned[index].url, '_blank');
+                        showToast(`🚀 Abrindo: ${AppState.pinned[index].name}`, 'success');
+                    }
+                }
+                
+                // D: alternar tema
+                if (e.key.toLowerCase() === 'd' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+                
+                // E: exportar
+                if (e.key.toLowerCase() === 'e' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    exportFavorites();
+                }
+                
+                // S: abrir configurações
+                if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    toggleSettings();
+                }
+                
+                // Escape: limpar busca
+                if (e.key === 'Escape') {
+                    document.getElementById('searchInput').value = '';
+                    filterLinks();
+                }
+            });
+        }
+
+        // ===== DRAG & DROP (Reordenar) =====
+        function initDragAndDrop() {
+            let draggedItem = null;
+            
+            // Links dentro de categorias
+            document.querySelectorAll('.link-item[draggable="true"]').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedItem = null;
+                });
+            });
+            
+            // Listas como drop zones
+            document.querySelectorAll('.links[data-sortable="true"]').forEach(list => {
+                list.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const afterElement = getDragAfterElement(list, e.clientY);
+                    if (afterElement) {
+                        list.insertBefore(draggedItem, afterElement);
+                    } else {
+                        list.appendChild(draggedItem);
+                    }
+                });
+            });
+            
+            // Categorias também podem ser arrastadas (reordenar seções)
+            document.querySelectorAll('.category-header[draggable="true"]').forEach(header => {
+                header.addEventListener('dragstart', (e) => {
+                    header.closest('.category').classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                header.addEventListener('dragend', () => {
+                    header.closest('.category').classList.remove('dragging');
+                });
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const elements = [...container.querySelectorAll('.link-item:not(.dragging)')];
+            return elements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // ===== CONFIGURAÇÕES =====
+        function initSettings() {
+            const toggle = document.getElementById('settingsToggle');
+            const panel = document.getElementById('settingsPanel');
+            
+            toggle.addEventListener('click', toggleSettings);
+            
+            // Max pinned
+            document.getElementById('maxPinned').value = AppState.settings.maxPinned;
+            document.getElementById('maxPinned').addEventListener('change', (e) => {
+                AppState.settings.maxPinned = parseInt(e.target.value);
+                localStorage.setItem('favorites_maxPinned', AppState.settings.maxPinned);
+                renderPinned();
+                showToast(`📌 Máximo de fixados: ${AppState.settings.maxPinned}`, 'success');
+            });
+            
+            // Ordenação
+            document.getElementById('sortOrder').value = AppState.settings.sortOrder;
+            document.getElementById('sortOrder').addEventListener('change', (e) => {
+                AppState.settings.sortOrder = e.target.value;
+                localStorage.setItem('favorites_sortOrder', AppState.settings.sortOrder);
+                applySortOrder();
+                showToast('🔄 Ordenação atualizada', 'success');
+            });
+            
+            // Reset contadores
+            document.getElementById('resetCounters').addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja zerar todos os contadores de cliques?')) {
+                    AppState.clickCounts = {};
+                    localStorage.setItem('favorites_clicks', '{}');
+                    document.querySelectorAll('.link-count').forEach(el => el.textContent = '0');
+                    showToast('🗑️ Contadores resetados', 'success');
+                }
+            });
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('visible');
+            showToast(panel.classList.contains('visible') ? '⚙️ Configurações abertas' : '⚙️ Configurações fechadas', 'success');
+        }
+
+        function applySortOrder() {
+            const order = AppState.settings.sortOrder;
+            document.querySelectorAll('.links[data-sortable="true"]').forEach(list => {
+                const items = Array.from(list.querySelectorAll('.link-item'));
+                if (order === 'clicks') {
+                    items.sort((a, b) => {
+                        const countA = parseInt(a.querySelector('.link-count')?.textContent) || 0;
+                        const countB = parseInt(b.querySelector('.link-count')?.textContent) || 0;
+                        return countB - countA;
+                    });
+                } else if (order === 'name') {
+                    items.sort((a, b) => a.dataset.name?.localeCompare(b.dataset.name) || 0);
+                }
+                // 'default' mantém ordem original do HTML
+                items.forEach(item => list.appendChild(item));
+            });
+        }
+
+        // ===== EXPORTAR / IMPORTAR =====
+        function initExportImport() {
+            document.getElementById('exportBtn').addEventListener('click', exportFavorites);
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('importFile').click();
+            });
+            document.getElementById('importFile').addEventListener('change', importFavorites);
+        }
+
+        function exportFavorites() {
+            const data = {
+                version: '1.0',
+                exported: new Date().toISOString(),
+                pinned: AppState.pinned,
+                clickCounts: AppState.clickCounts,
+                settings: AppState.settings,
+                adultVisible: AppState.adultVisible,
+                // Extrair estrutura atual dos links
+                links: Array.from(document.querySelectorAll('.link-item')).map(item => ({
+                    url: item.dataset.url,
+                    name: item.dataset.name,
+                    tags: item.dataset.tags?.split(',') || [],
+                    category: item.closest('.category')?.dataset.category,
+                    clicks: parseInt(item.querySelector('.link-count')?.textContent) || 0,
+                    pinned: item.classList.contains('pinned')
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `favoritos-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('💾 Backup exportado com sucesso!', 'success');
+        }
+
+        function importFavorites(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    // Restaurar estados
+                    if (data.pinned) {
+                        AppState.pinned = data.pinned;
+                        localStorage.setItem('favorites_pinned', JSON.stringify(AppState.pinned));
+                    }
+                    if (data.clickCounts) {
+                        AppState.clickCounts = data.clickCounts;
+                        localStorage.setItem('favorites_clicks', JSON.stringify(AppState.clickCounts));
+                    }
+                    if (data.settings) {
+                        AppState.settings = {...AppState.settings, ...data.settings};
+                        localStorage.setItem('favorites_maxPinned', AppState.settings.maxPinned);
+                        localStorage.setItem('favorites_sortOrder', AppState.settings.sortOrder);
+                    }
+                    
+                    // Atualizar UI
+                    initClickCounters();
+                    renderPinned();
+                    applySortOrder();
+                    
+                    showToast('📁 Backup importado com sucesso! 🎉', 'success');
+                } catch (err) {
+                    showToast('❌ Erro ao importar arquivo', 'error');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input
+        }
+
+        // ===== CATEGORIAS RECOLHÍVEIS =====
+        function initCollapsibles() {
+            document.querySelectorAll('.collapse-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const links = btn.closest('.category-header').nextElementSibling;
+                    const isCollapsed = links.style.display === 'none';
+                    
+                    links.style.display = isCollapsed ? '' : 'none';
+                    btn.textContent = isCollapsed ? '−' : '+';
+                    btn.title = isCollapsed ? 'Recolher' : 'Expandir';
+                });
+            });
+        }
+
+        // ===== TOAST NOTIFICATIONS =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            // Remover após animação
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ===== SERVICE WORKER PARA PWA (básico) =====
+        if ('serviceWorker' in navigator) {
+            // Nota: Em produção, registre um arquivo sw.js real
+            // Este é um placeholder para funcionar offline básico
+            console.log('📱 PWA support detected');
+        }
+    </script>
+</body>
+</html>
