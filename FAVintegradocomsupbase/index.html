@@ -3,185 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Favoritos Rápidos</title>
+  <title>Meus Favoritos Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e2937;
-      --text: #e2e8f0;
-      --accent: #60a5fa;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 1350px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 2.8em;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 18px;
-      border: 1px solid #334155;
-    }
-
-    .card h3 {
-      margin: 0 0 16px 0;
-      color: var(--accent);
-      font-size: 1.4em;
-      border-bottom: 1px solid #475569;
-      padding-bottom: 10px;
-    }
-
-    .link {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      color: var(--text);
-      text-decoration: none;
-      border-radius: 10px;
-      transition: 0.2s;
-    }
-
-    .link:hover {
-      background: #334155;
-    }
-
-    .link img {
-      width: 22px;
-      height: 22px;
-      border-radius: 5px;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 60px;
-      opacity: 0.6;
-    }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .category-header { cursor: pointer; }
+    .link-item { transition: all 0.2s; }
+    .link-item:hover { background-color: #1f2937; }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>⭐ Meus Favoritos Rápidos</h1>
+<body class="bg-zinc-950 text-zinc-200 min-h-screen">
+  <div class="max-w-4xl mx-auto p-6">
 
-    <div class="grid" id="grid"></div>
+    <!-- Header - igual ao original -->
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold flex items-center justify-center gap-3">
+        📌 Meus Favoritos Pro
+      </h1>
+      <p class="text-zinc-400 mt-2 text-lg">Organização inteligente • Atalhos • Backup automático</p>
+    </div>
+
+    <!-- Barra de ações -->
+    <div class="flex flex-wrap gap-4 justify-center mb-10">
+      <button onclick="addCategory()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-2xl flex items-center gap-2">
+        <i class="fas fa-plus"></i> Nova Categoria
+      </button>
+      <button onclick="clearAll()" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-2xl flex items-center gap-2">
+        🗑️ Limpar Tudo
+      </button>
+    </div>
+
+    <input id="search" type="text" placeholder="🔎 Buscar..." 
+           class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl px-6 py-4 mb-12 focus:outline-none focus:border-emerald-500 text-lg"
+           onkeyup="filterLinks()">
+
+    <div id="categories" class="space-y-10"></div>
   </div>
 
-  <div class="footer">
-    <p>Meus Atalhos Rápidos • Hospedado no GitHub Pages</p>
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md mx-4">
+      <h2 class="text-2xl font-bold mb-6" id="modalTitle">Adicionar Link</h2>
+      <input id="linkTitle" placeholder="Título do link" class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-4">
+      <input id="linkUrl" placeholder="https://..." class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-4">
+      <input id="linkTag" placeholder="Tag / descrição (opcional)" class="w-full px-5 py-4 bg-zinc-800 rounded-2xl mb-6">
+      <div class="flex gap-3">
+        <button onclick="hideModal()" class="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">Cancelar</button>
+        <button onclick="saveLink()" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-medium">Salvar</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const categories = [
-      { title: "📧 Comunicação", links: [
-        { name: "Gmail", url: "https://mail.google.com" },
-        { name: "Google Account", url: "https://accounts.google.com" },
-        { name: "WhatsApp Web", url: "https://web.whatsapp.com/" },
-        { name: "Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
-      ]},
-      { title: "☁️ Armazenamento e Senhas", links: [
-        { name: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" },
-        { name: "Google Passwords", url: "https://passwords.google.com/" },
-        { name: "Feedly", url: "https://feedly.com/" }
-      ]},
-      { title: "🎥 Entretenimento & IA", links: [
-        { name: "YouTube", url: "https://www.youtube.com/" },
-        { name: "Twitter / X", url: "https://twitter.com/home" },
-        { name: "Twitch Following", url: "https://www.twitch.tv/directory/following" },
-        { name: "Grok", url: "https://grok.com/" },
-        { name: "ChatGPT", url: "https://chat.openai.com/" },
-        { name: "Gemini", url: "https://gemini.google.com/" },
-        { name: "Venice AI", url: "https://venice.ai/" },
-        { name: "Chat Z.ai", url: "https://chat.z.ai/" }
-      ]},
-      { title: "💼 Trabalho e Cursos", links: [
-        { name: "Smry.ai", url: "https://www.smry.ai/" },
-        { name: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
-        { name: "Bolha Tools", url: "https://open.bolha.tools/" },
-        { name: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304" }
-      ]},
-      { title: "🔧 Benchmarks e Tech", links: [
-        { name: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php" },
-        { name: "CPU Compare", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" },
-        { name: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
-        { name: "ImgBB", url: "https://imgbb.com/" },
-        { name: "Twitter Video Downloader", url: "https://twittervideodownloader.com/" }
-      ]},
-      { title: "📈 Trading e Finanças", links: [
-        { name: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
-      ]},
-      { title: "🛒 Compras e Farmácia", links: [
-        { name: "Drogasil", url: "https://www.drogasil.com.br/" },
-        { name: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/" },
-        { name: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/" }
-      ]},
-      { title: "🔞 Adulto / Fetish", links: [
-        { name: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
-        { name: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
-        { name: "Pirataria Explicito", url: "https://pirataria.link/explicito" },
-        { name: "Reddit - Armpit Fetish", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly..." },
-        { name: "Google - Armpit Search", url: "https://www.google.com/search?q=(stubble+OR+prickly...)" },
-        { name: "Google - Orgasm Contractions", url: "https://www.google.com/search?num=12...orgasmic+contractions..." }
-      ]},
-      { title: "⚽ Outros", links: [
-        { name: "HLTV - CS Matches", url: "https://www.hltv.org/matches" },
-        { name: "Google News", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" },
-        { name: "Grok Tasks", url: "https://grok.com/tasks" },
-        { name: "Localhost:3000", url: "http://localhost:3000/" },
-        { name: "Wish List", url: "https://wish.com" }
-      ]}
-    ];
+    // Suas chaves
+    const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
 
-    function getFavicon(url) {
-      try {
-        const domain = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?sz=32&domain=${domain}`;
-      } catch {
-        return '';
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let data = { categories: [] };
+    let currentCatIndex = null;
+    let currentLinkIndex = null;
+
+    async function loadData() {
+      const { data: result, error } = await supabase
+        .from('favoritos')
+        .select('categories')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        alert("Erro ao conectar com Supabase. Verifique a tabela 'favoritos'.");
+        return;
       }
+
+      if (result && result.length > 0 && result[0].categories) {
+        data = result[0].categories;
+      } else {
+        data = { categories: [] }; // começa vazio - você adiciona as categorias
+        await saveToSupabase();
+      }
+      render();
     }
 
-    function renderCards() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
+    async function saveToSupabase() {
+      try {
+        const { data: existing } = await supabase.from('favoritos').select('id').limit(1);
+        if (existing && existing.length > 0) {
+          await supabase.from('favoritos').update({ categories: data }).eq('id', existing[0].id);
+        } else {
+          await supabase.from('favoritos').insert([{ categories: data }]);
+        }
+      } catch (e) { console.error(e); }
+    }
 
-      categories.forEach(category => {
-        let html = `<div class="card"><h3>${category.title}</h3>`;
+    function render() {
+      const container = document.getElementById("categories");
+      container.innerHTML = "";
 
-        category.links.forEach(link => {
-          html += `
-            <a href="${link.url}" target="_blank" class="link">
-              <img src="${getFavicon(link.url)}" alt="">
-              ${link.name}
-            </a>`;
+      data.categories.forEach((cat, catIndex) => {
+        const div = document.createElement("div");
+        div.className = "category bg-zinc-900 rounded-3xl p-6";
+        div.innerHTML = `
+          <div class="flex items-center justify-between mb-4 category-header" onclick="toggleCategory(this)">
+            <h2 class="text-2xl font-semibold flex items-center gap-3">
+              ${cat.emoji || '📁'} ${cat.name}
+            </h2>
+            <div class="flex gap-3">
+              <button onclick="addLink(${catIndex}); event.stopImmediatePropagation()" class="text-emerald-400 hover:text-white">➕</button>
+              <button onclick="deleteCategory(${catIndex}); event.stopImmediatePropagation()" class="text-red-400 hover:text-white">🗑️</button>
+            </div>
+          </div>
+          <ul id="list-${catIndex}" class="space-y-1"></ul>
+        `;
+        container.appendChild(div);
+
+        const ul = div.querySelector(`#list-${catIndex}`);
+        cat.links.forEach((link, linkIndex) => {
+          const li = document.createElement("li");
+          li.className = "link-item flex items-center justify-between px-5 py-3 rounded-2xl group";
+          li.innerHTML = `
+            <div class="flex-1">
+              <a href="${link.url}" target="_blank" class="text-lg hover:underline">${link.title}</a>
+              ${link.tag ? `<span class="ml-4 text-sm text-zinc-500">${link.tag}</span>` : ''}
+            </div>
+            <div class="flex gap-4 opacity-0 group-hover:opacity-100">
+              <button onclick="editLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-blue-400">✏️</button>
+              <button onclick="deleteLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-red-400">🗑️</button>
+            </div>
+          `;
+          ul.appendChild(li);
         });
 
-        html += `</div>`;
-        grid.innerHTML += html;
+        // Drag and drop
+        new Sortable(ul, {
+          group: "links",
+          animation: 150,
+          onEnd: async (evt) => {
+            const from = parseInt(evt.from.id.split('-')[1]);
+            const to = parseInt(evt.to.id.split('-')[1]);
+            const moved = data.categories[from].links.splice(evt.oldIndex, 1)[0];
+            data.categories[to].links.splice(evt.newIndex, 0, moved);
+            render();
+            await saveToSupabase();
+          }
+        });
       });
     }
 
-    window.onload = renderCards;
+    function toggleCategory(el) {
+      const ul = el.parentElement.querySelector('ul');
+      ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Funções de CRUD (todas salvam automaticamente)
+    function addCategory() {
+      const name = prompt("Nome da categoria (ex: IA & Chatbots):");
+      if (!name) return;
+      const emoji = prompt("Emoji para a categoria (ex: 🤖):", "📁");
+      data.categories.push({ name: name.trim(), emoji: emoji || "📁", links: [] });
+      render();
+      saveToSupabase();
+    }
+
+    function deleteCategory(index) {
+      if (confirm("Excluir esta categoria e todos os links?")) {
+        data.categories.splice(index, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function addLink(catIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = null;
+      document.getElementById("modalTitle").textContent = "Novo Link";
+      document.getElementById("linkTitle").value = "";
+      document.getElementById("linkUrl").value = "";
+      document.getElementById("linkTag").value = "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function editLink(catIndex, linkIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = linkIndex;
+      const link = data.categories[catIndex].links[linkIndex];
+      document.getElementById("modalTitle").textContent = "Editar Link";
+      document.getElementById("linkTitle").value = link.title;
+      document.getElementById("linkUrl").value = link.url;
+      document.getElementById("linkTag").value = link.tag || "";
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    async function saveLink() {
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkUrl").value.trim();
+      const tag = document.getElementById("linkTag").value.trim();
+
+      if (!title || !url) return alert("Título e URL são obrigatórios");
+
+      if (currentLinkIndex === null) {
+        data.categories[currentCatIndex].links.push({ title, url, tag });
+      } else {
+        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag };
+      }
+
+      hideModal();
+      render();
+      await saveToSupabase();
+    }
+
+    function deleteLink(catIndex, linkIndex) {
+      if (confirm("Excluir este link?")) {
+        data.categories[catIndex].links.splice(linkIndex, 1);
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function hideModal() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function clearAll() {
+      if (confirm("Apagar TODOS os favoritos?")) {
+        data = { categories: [] };
+        render();
+        saveToSupabase();
+      }
+    }
+
+    function filterLinks() {
+      const term = document.getElementById("search").value.toLowerCase();
+      document.querySelectorAll(".category").forEach(cat => {
+        const title = cat.querySelector("h2").textContent.toLowerCase();
+        const links = cat.querySelectorAll(".link-item");
+        let showCat = title.includes(term);
+        links.forEach(li => {
+          if (li.textContent.toLowerCase().includes(term)) {
+            li.style.display = "flex";
+            showCat = true;
+          } else {
+            li.style.display = "none";
+          }
+        });
+        cat.style.display = showCat ? "block" : "none";
+      });
+    }
+
+    window.onload = loadData;
   </script>
 </body>
 </html>
