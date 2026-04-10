@@ -5,325 +5,435 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            bg: { DEFAULT: '#0f172a', card: '#1e293b', hover: '#334155' },
-            text: { DEFAULT: '#e2e8f0', muted: '#94a3b8' },
-            accent: { blue: '#3b82f6', green: '#22c55e', red: '#ef4444', amber: '#f59e0b' }
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            dark: '#0f172a',
+            card: '#ffffff',
+            cardDark: '#1e293b'
           }
         }
       }
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { 
-      background: #0f172a; 
-      color: #e2e8f0; 
-      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-      line-height: 1.5;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
-    .category { 
-      background: #1e293b; 
-      border-radius: 12px; 
-      padding: 16px; 
-      margin-bottom: 16px;
-      border: 1px solid #334155;
+    
+    body {
+      background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+      transition: background 0.3s ease;
     }
-    .category-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      cursor: pointer;
-      padding: 4px 0;
+    
+    body.dark {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     }
-    .category-title { 
-      font-size: 1.1rem; 
-      font-weight: 600; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px;
+    
+    .category-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
     }
-    .category-toggle { 
-      font-size: 1.2rem; 
-      color: #94a3b8; 
-      transition: transform 0.2s;
-      background: none; 
-      border: none; 
-      cursor: pointer;
+    
+    body.dark .category-card {
+      background: rgba(30, 41, 59, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-    .category-toggle.collapsed { transform: rotate(-90deg); }
-    .links-list { 
-      margin-top: 12px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 4px;
+    
+    .category-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
-    .link-item {
+    
+    .category-header {
       display: flex;
       align-items: center;
-      padding: 10px 12px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      cursor: pointer;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
     }
-    .link-item:hover { background: #334155; }
-    .link-content { 
-      flex: 1; 
-      min-width: 0; 
-      display: flex; 
-      align-items: center; 
+    
+    body.dark .category-header {
+      border-bottom-color: #334155;
+    }
+    
+    .category-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    body.dark .category-title {
+      color: #f1f5f9;
+    }
+    
+    .link-item {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: grab;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    
+    body.dark .link-item {
+      background: #334155;
+    }
+    
+    .link-item:hover {
+      background: #e0f2fe;
+      border-color: #3b82f6;
+      transform: translateX(4px);
+    }
+    
+    body.dark .link-item:hover {
+      background: #475569;
+    }
+    
+    .link-item:active {
+      cursor: grabbing;
+    }
+    
+    .link-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
       gap: 10px;
+      min-width: 0;
     }
-    .link-title { 
-      color: #60a5fa; 
-      text-decoration: none; 
+    
+    .link-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .link-title {
+      color: #3b82f6;
+      text-decoration: none;
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      transition: color 0.2s;
     }
-    .link-title:hover { text-decoration: underline; }
-    .link-tags { 
-      display: flex; 
-      gap: 6px; 
-      margin-top: 4px;
+    
+    .link-title:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+    
+    body.dark .link-title {
+      color: #60a5fa;
+    }
+    
+    body.dark .link-title:hover {
+      color: #93c5fd;
+    }
+    
+    .tags-container {
+      display: flex;
+      gap: 6px;
       flex-wrap: wrap;
+      margin-top: 4px;
     }
-    .tag { 
-      font-size: 0.75rem; 
-      color: #94a3b8; 
-      background: #334155; 
-      padding: 2px 8px; 
-      border-radius: 10px;
+    
+    .tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #dbeafe;
+      color: #1e40af;
+      font-weight: 500;
     }
-    .pin-counter { 
-      font-size: 0.85rem; 
-      color: #94a3b8; 
-      display: flex; 
-      align-items: center; 
-      gap: 2px;
-      white-space: nowrap;
+    
+    body.dark .tag {
+      background: #1e40af;
+      color: #dbeafe;
     }
-    .link-actions { 
-      display: none; 
-      gap: 8px; 
-      margin-left: 8px;
-    }
-    .link-item:hover .link-actions { display: flex; }
-    .action-btn { 
-      background: none; 
-      border: none; 
-      font-size: 1.1rem; 
-      cursor: pointer; 
-      padding: 4px;
-      opacity: 0.7;
+    
+    .link-actions {
+      display: flex;
+      gap: 6px;
+      opacity: 0;
       transition: opacity 0.2s;
     }
-    .action-btn:hover { opacity: 1; }
-    .action-btn.edit { color: #f59e0b; }
-    .action-btn.delete { color: #ef4444; }
     
-    /* Modal */
-    .modal { 
-      display: none; 
-      position: fixed; 
-      inset: 0; 
-      background: rgba(0,0,0,0.8); 
+    .link-item:hover .link-actions {
+      opacity: 1;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      opacity: 0.6;
+    }
+    
+    .action-btn:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.05);
+    }
+    
+    body.dark .action-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #475569;
+    }
+    
+    body.dark .btn-secondary {
+      background: #334155;
+      color: #cbd5e1;
+    }
+    
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+    
+    body.dark .btn-secondary:hover {
+      background: #475569;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
       z-index: 100;
-      align-items: center; 
+      align-items: center;
       justify-content: center;
       backdrop-filter: blur(4px);
     }
-    .modal.active { display: flex; }
-    .modal-content { 
-      background: #1e293b; 
-      padding: 24px; 
-      border-radius: 16px; 
-      width: 90%; 
-      max-width: 480px;
-      border: 1px solid #334155;
+    
+    .modal.active {
+      display: flex;
     }
+    
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    body.dark .modal-content {
+      background: #1e293b;
+    }
+    
     .modal input, .modal select {
       width: 100%;
       padding: 12px 16px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #e2e8f0;
-      margin-top: 4px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      color: #1e293b;
+      margin-top: 6px;
       margin-bottom: 16px;
+      font-size: 0.95rem;
     }
+    
+    body.dark .modal input, body.dark .modal select {
+      background: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    
     .modal input:focus, .modal select:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
     
-    /* Header */
-    .header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: 16px 24px;
-      border-bottom: 1px solid #334155;
-      position: sticky;
-      top: 0;
-      background: #0f172a;
-      z-index: 50;
-    }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .header-title { font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .header-actions { display: flex; gap: 8px; }
-    .header-btn { 
-      background: #1e293b; 
-      border: 1px solid #334155; 
-      padding: 8px 16px; 
-      border-radius: 8px;
-      color: #e2e8f0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-    }
-    .header-btn:hover { background: #334155; }
-    .header-btn.danger { border-color: #ef4444; color: #fca5a5; }
-    .header-btn.danger:hover { background: #451a1a; }
-    
-    /* Settings Panel */
-    .settings-panel {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 24px;
-      border: 1px solid #334155;
-    }
-    .settings-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .settings-row:last-child { margin-bottom: 0; }
-    .settings-label { color: #94a3b8; font-size: 0.9rem; }
-    .settings-select, .settings-input {
-      background: #0f172a;
-      border: 1px solid #334155;
-      padding: 8px 12px;
-      border-radius: 8px;
-      color: #e2e8f0;
-      font-size: 0.9rem;
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     
-    /* Search */
+    body.dark .header {
+      background: rgba(30, 41, 59, 0.95);
+      border-bottom-color: rgba(255,255,255,0.08);
+    }
+    
     .search-box {
-      margin: 0 24px 24px;
       position: relative;
+      max-width: 600px;
+      margin: 20px auto;
     }
+    
     .search-input {
       width: 100%;
       padding: 14px 20px 14px 48px;
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: white;
+      border: 2px solid #e2e8f0;
       border-radius: 12px;
-      color: #e2e8f0;
       font-size: 1rem;
+      transition: all 0.3s;
     }
+    
+    body.dark .search-input {
+      background: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    
     .search-input:focus {
       outline: none;
       border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
     }
+    
     .search-icon {
       position: absolute;
       left: 18px;
       top: 50%;
       transform: translateY(-50%);
-      color: #94a3b8;
       font-size: 1.2rem;
+      color: #94a3b8;
     }
     
-    /* Adult content warning */
-    .adult-category { border-color: #dc2626 !important; }
-    .adult-badge {
-      display: inline-block;
-      background: #dc2626;
-      color: white;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 8px;
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
     }
     
-    /* Toast */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1200px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1201px) and (max-width: 1600px) {
+      .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (min-width: 1601px) {
+      .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .sortable-ghost {
+      opacity: 0.4;
+      background: #bfdbfe !important;
+    }
+    
+    body.dark .sortable-ghost {
+      background: #1e40af !important;
+    }
+    
     .toast {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 14px 20px;
-      border-radius: 12px;
+      background: white;
+      border-left: 4px solid #3b82f6;
+      padding: 16px 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 200;
       animation: slideIn 0.3s ease;
-      max-width: 320px;
     }
+    
+    body.dark .toast {
+      background: #1e293b;
+    }
+    
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
     
-    /* Pinned section */
-    .pinned-section {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 24px;
-      border: 1px solid #334155;
-    }
-    .pinned-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #f59e0b;
-    }
-    .pinned-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 8px;
-    }
-    .pinned-item {
-      background: #0f172a;
-      padding: 10px 14px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .theme-toggle {
+      background: none;
+      border: 2px solid #e2e8f0;
+      padding: 10px 16px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 1.2rem;
+      transition: all 0.3s;
     }
-    .pinned-item:hover { background: #334155; }
-    .pinned-item .link-title { font-size: 0.95rem; }
     
-    /* Container */
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
+    body.dark .theme-toggle {
+      border-color: #475569;
+      background: #334155;
+    }
     
-    /* Responsive */
-    @media (max-width: 768px) {
-      .header { flex-wrap: wrap; gap: 12px; }
-      .settings-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .pinned-grid { grid-template-columns: 1fr; }
+    .theme-toggle:hover {
+      transform: scale(1.05);
+      border-color: #3b82f6;
     }
   </style>
 </head>
@@ -331,83 +441,59 @@
 
   <!-- Header -->
   <header class="header">
-    <div class="header-left">
-      <button id="themeToggle" class="header-btn" title="Alternar tema">🌙</button>
-      <span class="header-title">⭐ Meus Favoritos Rápidos</span>
-    </div>
-    <div class="header-actions">
-      <button onclick="openSettings()" class="header-btn">⚙️ Config</button>
-      <button onclick="exportData()" class="header-btn">💾 Exportar</button>
-      <button onclick="importData()" class="header-btn">📁 Importar</button>
-      <button onclick="toggleAdult()" id="adultToggle" class="header-btn">🔞 Conteúdo</button>
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          ⭐ Meus Favoritos Rápidos
+        </h1>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn" title="Alternar tema">🌙</button>
+          <button onclick="addCategory()" class="btn-primary">✨ Nova Categoria</button>
+          <button onclick="clearAll()" class="btn-primary btn-danger">🗑️ Limpar Tudo</button>
+          <button onclick="exportData()" class="btn-primary btn-secondary">💾 Exportar</button>
+        </div>
+      </div>
+      
+      <!-- Search -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
+      </div>
     </div>
   </header>
 
-  <div class="container">
-    
-    <!-- Settings Panel (hidden by default) -->
-    <div id="settingsPanel" class="settings-panel hidden">
-      <h3 class="font-semibold mb-4">⚙️ Preferências</h3>
-      <div class="settings-row">
-        <span class="settings-label">Tema</span>
-        <select id="themeSelect" class="settings-select" onchange="setTheme(this.value)">
-          <option value="system">🔄 Automático (sistema)</option>
-          <option value="light">☀️ Claro</option>
-          <option value="dark" selected>🌙 Escuro</option>
-        </select>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">Ordenar por</span>
-        <select id="sortSelect" class="settings-select" onchange="applySort()">
-          <option value="original">📋 Original</option>
-          <option value="accessed">📊 Mais acessados</option>
-          <option value="name">🔤 Nome (A-Z)</option>
-        </select>
-      </div>
-      <div class="settings-row">
-        <button onclick="resetCounters()" class="header-btn">🗑️ Resetar contadores</button>
-        <button onclick="clearAll()" class="header-btn danger">🗑️ Limpar Tudo</button>
-      </div>
-    </div>
-
-    <!-- Search -->
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
-    </div>
-
-    <!-- Pinned Section -->
-    <div id="pinnedSection" class="pinned-section hidden">
-      <div class="pinned-title">📌 Fixados <span class="text-zinc-500 text-sm font-normal">(atalhos Ctrl+1 a Ctrl+5)</span></div>
-      <div id="pinnedGrid" class="pinned-grid"></div>
-    </div>
-
-    <!-- Categories -->
-    <div id="categories"></div>
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 pb-12">
+    <div id="categories" class="grid-container"></div>
     
     <!-- Empty State -->
-    <div id="emptyState" class="text-center text-zinc-500 py-20 hidden">
-      <div class="text-4xl mb-4">📭</div>
-      <p class="text-lg">Nenhum favorito ainda</p>
-      <button onclick="addCategory()" class="header-btn mt-4 mx-auto">✨ Nova Categoria</button>
+    <div id="emptyState" class="text-center py-20 hidden">
+      <div class="text-6xl mb-4">📭</div>
+      <p class="text-xl text-gray-600 dark:text-gray-300 mb-6">Nenhum favorito ainda</p>
+      <button onclick="addCategory()" class="btn-primary">✨ Criar Primeira Categoria</button>
     </div>
   </div>
 
   <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-content">
-      <h2 class="text-xl font-bold mb-6" id="modalTitle">Adicionar Link</h2>
-      <label class="text-sm text-zinc-400">Título *</label>
+      <h2 class="text-2xl font-bold mb-6" id="modalTitle">➕ Adicionar Link</h2>
+      
+      <label class="block text-sm font-medium mb-2">Título *</label>
       <input id="linkTitle" placeholder="Ex: Gmail">
-      <label class="text-sm text-zinc-400">URL *</label>
+      
+      <label class="block text-sm font-medium mb-2">URL *</label>
       <input id="linkUrl" placeholder="https://exemplo.com">
-      <label class="text-sm text-zinc-400">Tags (separadas por vírgula)</label>
-      <input id="linkTags" placeholder="Ex: trabalho, google, email">
-      <label class="text-sm text-zinc-400">Categoria</label>
+      
+      <label class="block text-sm font-medium mb-2">Tags (separadas por vírgula)</label>
+      <input id="linkTags" placeholder="Ex: email, google, trabalho">
+      
+      <label class="block text-sm font-medium mb-2">Categoria</label>
       <select id="linkCategory"></select>
-      <div class="flex gap-3 mt-6">
-        <button onclick="hideModal()" class="flex-1 header-btn">Cancelar</button>
-        <button onclick="saveLink()" class="flex-1 header-btn" style="background:#3b82f6;border-color:#2563eb">Salvar</button>
+      
+      <div class="flex gap-3 mt-8">
+        <button onclick="hideModal()" class="flex-1 btn-primary btn-secondary">Cancelar</button>
+        <button onclick="saveLink()" class="flex-1 btn-primary">Salvar</button>
       </div>
     </div>
   </div>
@@ -416,383 +502,488 @@
   <div id="toast" class="toast hidden"></div>
 
   <script>
-    // ===== CONFIG =====
+    // ===== CONFIGURAÇÃO =====
     const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
     let supabaseClient = null;
-    try { supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
+    try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
 
     let data = { categories: [] };
     let currentCatIndex = null;
     let currentLinkIndex = null;
-    let showAdult = false;
-    let pinnedLinks = [];
+    let isDark = false;
 
     // ===== DADOS INICIAIS =====
     const initialData = {
       categories: [
-        { name: "🔐 Google & Conta", emoji: "🔐", links: [
-          { title: "🔍 Gmail / Conta Google", url: "https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w", tags: ["email","google"], accesses: 0 },
-          { title: "🔍 Google Passwords", url: "https://passwords.google.com/", tags: ["senhas"], accesses: 0 },
-          { title: "🔍 Google Notícias", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["notícias"], accesses: 0 },
-          { title: "🔍 Gemini AI", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA"], accesses: 0 }
-        ]},
-        { name: "💬 Comunicação", emoji: "💬", links: [
-          { title: "💬 Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho"], accesses: 0 },
-          { title: "💚 WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["mensagens"], accesses: 0 }
-        ]},
-        { name: "☁️ Nuvem & Ferramentas", emoji: "☁️", links: [
-          { title: "🌐 OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC", tags: ["nuvem"], accesses: 0 },
-          { title: "🌐 Feedly", url: "https://feedly.com/", tags: ["RSS"], accesses: 0 },
-          { title: "🌐 ImgBB", url: "https://imgbb.com/", tags: ["imagens"], accesses: 0 },
-          { title: "🐦 Twitter Video Downloader", url: "https://twittervideodownloader.com/", tags: ["download"], accesses: 0 }
-        ]},
-        { name: "🤖 IA & Chatbots", emoji: "🤖", links: [
-          { title: "🌐 Grok", url: "https://grok.com/", tags: ["IA","chat"], accesses: 0 },
-          { title: "🌐 Grok Tasks", url: "https://grok.com/tasks", tags: ["tarefas"], accesses: 0 },
-          { title: "🌐 ChatGPT", url: "https://chat.openai.com/", tags: ["IA"], accesses: 0 },
-          { title: "🌐 Venice.ai", url: "https://venice.ai/", tags: ["privado"], accesses: 0 },
-          { title: "🌐 OpenRouter", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["modelos"], accesses: 0 },
-          { title: "🌐 Chat Z.ai", url: "https://chat.z.ai/", tags: [], accesses: 0 },
-          { title: "🌐 SMRY.ai", url: "https://www.smry.ai/", tags: ["resumos"], accesses: 0 },
-          { title: "✨ Chat Qwen ✨", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA","Qwen"], accesses: 0 }
-        ]},
-        { name: "🎬 Entretenimento", emoji: "🎬", links: [
-          { title: "🎬 YouTube", url: "https://www.youtube.com/", tags: ["vídeo"], accesses: 0 },
-          { title: "🐦 X (Twitter)", url: "https://twitter.com/home", tags: ["social"], accesses: 0 },
-          { title: "🎮 Twitch", url: "https://www.twitch.tv/directory/following", tags: ["lives"], accesses: 0 },
-          { title: "🌐 HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports"], accesses: 0 }
-        ]},
-        { name: "💻 Tech & Benchmarks", emoji: "💻", links: [
-          { title: "🌐 CPU Benchmark (Single)", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware"], accesses: 0 },
-          { title: "🌐 CPU Benchmark (Compare)", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H", tags: ["comparar"], accesses: 0 },
-          { title: "🌐 VideoCard Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU"], accesses: 0 },
-          { title: "🔧 localhost:3000", url: "http://localhost:3000/", tags: ["dev"], accesses: 0 }
-        ]},
-        { name: "🎓 Estudos & Cursos", emoji: "🎓", links: [
-          { title: "🌐 Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos"], accesses: 0 },
-          { title: "🌐 Hotmart - Excelência", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user", tags: ["negócios"], accesses: 0 },
-          { title: "🌐 Medical Brasil Catalog", url: "https://medical-brasil.catalog.kyte.site/", tags: ["médico"], accesses: 0 }
-        ]},
-        { name: "💰 Finanças & Trading", emoji: "💰", links: [
-          { title: "🌐 TradingView", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025", tags: ["trading"], accesses: 0 }
-        ]},
-        { name: "🛒 Compras", emoji: "🛒", links: [
-          { title: "🌐 Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia"], accesses: 0 },
-          { title: "🌐 Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"], accesses: 0 }
-        ]},
-        { name: "🔧 Utilitários", emoji: "🔧", links: [
-          { title: "🌐 Bolha Tools", url: "https://open.bolha.tools/", tags: ["ferramentas"], accesses: 0 },
-          { title: "🔐 AES", url: "#", tags: ["segurança"], accesses: 0 },
-          { title: "🎁 Wish List", url: "#", tags: [], accesses: 0 }
-        ]},
-        { name: "🔞 Conteúdo Sensível", emoji: "🔞", adult: true, links: [
-          { title: "🌐 PhotoAcompanhantes - Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba", tags: ["busca"], accesses: 0 },
-          { title: "🌐 Coomer - Erika's Bulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur", tags: ["archive"], accesses: 0 },
-          { title: "🌐 Pirataria.link - Explícito", url: "https://pirataria.link/explicito", tags: [], accesses: 0 },
-          { title: "🤖 Reddit - Armpit Fetish (Stubble)", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all", tags: ["Reddit"], accesses: 0 },
-          { title: "🔍 Google - Reddit Armpit Search", url: "https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble", tags: ["busca"], accesses: 0 },
-          { title: "🔍 Google - Reddit Orgasm Search", url: "https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt", tags: ["busca"], accesses: 0 },
-          { title: "🔍 Google - Contractions Search", url: "https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1", tags: ["busca"], accesses: 0 }
-        ]}
+        {
+          name: "🔐 Google",
+          links: [
+            { title: "Gmail", url: "https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w", tags: ["email", "conta"] },
+            { title: "Notícias", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["noticias", "feed"] },
+            { title: "Senhas", url: "https://passwords.google.com/", tags: ["segurança", "google"] },
+            { title: "Gemini", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA", "google"] }
+          ]
+        },
+        {
+          name: "💬 Comunicação",
+          links: [
+            { title: "Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho", "chat"] },
+            { title: "WhatsApp", url: "https://web.whatsapp.com/", tags: ["mensagens", "chat"] }
+          ]
+        },
+        {
+          name: "🛠️ Ferramentas",
+          links: [
+            { title: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC", tags: ["nuvem", "arquivos"] },
+            { title: "Feedly", url: "https://feedly.com/", tags: ["RSS", "leitura"] },
+            { title: "ImgBB", url: "https://imgbb.com/", tags: ["imagens", "upload"] },
+            { title: "Twitter DL", url: "https://twittervideodownloader.com/", tags: ["download", "vídeo"] },
+            { title: "SnapTik", url: "#", tags: ["download", "TikTok"] },
+            { title: "Snapins", url: "#", tags: ["IA", "marketing"] },
+            { title: "X-Downloader", url: "#", tags: ["download", "X"] }
+          ]
+        },
+        {
+          name: "🤖 IA",
+          links: [
+            { title: "Grok", url: "https://grok.com/", tags: ["IA", "chat"] },
+            { title: "Grok Tasks", url: "https://grok.com/tasks", tags: ["IA", "tarefas"] },
+            { title: "ChatGPT", url: "https://chat.openai.com/", tags: ["IA", "OpenAI"] },
+            { title: "Venice", url: "https://venice.ai/", tags: ["IA", "privado"] },
+            { title: "OpenRouter", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["IA", "modelos"] },
+            { title: "Z.ai", url: "https://chat.z.ai/", tags: ["IA", "chat"] },
+            { title: "SMRY", url: "https://www.smry.ai/", tags: ["IA", "resumo"] },
+            { title: "Qwen ✨", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA", "Qwen"] }
+          ]
+        },
+        {
+          name: "🎬 Entretenimento",
+          links: [
+            { title: "YouTube", url: "https://www.youtube.com/", tags: ["vídeo"] },
+            { title: "X (Twitter)", url: "https://twitter.com/home", tags: ["social"] },
+            { title: "Twitch", url: "https://www.twitch.tv/directory/following", tags: ["lives"] },
+            { title: "HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports"] }
+          ]
+        },
+        {
+          name: "💻 Tech",
+          links: [
+            { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware"] },
+            { title: "VideoCard", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU"] },
+            { title: "localhost:3000", url: "http://localhost:3000/", tags: ["dev"] }
+          ]
+        },
+        {
+          name: "🎓 Estudos",
+          links: [
+            { title: "Estratégia", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos"] },
+            { title: "Hotmart", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304", tags: ["negócios"] }
+          ]
+        },
+        {
+          name: "💰 Finanças",
+          links: [
+            { title: "TradingView", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025", tags: ["trading"] }
+          ]
+        },
+        {
+          name: "🛒 Compras",
+          links: [
+            { title: "Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia"] },
+            { title: "Paraguay Pharma", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"] }
+          ]
+        }
       ]
     };
 
-    // ===== UTILS =====
-    function escapeHtml(t){if(!t)return'';const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};return String(t).replace(/[&<>"']/g,s=>m[s])}
-    function isValidUrl(s){try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:'}catch{_}return false}
-    function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast';t.style.borderColor=type==='error'?'#ef4444':type==='success'?'#22c55e':'#334155';setTimeout(()=>t.classList.add('hidden'),3000)}
-    
-    // ===== INIT =====
-    function init(){
-      loadTheme();
-      initializeData();
-      populateCategorySelect();
-      render();
-      setTimeout(loadFromSupabase,200);
-      
-      // Keyboard shortcuts
-      document.addEventListener('keydown',e=>{
-        if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('searchInput').focus();}
-        if(e.key==='Escape')hideModal();
-      });
-      
-      // Theme toggle
-      document.getElementById('themeToggle').onclick=()=>{
-        const themes=['system','light','dark'];
-        const current=document.getElementById('themeSelect').value;
-        const next=themes[(themes.indexOf(current)+1)%themes.length];
-        document.getElementById('themeSelect').value=next;
-        setTheme(next);
-      };
+    // ===== FUNÇÕES UTILITÁRIAS =====
+    function escapeHtml(text) {
+      if (!text) return '';
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    function initializeData(){
-      const local=localStorage.getItem('favorites_data');
-      if(local){try{const p=JSON.parse(local);if(p.categories?.length)data=p;else throw 0}catch(e){data=JSON.parse(JSON.stringify(initialData))}}
-      else{data=JSON.parse(JSON.stringify(initialData))}
+    function isValidUrl(string) {
+      try { new URL(string); return true; } catch (_) { return false; }
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.borderLeftColor = type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6';
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    // ===== TEMA =====
+    function toggleTheme() {
+      isDark = !isDark;
+      document.body.classList.toggle('dark', isDark);
+      document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        isDark = true;
+        document.body.classList.add('dark');
+        document.getElementById('themeBtn').textContent = '☀️';
+      }
+    }
+
+    // ===== INICIALIZAÇÃO =====
+    function initializeData() {
+      const local = localStorage.getItem('favorites_data');
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          if (parsed.categories && parsed.categories.length > 0) {
+            data = parsed;
+            return;
+          }
+        } catch (e) { console.warn('Erro ao carregar localStorage', e); }
+      }
+      data = JSON.parse(JSON.stringify(initialData));
       saveLocal();
     }
 
-    function saveLocal(){localStorage.setItem('favorites_data',JSON.stringify(data))}
-
-    async function loadFromSupabase(){
-      if(!supabaseClient)return;
-      try{
-        const{data:r,error}=await supabaseClient.from('favoritos').select('categories').limit(1).order('created_at',{ascending:false});
-        if(error)throw error;
-        if(r?.[0]?.categories){data={categories:r[0].categories};saveLocal();render();showToast('✅ Dados sincronizados','success')}
-      }catch(e){console.warn('⚠️ Supabase offline:',e.message)}
+    function saveLocal() {
+      localStorage.setItem('favorites_data', JSON.stringify(data));
     }
 
-    async function saveToSupabase(){
-      if(!supabaseClient){saveLocal();return}
-      try{
-        const{data:ex}=await supabaseClient.from('favoritos').select('id').limit(1);
-        if(ex?.[0]?.id)await supabaseClient.from('favoritos').update({categories:data.categories}).eq('id',ex[0].id)
-        else await supabaseClient.from('favoritos').insert([{categories:data.categories}])
-        saveLocal();showToast('✅ Salvo na nuvem','success')
-      }catch(e){console.warn('⚠️ Erro ao salvar:',e.message);saveLocal();showToast('💾 Salvo localmente','info')}
+    async function loadFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        const { data: result, error } = await supabaseClient.from('favoritos').select('categories').limit(1).order('created_at', { ascending: false });
+        if (error) throw error;
+        if (result && result[0] && result[0].categories) {
+          data = { categories: result[0].categories };
+          saveLocal();
+          render();
+          showToast('✅ Dados sincronizados da nuvem', 'success');
+        }
+      } catch (e) {
+        console.warn('⚠️ Supabase offline:', e.message);
+      }
     }
 
-    // ===== THEME =====
-    function loadTheme(){
-      const saved=localStorage.getItem('theme')||'dark';
-      document.getElementById('themeSelect').value=saved;
-      setTheme(saved);
-    }
-    function setTheme(val){
-      localStorage.setItem('theme',val);
-      const isDark=val==='dark'||(val==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
-      document.documentElement.classList.toggle('dark',isDark);
-      document.getElementById('themeToggle').textContent=isDark?'🌙':'☀️';
+    async function saveToSupabase() {
+      if (!supabaseClient) {
+        saveLocal();
+        return;
+      }
+      try {
+        const { data: existing } = await supabaseClient.from('favoritos').select('id').limit(1);
+        if (existing && existing.length > 0) {
+          await supabaseClient.from('favoritos').update({ categories: data.categories }).eq('id', existing[0].id);
+        } else {
+          await supabaseClient.from('favoritos').insert([{ categories: data.categories }]);
+        }
+        saveLocal();
+        showToast('✅ Salvo na nuvem', 'success');
+      } catch (e) {
+        console.warn('⚠️ Erro ao salvar:', e.message);
+        saveLocal();
+        showToast('💾 Salvo localmente', 'info');
+      }
     }
 
-    // ===== RENDER =====
-    function render(){
-      const catEl=document.getElementById('categories');
-      const empty=document.getElementById('emptyState');
-      catEl.innerHTML='';
-      
-      const cats=data.categories.filter(c=>!c.adult||showAdult);
-      if(!cats.length){empty.classList.remove('hidden');return}
-      empty.classList.add('hidden');
-      
-      cats.forEach((cat,catIdx)=>{
-        const realIdx=data.categories.indexOf(cat);
-        const card=document.createElement('div');
-        card.className='category'+(cat.adult?' adult-category':'');
-        card.innerHTML=`
-          <div class="category-header" onclick="toggleCategory(${realIdx})">
-            <div class="category-title">${cat.emoji||'📁'} ${escapeHtml(cat.name)}${cat.adult?'<span class="adult-badge">18+</span>':''}</div>
-            <button class="category-toggle" id="toggle-${realIdx}">▼</button>
+    // ===== RENDERIZAÇÃO =====
+    function render() {
+      const container = document.getElementById('categories');
+      const emptyState = document.getElementById('emptyState');
+      container.innerHTML = '';
+
+      if (!data.categories || data.categories.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      data.categories.forEach((cat, catIndex) => {
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+          <div class="category-header">
+            <span class="text-2xl">${cat.emoji || '📁'}</span>
+            <h2 class="category-title">${escapeHtml(cat.name)}</h2>
+            <span class="text-sm text-gray-500 dark:text-gray-400 ml-auto">(${cat.links.length})</span>
           </div>
-          <ul class="links-list" id="links-${realIdx}"></ul>
+          <div id="links-${catIndex}" class="links-container" data-cat-index="${catIndex}"></div>
+          <button onclick="addLink(${catIndex})" class="btn-primary w-full mt-4 justify-center text-sm py-3">
+            ➕ Adicionar Link
+          </button>
         `;
-        catEl.appendChild(card);
-        renderLinks(cat.links,realIdx,document.getElementById(`links-${realIdx}`));
+        container.appendChild(card);
+
+        const linksContainer = card.querySelector(`#links-${catIndex}`);
+        renderLinks(cat.links, catIndex, linksContainer);
       });
-      renderPinned();
+
+      populateCategorySelect();
     }
 
-    function renderLinks(links,catIdx,container){
-      container.innerHTML='';
-      const sorted=[...links].sort((a,b)=>{
-        const s=document.getElementById('sortSelect')?.value||'original';
-        if(s==='name')return a.title.localeCompare(b.title);
-        if(s==='accessed')return(b.accesses||0)-(a.accesses||0);
-        return 0;
-      });
-      sorted.forEach((link,linkIdx)=>{
-        const realIdx=links.indexOf(link);
-        const li=document.createElement('li');
-        li.className='link-item';
-        li.innerHTML=`
-          <div class="link-content" onclick="openLink('${escapeHtml(link.url)}',${catIdx},${realIdx})">
-            <span class="link-title">${escapeHtml(link.title)}</span>
+    function renderLinks(links, catIndex, container) {
+      container.innerHTML = '';
+      
+      links.forEach((link, linkIndex) => {
+        const item = document.createElement('div');
+        item.className = 'link-item';
+        item.draggable = true;
+        item.innerHTML = `
+          <div class="link-content">
+            <span class="link-icon">🔗</span>
+            <div class="flex-1 min-w-0">
+              <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-title" onclick="event.stopPropagation()">
+                ${escapeHtml(link.title)}
+              </a>
+              ${link.tags && link.tags.length ? `
+                <div class="tags-container">
+                  ${link.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
           </div>
-          <div class="pin-counter">${link.accesses||0}📌</div>
           <div class="link-actions">
-            <button class="action-btn edit" onclick="event.stopPropagation();editLink(${catIdx},${realIdx})">✏️</button>
-            <button class="action-btn delete" onclick="event.stopPropagation();deleteLink(${catIdx},${realIdx})">🗑️</button>
+            <button class="action-btn" onclick="editLink(${catIndex}, ${linkIndex})" title="Editar">✏️</button>
+            <button class="action-btn" onclick="deleteLink(${catIndex}, ${linkIndex})" title="Excluir">🗑️</button>
           </div>
-          ${link.tags?.length?`<div class="link-tags">${link.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>`:''}
         `;
-        container.appendChild(li);
+        
+        // Drag events
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ catIndex, linkIndex }));
+          item.style.opacity = '0.5';
+        });
+        
+        item.addEventListener('dragend', () => {
+          item.style.opacity = '1';
+        });
+        
+        container.appendChild(item);
+      });
+
+      // Drop zone
+      container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        container.style.background = isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)';
+      });
+      
+      container.addEventListener('dragleave', () => {
+        container.style.background = '';
+      });
+      
+      container.addEventListener('drop', (e) => {
+        e.preventDefault();
+        container.style.background = '';
+        
+        try {
+          const fromData = JSON.parse(e.dataTransfer.getData('text/plain'));
+          const toCatIndex = parseInt(container.dataset.catIndex);
+          
+          if (fromData.catIndex !== toCatIndex || fromData.linkIndex !== undefined) {
+            const link = data.categories[fromData.catIndex].links.splice(fromData.linkIndex, 1)[0];
+            data.categories[toCatIndex].links.push(link);
+            render();
+            saveToSupabase();
+            showToast('🔄 Link movido!', 'success');
+          }
+        } catch (err) {
+          console.error('Erro ao mover link:', err);
+        }
+      });
+
+      // Initialize SortableJS for better drag experience
+      new Sortable(container, {
+        group: 'links',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: async (evt) => {
+          const fromCat = parseInt(evt.from.dataset.catIndex);
+          const toCat = parseInt(evt.to.dataset.catIndex);
+          
+          const movedLink = data.categories[fromCat].links.splice(evt.oldIndex, 1)[0];
+          data.categories[toCat].links.splice(evt.newIndex, 0, movedLink);
+          
+          render();
+          await saveToSupabase();
+          showToast('🔄 Link movido!', 'success');
+        }
       });
     }
 
-    function renderPinned(){
-      const section=document.getElementById('pinnedSection');
-      const grid=document.getElementById('pinnedGrid');
-      if(!pinnedLinks.length){section.classList.add('hidden');return}
-      section.classList.remove('hidden');
-      grid.innerHTML=pinnedLinks.map((p,i)=>`
-        <div class="pinned-item" onclick="openLink('${escapeHtml(p.url)}',${p.cat},${p.idx})" title="Ctrl+${i+1}">
-          <span class="text-amber-400">${i+1}.</span>
-          <span class="link-title">${escapeHtml(p.title)}</span>
-        </div>
-      `).join('');
-    }
-
-    // ===== ACTIONS =====
-    function openLink(url,catIdx,linkIdx){
-      const cat=data.categories[catIdx];
-      if(!cat)return;
-      const link=cat.links[linkIdx];
-      if(!link)return;
-      link.accesses=(link.accesses||0)+1;
+    // ===== CRUD =====
+    function addCategory() {
+      const name = prompt('✨ Nome da nova categoria:');
+      if (!name || !name.trim()) return;
+      const emoji = prompt('🎨 Emoji (opcional):', '📁');
+      data.categories.push({ name: name.trim(), emoji: emoji?.trim() || '📁', links: [] });
+      render();
       saveToSupabase();
-      render();
-      window.open(url,'_blank','noopener,noreferrer');
+      showToast('📁 Categoria criada!', 'success');
     }
 
-    function toggleCategory(idx){
-      const toggle=document.getElementById(`toggle-${idx}`);
-      const list=document.getElementById(`links-${idx}`);
-      if(toggle&&list){
-        const collapsed=toggle.classList.toggle('collapsed');
-        list.style.display=collapsed?'none':'flex';
+    function deleteCategory(index) {
+      if (confirm(`Excluir categoria "${data.categories[index].name}" e todos os links?`)) {
+        data.categories.splice(index, 1);
+        render();
+        saveToSupabase();
+        showToast('🗑️ Categoria excluída', 'success');
       }
     }
 
-    function toggleAdult(){
-      showAdult=!showAdult;
-      document.getElementById('adultToggle').style.borderColor=showAdult?'#ef4444':'#334155';
-      render();
-      showToast(showAdult?'🔞 Conteúdo sensível visível':'🔞 Conteúdo oculto','info');
-    }
-
-    function openSettings(){document.getElementById('settingsPanel').classList.toggle('hidden')}
-
-    function addCategory(){
-      const name=prompt('✨ Nome da categoria:');if(!name?.trim())return;
-      const emoji=prompt('🎨 Emoji (opcional):','📁');
-      data.categories.push({name:name.trim(),emoji:emoji?.trim()||'📁',links:[]});
-      populateCategorySelect();render();saveToSupabase();showToast('📁 Categoria criada','success');
-    }
-
-    function deleteCategory(idx){
-      if(confirm(`Excluir "${data.categories[idx].name}"?`)){
-        data.categories.splice(idx,1);populateCategorySelect();render();saveToSupabase();showToast('🗑️ Excluída','success');
-      }
-    }
-
-    function addLink(catIdx){
-      currentCatIndex=catIdx;currentLinkIndex=null;
-      document.getElementById('modalTitle').textContent='➕ Novo Link';
-      document.getElementById('linkTitle').value='';document.getElementById('linkUrl').value='';document.getElementById('linkTags').value='';
-      document.getElementById('linkCategory').value=catIdx;
+    function addLink(catIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = null;
+      document.getElementById('modalTitle').textContent = '➕ Adicionar Link';
+      document.getElementById('linkTitle').value = '';
+      document.getElementById('linkUrl').value = '';
+      document.getElementById('linkTags').value = '';
+      document.getElementById('linkCategory').value = catIndex;
       document.getElementById('modal').classList.add('active');
       document.getElementById('linkTitle').focus();
     }
 
-    function editLink(catIdx,linkIdx){
-      currentCatIndex=catIdx;currentLinkIndex=linkIdx;
-      const link=data.categories[catIdx].links[linkIdx];
-      document.getElementById('modalTitle').textContent='✏️ Editar Link';
-      document.getElementById('linkTitle').value=link.title||'';document.getElementById('linkUrl').value=link.url||'';document.getElementById('linkTags').value=link.tags?.join(', ')||'';
-      document.getElementById('linkCategory').value=catIdx;
+    function editLink(catIndex, linkIndex) {
+      currentCatIndex = catIndex;
+      currentLinkIndex = linkIndex;
+      const link = data.categories[catIndex].links[linkIndex];
+      document.getElementById('modalTitle').textContent = '✏️ Editar Link';
+      document.getElementById('linkTitle').value = link.title || '';
+      document.getElementById('linkUrl').value = link.url || '';
+      document.getElementById('linkTags').value = link.tags ? link.tags.join(', ') : '';
+      document.getElementById('linkCategory').value = catIndex;
       document.getElementById('modal').classList.add('active');
     }
 
-    async function saveLink(){
-      const title=document.getElementById('linkTitle').value.trim();
-      let url=document.getElementById('linkUrl').value.trim();
-      const tags=document.getElementById('linkTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-      if(!title||!url){showToast('⚠️ Título e URL obrigatórios','error');return}
-      if(!/^https?:\/\//i.test(url))url='https://'+url;
-      if(!isValidUrl(url)){showToast('⚠️ URL inválida','error');return}
-      
-      const linkData={title,url,tags,accesses:currentLinkIndex!==null?data.categories[currentCatIndex].links[currentLinkIndex].accesses:0};
-      if(currentLinkIndex===null)data.categories[currentCatIndex].links.push(linkData)
-      else data.categories[currentCatIndex].links[currentLinkIndex]=linkData;
-      
-      hideModal();populateCategorySelect();render();await saveToSupabase();
-      showToast(currentLinkIndex===null?'✅ Link adicionado':'✅ Link atualizado','success');
+    async function saveLink() {
+      const title = document.getElementById('linkTitle').value.trim();
+      let url = document.getElementById('linkUrl').value.trim();
+      const tagsStr = document.getElementById('linkTags').value.trim();
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+      if (!title || !url) {
+        showToast('⚠️ Título e URL são obrigatórios!', 'error');
+        return;
+      }
+
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      if (!isValidUrl(url)) {
+        showToast('⚠️ URL inválida!', 'error');
+        return;
+      }
+
+      if (currentLinkIndex === null) {
+        data.categories[currentCatIndex].links.push({ title, url, tags });
+        showToast('✅ Link adicionado!', 'success');
+      } else {
+        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tags };
+        showToast('✅ Link atualizado!', 'success');
+      }
+
+      hideModal();
+      render();
+      await saveToSupabase();
     }
 
-    function deleteLink(catIdx,linkIdx){
-      if(confirm('Excluir este link?')){
-        data.categories[catIdx].links.splice(linkIdx,1);render();saveToSupabase();showToast('🗑️ Excluído','success');
+    function deleteLink(catIndex, linkIndex) {
+      if (confirm('Excluir este link?')) {
+        data.categories[catIndex].links.splice(linkIndex, 1);
+        render();
+        saveToSupabase();
+        showToast('🗑️ Link excluído', 'success');
       }
     }
 
-    function hideModal(){document.getElementById('modal').classList.remove('active');currentCatIndex=currentLinkIndex=null}
-    document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')hideModal()};
+    function hideModal() {
+      document.getElementById('modal').classList.remove('active');
+      currentCatIndex = null;
+      currentLinkIndex = null;
+    }
 
-    function clearAll(){
-      if(confirm('🚨 Apagar TUDO?')&&confirm('✅ Confirmar?')){
-        data={categories:[]};pinnedLinks=[];render();saveToSupabase();showToast('🗑️ Tudo limpo','success');
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') hideModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideModal();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+    });
+
+    function clearAll() {
+      if (confirm('🚨 ATENÇÃO: Isso apagará TODOS os favoritos permanentemente. Continuar?') &&
+          confirm('✅ Confirmar exclusão total?')) {
+        data = { categories: [] };
+        render();
+        saveToSupabase();
+        showToast('🗑️ Todos os dados foram limpos', 'success');
       }
     }
 
-    function filterLinks(){
-      const term=document.getElementById('searchInput').value.toLowerCase().trim();
-      document.querySelectorAll('.category').forEach(card=>{
-        const title=card.querySelector('.category-title')?.textContent.toLowerCase()||'';
-        const items=card.querySelectorAll('.link-item');
-        let visible=title.includes(term);
-        items.forEach(item=>{
-          const text=item.textContent.toLowerCase();
-          const match=term===''||text.includes(term);
-          item.style.display=match?'flex':'none';
-          if(match)visible=true;
+    function filterLinks() {
+      const term = document.getElementById('searchInput').value.toLowerCase().trim();
+      let hasResults = false;
+
+      document.querySelectorAll('.category-card').forEach(card => {
+        const title = card.querySelector('.category-title')?.textContent.toLowerCase() || '';
+        const items = card.querySelectorAll('.link-item');
+        let categoryVisible = title.includes(term);
+
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          const match = term === '' || text.includes(term);
+          item.style.display = match ? 'flex' : 'none';
+          if (match) {
+            categoryVisible = true;
+            hasResults = true;
+          }
         });
-        card.style.display=visible?'block':'none';
-      });
-    }
 
-    function applySort(){render()}
-    function resetCounters(){
-      if(confirm('Resetar contadores de acesso?')){
-        data.categories.forEach(c=>c.links.forEach(l=>l.accesses=0));
-        render();saveToSupabase();showToast('🔄 Contadores zerados','success');
+        card.style.display = categoryVisible ? 'block' : 'none';
+      });
+
+      const emptyState = document.getElementById('emptyState');
+      if (term !== '' && !hasResults) {
+        emptyState.classList.remove('hidden');
+        emptyState.querySelector('p').textContent = '🔍 Nenhum resultado encontrado';
+      } else if (term === '') {
+        emptyState.classList.add('hidden');
       }
     }
 
-    function populateCategorySelect(){
-      const sel=document.getElementById('linkCategory');
-      sel.innerHTML=data.categories.map((c,i)=>`<option value="${i}">${c.emoji||'📁'} ${escapeHtml(c.name)}</option>`).join('');
+    function populateCategorySelect() {
+      const select = document.getElementById('linkCategory');
+      select.innerHTML = data.categories.map((c, i) => 
+        `<option value="${i}">${c.emoji || '📁'} ${escapeHtml(c.name)}</option>`
+      ).join('');
     }
 
-    // ===== EXPORT/IMPORT =====
-    function exportData(){
-      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-      a.download=`favoritos-${new Date().toISOString().split('T')[0]}.json`;a.click();
-      showToast('💾 Backup exportado','success');
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favoritos-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('💾 Backup exportado!', 'success');
     }
 
-    function importData(){
-      const input=document.createElement('input');input.type='file';input.accept='.json';
-      input.onchange=e=>{
-        const file=e.target.files[0];if(!file)return;
-        const reader=new FileReader();
-        reader.onload=ev=>{
-          try{
-            const imported=JSON.parse(ev.target.result);
-            if(imported.categories){data=imported;populateCategorySelect();render();saveToSupabase();showToast('📁 Dados importados','success')}
-            else showToast('⚠️ Arquivo inválido','error');
-          }catch{showToast('⚠️ Erro ao importar','error')}
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
-
-    // ===== PINNED =====
-    function togglePin(catIdx,linkIdx){
-      const link=data.categories[catIdx].links[linkIdx];
-      const existing=pinnedLinks.findIndex(p=>p.url===link.url);
-      if(existing>=0)pinnedLinks.splice(existing,1)
-      else if(pinnedLinks.length<5)pinnedLinks.push({title:link.title,url:link.url,cat:catIdx,idx:linkIdx})
-      else showToast('⚠️ Máximo 5 fixados','error');
-      renderPinned();saveLocal();
-    }
-
-    // ===== START =====
-    window.addEventListener('DOMContentLoaded',init);
+    // ===== INICIALIZAÇÃO =====
+    window.addEventListener('DOMContentLoaded', () => {
+      loadTheme();
+      initializeData();
+      render();
+      setTimeout(() => loadFromSupabase(), 200);
+    });
   </script>
 </body>
 </html>
