@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Favoritos Rápidos</title>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #0f172a, #1e3a8a);
+      --card-bg: rgba(255,255,255,0.09);
+      --card-hover: rgba(255,255,255,0.20);
+      --text: #e0f2fe;
+      --accent: #60a5fa;
+      --shadow: rgba(0,0,0,0.45);
+    }
+    [data-theme="light"] {
+      --bg: linear-gradient(135deg, #f8fafc, #e0f2fe);
+      --card-bg: rgba(255,255,255,0.92);
+      --card-hover: rgba(255,255,255,0.98);
+      --text: #0f172a;
+      --accent: #1e40af;
+      --shadow: rgba(0,0,0,0.12);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px 15px;
+      min-height: 100vh;
+      transition: background 0.5s ease;
+    }
+
+    .container { max-width: 1280px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    h1 { 
+      margin: 0; 
+      font-size: 2.7em; 
+      font-weight: 700; 
+      text-shadow: 0 4px 20px var(--shadow); 
+    }
+
+    .info-bar { 
+      font-size: 1.1em; 
+      opacity: 0.95; 
+    }
+
+    .controls { 
+      display: flex; 
+      align-items: center; 
+      gap: 15px; 
+    }
+
+    .search-bar {
+      padding: 12px 20px;
+      width: 340px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      font-size: 1.05em;
+      outline: none;
+    }
+
+    [data-theme="light"] .search-bar {
+      background: rgba(255,255,255,0.95);
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 2em;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+    }
+
+    .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: all 0.35s ease;
+      min-height: 120px;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      background: var(--card-hover);
+    }
+
+    .card h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.5em;
+      color: var(--accent);
+      border-bottom: 2px solid rgba(96,165,250,0.3);
+      padding-bottom: 8px;
+    }
+
+    .link-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      font-size: 1.05em;
+      cursor: grab;
+    }
+
+    .link-item:hover {
+      background: rgba(255,255,255,0.12);
+      padding-left: 16px;
+    }
+
+    .link-item a {
+      color: var(--text);
+      text-decoration: none;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .delete-btn {
+      opacity: 0;
+      background: #ef4444;
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .link-item:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { background: #dc2626; }
+
+    .card a img {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+
+    .add-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: var(--accent);
+      color: white;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      font-size: 28px;
+      border: none;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    .add-btn:hover { transform: scale(1.1); }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 28px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 400px;
+      backdrop-filter: blur(20px);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: none;
+      font-size: 1.05em;
+    }
+
+    .modal button { 
+      background: var(--accent); 
+      color: white; 
+      cursor: pointer; 
+      font-weight: bold; 
+      padding: 13px; 
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 70px;
+      opacity: 0.8;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⭐ Meus Favoritos Rápidos</h1>
+      <div class="controls">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔎 Buscar links ou categorias..." autocomplete="off">
+        <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">🌙</button>
+      </div>
+    </header>
+
+    <div class="info-bar" id="infoBar"></div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <button class="add-btn" id="addBtn" title="Adicionar novo link">+</button>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 style="margin-top:0;">Adicionar Novo Link</h2>
+      <input type="text" id="newName" placeholder="Nome do link">
+      <div style="position: relative;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888;">https://</span>
+        <input type="text" id="newUrl" placeholder="exemplo.com" style="padding-left: 78px;">
+      </div>
+      <select id="newCategory"></select>
+      <button onclick="addNewLink()">✅ Adicionar</button>
+      <button onclick="closeModal()" style="background:#666; margin-top:8px;">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Meus Atalhos Rápidos • Hospedado no GitHub Pages</p>
+    <p>Total de links: <strong id="totalLinks">0</strong></p>
+  </div>
+
+  <script>
+    // ==================== TODOS OS SEUS LINKS ====================
+    let categories = JSON.parse(localStorage.getItem('myLinks')) || [
+      { title: "📧 Comunicação", links: [
+        { name: "Gmail", url: "https://mail.google.com" },
+        { name: "Google Account", url: "https://accounts.google.com" },
+        { name: "WhatsApp Web", url: "https://web.whatsapp.com/" },
+        { name: "Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
+      ]},
+      { title: "☁️ Armazenamento e Senhas", links: [
+        { name: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" },
+        { name: "Google Passwords", url: "https://passwords.google.com/" },
+        { name: "Feedly", url: "https://feedly.com/" }
+      ]},
+      { title: "🎥 Entretenimento & IA", links: [
+        { name: "YouTube", url: "https://www.youtube.com/" },
+        { name: "Twitter / X", url: "https://twitter.com/home" },
+        { name: "Twitch Following", url: "https://www.twitch.tv/directory/following" },
+        { name: "Grok", url: "https://grok.com/" },
+        { name: "ChatGPT", url: "https://chat.openai.com/" },
+        { name: "Gemini", url: "https://gemini.google.com/" },
+        { name: "Venice AI", url: "https://venice.ai/" },
+        { name: "Chat Z.ai", url: "https://chat.z.ai/" }
+      ]},
+      { title: "💼 Trabalho e Cursos", links: [
+        { name: "Smry.ai", url: "https://www.smry.ai/" },
+        { name: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
+        { name: "Bolha Tools", url: "https://open.bolha.tools/" },
+        { name: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304" }
+      ]},
+      { title: "🔧 Benchmarks e Tech", links: [
+        { name: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php" },
+        { name: "CPU Compare", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" },
+        { name: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
+        { name: "ImgBB", url: "https://imgbb.com/" },
+        { name: "Twitter Video Downloader", url: "https://twittervideodownloader.com/" }
+      ]},
+      { title: "📈 Trading e Finanças", links: [
+        { name: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
+      ]},
+      { title: "🛒 Compras e Farmácia", links: [
+        { name: "Drogasil", url: "https://www.drogasil.com.br/" },
+        { name: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/" },
+        { name: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/" }
+      ]},
+      { title: "🔞 Adulto / Fetish", links: [
+        { name: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
+        { name: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
+        { name: "Pirataria Explicito", url: "https://pirataria.link/explicito" },
+        { name: "Reddit - Armpit Fetish", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly..." },
+        { name: "Google - Armpit Search", url: "https://www.google.com/search?q=(stubble+OR+prickly...)" },
+        { name: "Google - Orgasm Contractions", url: "https://www.google.com/search?num=12...orgasmic+contractions..." }
+      ]},
+      { title: "⚽ Outros", links: [
+        { name: "HLTV - CS Matches", url: "https://www.hltv.org/matches" },
+        { name: "Google News", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" },
+        { name: "Grok Tasks", url: "https://grok.com/tasks" },
+        { name: "Localhost:3000", url: "http://localhost:3000/" },
+        { name: "Wish List", url: "https://wish.com" }
+      ]}
+    ];
+
+    function saveLinks() {
+      localStorage.setItem('myLinks', JSON.stringify(categories));
+    }
+
+    function getFaviconUrl(url) {
+      try {
+        const domain = new URL(url).hostname;
+        return `https://www.google.com/s2/favicons?sz=32&domain=${domain}`;
+      } catch (e) { return ''; }
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      categories.forEach((category, catIndex) => {
+        if (category.links.length === 0) return;
+
+        let html = `<div class="card" data-category="${catIndex}" ondrop="drop(event)" ondragover="allowDrop(event)">
+                      <h3>${category.title}</h3>`;
+
+        category.links.forEach((link, linkIndex) => {
+          const favicon = getFaviconUrl(link.url);
+          html += `
+            <div class="link-item" draggable="true" ondragstart="drag(event)" data-cat="${catIndex}" data-link="${linkIndex}">
+              <a href="${link.url}" target="_blank" rel="noopener">
+                <img src="${favicon}" alt="" onerror="this.style.display='none'">
+                ${link.name}
+              </a>
+              <button class="delete-btn" onclick="deleteLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()">🗑️</button>
+            </div>`;
+        });
+
+        html += `</div>`;
+        grid.innerHTML += html;
+      });
+
+      document.getElementById('totalLinks').textContent = categories.reduce((acc, cat) => acc + cat.links.length, 0);
+    }
+
+    // Drag and Drop
+    function allowDrop(ev) {
+      ev.preventDefault();
+      ev.currentTarget.classList.add('drag-over');
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.getAttribute("data-cat") + "," + ev.target.getAttribute("data-link"));
+      ev.target.classList.add('dragging');
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text").split(",");
+      const fromCat = parseInt(data[0]);
+      const fromLink = parseInt(data[1]);
+      const toCat = parseInt(ev.currentTarget.getAttribute("data-category"));
+
+      if (fromCat !== toCat && !isNaN(fromCat) && !isNaN(toCat)) {
+        const linkToMove = categories[fromCat].links.splice(fromLink, 1)[0];
+        categories[toCat].links.push(linkToMove);
+        saveLinks();
+        renderCards();
+      }
+
+      document.querySelectorAll('.card').forEach(card => card.classList.remove('drag-over'));
+    }
+
+    function deleteLink(catIndex, linkIndex) {
+      if (confirm("Deseja excluir este link?")) {
+        categories[catIndex].links.splice(linkIndex, 1);
+        saveLinks();
+        renderCards();
+      }
+    }
+
+    function setupSearch() {
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.card').forEach(card => {
+          card.style.display = (!term || card.textContent.toLowerCase().includes(term)) ? '' : 'none';
+        });
+      });
+    }
+
+    function setupTheme() {
+      const btn = document.getElementById('themeToggle');
+      let theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+
+      btn.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      });
+    }
+
+    function openModal() {
+      const modal = document.getElementById('modal');
+      const select = document.getElementById('newCategory');
+      select.innerHTML = '';
+
+      categories.forEach((cat, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = cat.title;
+        select.appendChild(opt);
+      });
+
+      document.getElementById('newName').value = '';
+      document.getElementById('newUrl').value = '';
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function addNewLink() {
+      let name = document.getElementById('newName').value.trim();
+      let urlInput = document.getElementById('newUrl').value.trim();
+      const catIndex = parseInt(document.getElementById('newCategory').value);
+
+      if (!name || !urlInput) return alert("Preencha o nome e a URL!");
+
+      let fullUrl = urlInput.startsWith('http') ? urlInput : 'https://' + urlInput;
+
+      categories[catIndex].links.push({ name, url: fullUrl });
+      saveLinks();
+      renderCards();
+      closeModal();
+    }
+
+    async function updateInfoBar() {
+      const infoBar = document.getElementById('infoBar');
+      const now = new Date();
+      const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-23.09&longitude=-47.21&current=temperature_2m&timezone=America/Sao_Paulo');
+        const data = await res.json();
+        const temp = Math.round(data.current.temperature_2m);
+        infoBar.innerHTML = `🕒 ${time} • 🌡️ ${temp}°C`;
+      } catch (e) {
+        infoBar.innerHTML = `🕒 ${time}`;
+      }
+    }
+
+    // Inicialização
+    window.onload = () => {
+      renderCards();
+      setupSearch();
+      setupTheme();
+      updateInfoBar();
+      setInterval(updateInfoBar, 60000);
+
+      document.getElementById('addBtn').addEventListener('click', openModal);
+    };
+  </script>
+</body>
+</html>
