@@ -5,22 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#7c3aed',
-            secondary: '#a78bfa',
-            bg: '#0f172a',
-            card: '#1e293b',
-            'card-hover': '#334155'
-          }
-        }
-      }
-    }
-  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -42,7 +26,7 @@
     }
     
     .container {
-      max-width: 1400px;
+      max-width: 1000px; /* Largura controlada para melhor leitura */
       margin: 0 auto;
     }
     
@@ -139,7 +123,6 @@
     .search-box {
       position: relative;
       width: 100%;
-      max-width: 100%;
     }
     
     .search-box input {
@@ -171,50 +154,22 @@
       font-size: 1.1rem;
     }
     
-    /* Grid Responsivo */
-    .grid-container {
-      display: grid;
-      gap: 16px;
-      /* Padrão mobile: 1 coluna */
-      grid-template-columns: 1fr;
-    }
-    
-    /* Tablet pequeno: 2 colunas */
-    @media (min-width: 640px) {
-      .grid-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    /* Tablet grande: 3 colunas */
-    @media (min-width: 768px) {
-      .grid-container {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    
-    /* Desktop pequeno: 4 colunas */
-    @media (min-width: 1024px) {
-      .grid-container {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-    
-    /* Desktop grande: 5 colunas */
-    @media (min-width: 1280px) {
-      .grid-container {
-        grid-template-columns: repeat(5, 1fr);
-      }
+    /* Container de Categorias - 1 coluna sempre */
+    .categories-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     
     /* Card de categoria */
     .category-card {
       background: rgba(255,255,255,0.95);
       border-radius: 16px;
-      padding: 16px;
+      padding: 20px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       transition: all 0.3s;
-      overflow: hidden; /* Impede que conteúdo vaze */
+      overflow: hidden;
+      width: 100%;
     }
     
     body.dark .category-card {
@@ -222,7 +177,7 @@
     }
     
     .category-card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     }
     
@@ -230,8 +185,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
+      margin-bottom: 15px;
+      padding-bottom: 12px;
       border-bottom: 2px solid #e2e8f0;
     }
     
@@ -240,11 +195,9 @@
     }
     
     .category-title {
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: #1e293b;
-      word-break: break-word;
-      hyphens: auto;
     }
     
     body.dark .category-title {
@@ -252,20 +205,20 @@
     }
     
     .category-count {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       color: #94a3b8;
       flex-shrink: 0;
-      margin-left: 8px;
+      margin-left: 10px;
     }
     
     /* Grid de links dentro da categoria */
     .links-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
     }
     
-    /* Em telas muito pequenas, 1 coluna */
+    /* Em telas pequenas, 1 coluna nos links */
     @media (max-width: 480px) {
       .links-grid {
         grid-template-columns: 1fr;
@@ -276,14 +229,14 @@
     .link-item {
       background: #f8fafc;
       border-radius: 10px;
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       cursor: grab;
       transition: all 0.2s;
       border: 1px solid transparent;
-      overflow: hidden; /* Impede que conteúdo vaze */
+      overflow: hidden;
     }
     
     body.dark .link-item {
@@ -304,7 +257,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 0; /* Permite que o flex filho encolha */
+      min-width: 0;
     }
     
     .link-icon {
@@ -318,8 +271,7 @@
       color: #3b82f6;
       text-decoration: none;
       font-weight: 600;
-      font-size: 0.85rem;
-      /* Tratamento de texto longo */
+      font-size: 0.95rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -351,16 +303,13 @@
     }
     
     .tag {
-      font-size: 0.65rem;
-      padding: 2px 6px;
+      font-size: 0.7rem;
+      padding: 2px 8px;
       border-radius: 6px;
       background: #dbeafe;
       color: #1e40af;
       font-weight: 500;
       white-space: nowrap;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     
     body.dark .tag {
@@ -390,10 +339,10 @@
     
     .btn-add {
       width: 100%;
-      margin-top: 12px;
-      padding: 10px;
+      margin-top: 15px;
+      padding: 12px;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
     
     /* Modal */
@@ -500,25 +449,6 @@
       text-align: center;
       padding: 60px 20px;
       color: white;
-      grid-column: 1 / -1;
-    }
-    
-    /* Scrollbar personalizado */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.1);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.3);
-      border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.5);
     }
   </style>
 </head>
@@ -545,8 +475,8 @@
       </div>
     </div>
 
-    <!-- Grid de Categorias -->
-    <div id="categories" class="grid-container"></div>
+    <!-- Lista de Categorias (1 por linha) -->
+    <div id="categories" class="categories-container"></div>
     
     <!-- Estado Vazio -->
     <div id="emptyState" class="empty-state" style="display:none;">
