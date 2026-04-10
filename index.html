@@ -1,207 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meus Favoritos Rápidos</title>
-  <style>
-    :root {
-      --bg: linear-gradient(135deg, #0f172a, #1e3a8a);
-      --card-bg: rgba(255,255,255,0.09);
-      --card-hover: rgba(255,255,255,0.20);
-      --text: #e0f2fe;
-      --accent: #60a5fa;
-    }
-    [data-theme="light"] {
-      --bg: linear-gradient(135deg, #f8fafc, #e0f2fe);
-      --card-bg: rgba(255,255,255,0.92);
-      --card-hover: rgba(255,255,255,0.98);
-      --text: #0f172a;
-      --accent: #1e40af;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px 15px;
-      min-height: 100vh;
-    }
-
-    .container { max-width: 1280px; margin: 0 auto; }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    h1 { margin: 0; font-size: 2.6em; font-weight: 700; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      padding: 16px;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-
-    .card h3 {
-      margin: 0 0 12px 0;
-      font-size: 1.45em;
-      color: var(--accent);
-    }
-
-    .link-item {
-      padding: 8px 10px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.05em;
-    }
-
-    .link-item:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
-    .link-item a {
-      color: var(--text);
-      text-decoration: none;
-      flex: 1;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 60px;
-      opacity: 0.7;
-      font-size: 0.95em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Sites - Lauro86</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: #e0f2fe;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 25px 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        .card h2 {
+            margin: 0 0 15px 0;
+            color: #60a5fa;
+            font-size: 1.5rem;
+        }
+        .card p {
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+        footer {
+            margin-top: 60px;
+            opacity: 0.7;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>⭐ Meus Favoritos Rápidos</h1>
-    </header>
+    <div class="container">
+        <h1>🚀 Meus Sites</h1>
+        <p>Escolha o site que deseja acessar</p>
 
-    <div class="grid" id="grid"></div>
-  </div>
+        <div class="grid">
 
-  <div class="footer">
-    <p>Meus Atalhos Rápidos • Hospedado no GitHub Pages</p>
-    <p>Total de links: <strong id="totalLinks">0</strong></p>
-  </div>
+            <div class="card">
+                <h2>FLAVIA-SITE</h2>
+                <p>Site teste gerado</p>
+                <a href="/FLAVIA-SITE/" class="btn">Acessar →</a>
+            </div>
 
-  <script>
-    // ==================== SEUS LINKS COMPLETOS ====================
-    const categories = [
-      { title: "📧 Comunicação", links: [
-        { name: "Gmail", url: "https://mail.google.com" },
-        { name: "Google Account", url: "https://accounts.google.com" },
-        { name: "WhatsApp Web", url: "https://web.whatsapp.com/" },
-        { name: "Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
-      ]},
-      { title: "☁️ Armazenamento e Senhas", links: [
-        { name: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" },
-        { name: "Google Passwords", url: "https://passwords.google.com/" },
-        { name: "Feedly", url: "https://feedly.com/" }
-      ]},
-      { title: "🎥 Entretenimento & IA", links: [
-        { name: "YouTube", url: "https://www.youtube.com/" },
-        { name: "Twitter / X", url: "https://twitter.com/home" },
-        { name: "Twitch Following", url: "https://www.twitch.tv/directory/following" },
-        { name: "Grok", url: "https://grok.com/" },
-        { name: "ChatGPT", url: "https://chat.openai.com/" },
-        { name: "Gemini", url: "https://gemini.google.com/" },
-        { name: "Venice AI", url: "https://venice.ai/" },
-        { name: "Chat Z.ai", url: "https://chat.z.ai/" }
-      ]},
-      { title: "💼 Trabalho e Cursos", links: [
-        { name: "Smry.ai", url: "https://www.smry.ai/" },
-        { name: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
-        { name: "Bolha Tools", url: "https://open.bolha.tools/" },
-        { name: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304" }
-      ]},
-      { title: "🔧 Benchmarks e Tech", links: [
-        { name: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php" },
-        { name: "CPU Compare", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" },
-        { name: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
-        { name: "ImgBB", url: "https://imgbb.com/" },
-        { name: "Twitter Video Downloader", url: "https://twittervideodownloader.com/" }
-      ]},
-      { title: "📈 Trading e Finanças", links: [
-        { name: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
-      ]},
-      { title: "🛒 Compras e Farmácia", links: [
-        { name: "Drogasil", url: "https://www.drogasil.com.br/" },
-        { name: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/" },
-        { name: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/" }
-      ]},
-      { title: "🔞 Adulto / Fetish", links: [
-        { name: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
-        { name: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
-        { name: "Pirataria Explicito", url: "https://pirataria.link/explicito" },
-        { name: "Reddit - Armpit Fetish", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly..." },
-        { name: "Google - Armpit Search", url: "https://www.google.com/search?q=(stubble+OR+prickly...)" },
-        { name: "Google - Orgasm Contractions", url: "https://www.google.com/search?num=12...orgasmic+contractions..." }
-      ]},
-      { title: "⚽ Outros", links: [
-        { name: "HLTV - CS Matches", url: "https://www.hltv.org/matches" },
-        { name: "Google News", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" },
-        { name: "Grok Tasks", url: "https://grok.com/tasks" },
-        { name: "Localhost:3000", url: "http://localhost:3000/" },
-        { name: "Wish List", url: "https://wish.com" }
-      ]}
-    ];
+            <div class="card">
+                <h2>favoritos</h2>
+                <p>Meus favoritos rápidos</p>
+                <a href="/favoritos-main/" class="btn">Acessar →</a>
+            </div>
 
-    function getFaviconUrl(url) {
-      try {
-        const domain = new URL(url).hostname;
-        return `https://www.google.com/s2/favicons?sz=32&domain=${domain}`;
-      } catch (e) { return ''; }
-    }
+            <div class="card">
+                <h2>fav2</h2>
+                <p>Versão 2</p>
+                <a href="/fav2-main/" class="btn">Acessar →</a>
+            </div>
 
-    function renderCards() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
+            <div class="card">
+                <h2>fav3</h2>
+                <p>Versão 3</p>
+                <a href="/fav3-main/" class="btn">Acessar →</a>
+            </div>
 
-      categories.forEach(category => {
-        if (category.links.length === 0) return;
+            <div class="card">
+                <h2>favQWEN</h2>
+                <p>Versão QWEN</p>
+                <a href="/favQWEN-main/" class="btn">Acessar →</a>
+            </div>
 
-        let html = `<div class="card"><h3>${category.title}</h3>`;
+            <div class="card">
+                <h2>favQWEN2</h2>
+                <p>Versão QWEN 2</p>
+                <a href="/favQWEN2-main/" class="btn">Acessar →</a>
+            </div>
 
-        category.links.forEach(link => {
-          const favicon = getFaviconUrl(link.url);
-          html += `
-            <div class="link-item">
-              <a href="${link.url}" target="_blank" rel="noopener">
-                <img src="${favicon}" alt="" onerror="this.style.display='none'">
-                ${link.name}
-              </a>
-            </div>`;
-        });
+            <div class="card">
+                <h2>favQWEN3</h2>
+                <p>Versão QWEN 3</p>
+                <a href="/favQWEN3-main/" class="btn">Acessar →</a>
+            </div>
 
-        html += `</div>`;
-        grid.innerHTML += html;
-      });
+        </div>
 
-      document.getElementById('totalLinks').textContent = categories.reduce((acc, cat) => acc + cat.links.length, 0);
-    }
-
-    window.onload = () => {
-      renderCards();
-    };
-  </script>
+        <footer>
+            Todos os sites hospedados no GitHub Pages • lauro86-oss
+        </footer>
+    </div>
 </body>
 </html>
