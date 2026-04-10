@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favoritos</title>
+  <style>
+    :root { --bg:#f8f9fa; --card:#fff; --text:#1f2937; --muted:#6b7280; --primary:#2563eb; --border:#e5e7eb; }
+    [data-dark] { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --primary:#60a5fa; --border:#334155; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font:14px/1.5 system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); padding:12px; transition:background .2s,color .2s; }
+    .wrap { max-width:700px; margin:0 auto; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:8px 0 16px; }
+    h1 { font-size:1.3rem; font-weight:600; }
+    #themeBtn { background:none; border:1px solid var(--border); padding:6px 10px; border-radius:6px; cursor:pointer; color:var(--text); font-size:1rem; }
+    #search { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); margin-bottom:12px; }
+    .cat { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:10px; }
+    .cat h2 { font-size:1rem; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+    .links { list-style:none; display:grid; gap:4px; }
+    @media(min-width:600px){ .links { grid-template-columns:1fr 1fr; } }
+    .link { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; text-decoration:none; color:var(--text); background:var(--bg); }
+    .link:hover { background:var(--primary); color:#fff; }
+    .link img { width:18px; height:18px; border-radius:4px; flex-shrink:0; }
+    .link span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .adult { display:none; }
+    .adult.show { display:block; }
+    #adultToggle { background:var(--primary); color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; margin-left:8px; }
+    footer { text-align:center; color:var(--muted); font-size:0.8rem; padding:16px 0 8px; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>📌 Favoritos</h1>
+      <div>
+        <button id="adultToggle">🔞</button>
+        <button id="themeBtn">🌙</button>
+      </div>
+    </header>
+    
+    <input type="text" id="search" placeholder="Buscar...">
+    
+    <div id="list">
+      <!-- Google & Conta -->
+      <div class="cat" data-cat="google">
+        <h2>🔐 Google</h2>
+        <ul class="links">
+          <li><a class="link" href="https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w" target="_blank"><img src="" data-domain="google.com"><span>Gmail</span></a></li>
+          <li><a class="link" href="https://passwords.google.com/" target="_blank"><img src="" data-domain="google.com"><span>Senhas</span></a></li>
+          <li><a class="link" href="https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" target="_blank"><img src="" data-domain="google.com"><span>Notícias</span></a></li>
+          <li><a class="link" href="https://gemini.google.com/gem/361063ffb92e" target="_blank"><img src="" data-domain="google.com"><span>Gemini</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Comunicação -->
+      <div class="cat" data-cat="com">
+        <h2>💬 Comunicação</h2>
+        <ul class="links">
+          <li><a class="link" href="https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" target="_blank"><img src="" data-domain="slack.com"><span>Slack</span></a></li>
+          <li><a class="link" href="https://web.whatsapp.com/" target="_blank"><img src="" data-domain="whatsapp.com"><span>WhatsApp</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Ferramentas -->
+      <div class="cat" data-cat="tools">
+        <h2>☁️ Ferramentas</h2>
+        <ul class="links">
+          <li><a class="link" href="https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" target="_blank"><img src="" data-domain="onedrive.live.com"><span>OneDrive</span></a></li>
+          <li><a class="link" href="https://feedly.com/" target="_blank"><img src="" data-domain="feedly.com"><span>Feedly</span></a></li>
+          <li><a class="link" href="https://imgbb.com/" target="_blank"><img src="" data-domain="imgbb.com"><span>ImgBB</span></a></li>
+          <li><a class="link" href="https://twittervideodownloader.com/" target="_blank"><img src="" data-domain="twittervideodownloader.com"><span>Twitter DL</span></a></li>
+          <li><a class="link" href="https://snaptik.app/pt" target="_blank"><img src="" data-domain="snaptik.app"><span>SnapTik</span></a></li>
+          <li><a class="link" href="https://snapins.ai/" target="_blank"><img src="" data-domain="snapins.ai"><span>Snapins</span></a></li>
+          <li><a class="link" href="https://x-downloader.com/" target="_blank"><img src="" data-domain="x-downloader.com"><span>X-Downloader</span></a></li>
+        </ul>
+      </div>
+
+      <!-- IA -->
+      <div class="cat" data-cat="ai">
+        <h2>🤖 IA</h2>
+        <ul class="links">
+          <li><a class="link" href="https://grok.com/" target="_blank"><img src="" data-domain="grok.com"><span>Grok</span></a></li>
+          <li><a class="link" href="https://grok.com/tasks" target="_blank"><img src="" data-domain="grok.com"><span>Grok Tasks</span></a></li>
+          <li><a class="link" href="https://chat.openai.com/" target="_blank"><img src="" data-domain="chat.openai.com"><span>ChatGPT</span></a></li>
+          <li><a class="link" href="https://venice.ai/" target="_blank"><img src="" data-domain="venice.ai"><span>Venice</span></a></li>
+          <li><a class="link" href="https://openrouter.ai/models?max_price=0&q=qwen" target="_blank"><img src="" data-domain="openrouter.ai"><span>OpenRouter</span></a></li>
+          <li><a class="link" href="https://chat.z.ai/" target="_blank"><img src="" data-domain="chat.z.ai"><span>Z.ai</span></a></li>
+          <li><a class="link" href="https://www.smry.ai/" target="_blank"><img src="" data-domain="smry.ai"><span>SMRY</span></a></li>
+          <li><a class="link" href="https://chat.qwen.ai/" target="_blank"><img src="" data-domain="chat.qwen.ai"><span>Qwen ✨</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Entretenimento -->
+      <div class="cat" data-cat="fun">
+        <h2>🎬 Entretenimento</h2>
+        <ul class="links">
+          <li><a class="link" href="https://www.youtube.com/" target="_blank"><img src="" data-domain="youtube.com"><span>YouTube</span></a></li>
+          <li><a class="link" href="https://twitter.com/home" target="_blank"><img src="" data-domain="twitter.com"><span>X</span></a></li>
+          <li><a class="link" href="https://www.twitch.tv/directory/following" target="_blank"><img src="" data-domain="twitch.tv"><span>Twitch</span></a></li>
+          <li><a class="link" href="https://www.hltv.org/matches" target="_blank"><img src="" data-domain="hltv.org"><span>HLTV</span></a></li>
+          <li><a class="link" href="https://www.myinstants.com/pt/index/br/" target="_blank"><img src="" data-domain="myinstants.com"><span>MyInstants</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Tech -->
+      <div class="cat" data-cat="tech">
+        <h2>💻 Tech</h2>
+        <ul class="links">
+          <li><a class="link" href="https://www.cpubenchmark.net/singleCompare.php" target="_blank"><img src="" data-domain="cpubenchmark.net"><span>CPU Benchmark</span></a></li>
+          <li><a class="link" href="https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" target="_blank"><img src="" data-domain="cpubenchmark.net"><span>CPU Compare</span></a></li>
+          <li><a class="link" href="https://www.videocardbenchmark.net/singleCompare.php" target="_blank"><img src="" data-domain="videocardbenchmark.net"><span>GPU Benchmark</span></a></li>
+          <li><a class="link" href="http://localhost:3000/" target="_blank"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;background:#64748b;color:#fff;border-radius:4px;font-size:12px">🔧</span><span>localhost</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Estudos -->
+      <div class="cat" data-cat="study">
+        <h2>🎓 Estudos</h2>
+        <ul class="links">
+          <li><a class="link" href="https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" target="_blank"><img src="" data-domain="estrategiaconcursos.com.br"><span>Estratégia</span></a></li>
+          <li><a class="link" href="https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user" target="_blank"><img src="" data-domain="hotmart.com"><span>Hotmart</span></a></li>
+          <li><a class="link" href="https://medical-brasil.catalog.kyte.site/" target="_blank"><img src="" data-domain="kyte.site"><span>Medical BR</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Finanças -->
+      <div class="cat" data-cat="money">
+        <h2>💰 Finanças</h2>
+        <ul class="links">
+          <li><a class="link" href="https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" target="_blank"><img src="" data-domain="tradingview.com"><span>TradingView</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Compras -->
+      <div class="cat" data-cat="shop">
+        <h2>🛒 Compras</h2>
+        <ul class="links">
+          <li><a class="link" href="https://www.drogasil.com.br/" target="_blank"><img src="" data-domain="drogasil.com.br"><span>Drogasil</span></a></li>
+          <li><a class="link" href="https://paraguaypharmaceuticals.com/" target="_blank"><img src="" data-domain="paraguaypharmaceuticals.com"><span>Paraguay Pharm</span></a></li>
+          <li><a class="link" href="http://www.ofertaesperta.com/" target="_blank"><img src="" data-domain="ofertaesperta.com"><span>Oferta Esperta</span></a></li>
+          <li><a class="link" href="https://www.hardmob.com.br/forums/407-Promocoes" target="_blank"><img src="" data-domain="hardmob.com.br"><span>Hardmob</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Utilitários -->
+      <div class="cat" data-cat="utils">
+        <h2>🔧 Utilitários</h2>
+        <ul class="links">
+          <li><a class="link" href="https://open.bolha.tools/" target="_blank"><img src="" data-domain="bolha.tools"><span>Bolha Tools</span></a></li>
+          <li><a class="link" href="https://calc.injectionshop.com/" target="_blank"><img src="" data-domain="calc.injectionshop.com"><span>Calc</span></a></li>
+          <li><a class="link" href="https://whatsmyname.me/" target="_blank"><img src="" data-domain="whatsmyname.me"><span>WhatsMyName</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Adulto -->
+      <div class="cat adult" id="adultCat">
+        <h2>🔞 Sensível</h2>
+        <ul class="links">
+          <li><a class="link" href="https://www.photoacompanhantes.com/acompanhantes/indaiatuba" target="_blank"><img src="" data-domain="photoacompanhantes.com"><span>PhotoAcompanhantes</span></a></li>
+          <li><a class="link" href="https://coomer.st/onlyfans/user/erikasbulbasaur" target="_blank"><img src="" data-domain="coomer.st"><span>Coomer</span></a></li>
+          <li><a class="link" href="https://pirataria.link/explicito" target="_blank"><img src="" data-domain="pirataria.link"><span>Pirataria</span></a></li>
+          <li><a class="link" href="https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all" target="_blank"><img src="" data-domain="reddit.com"><span>Reddit Armpit</span></a></li>
+          <li><a class="link" href="https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble" target="_blank"><img src="" data-domain="google.com"><span>Google Armpit</span></a></li>
+          <li><a class="link" href="https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt" target="_blank"><img src="" data-domain="google.com"><span>Google Orgasm</span></a></li>
+          <li><a class="link" href="https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1" target="_blank"><img src="" data-domain="google.com"><span>Google Contractions</span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <p>Favoritos • Ctrl+K busca • D tema • Esc+Esc Google</p>
+    </footer>
+  </div>
+
+  <script>
+    // Tema
+    const themeBtn = document.getElementById('themeBtn');
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    if(savedTheme === 'dark') { root.setAttribute('data-dark',''); themeBtn.textContent = '☀️'; }
+    themeBtn.onclick = () => {
+      const isDark = root.hasAttribute('data-dark');
+      if(isDark) { root.removeAttribute('data-dark'); themeBtn.textContent = '🌙'; localStorage.setItem('theme','light'); }
+      else { root.setAttribute('data-dark',''); themeBtn.textContent = '☀️'; localStorage.setItem('theme','dark'); }
+    };
+
+    // Ícones com fallback
+    document.querySelectorAll('img[data-domain]').forEach(img => {
+      const domain = img.dataset.domain;
+      img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+      img.onerror = () => {
+        img.style.display = 'none';
+        const emojis = {google:'🔍',slack:'💬',whatsapp:'💚',youtube:'🎬',twitter:'🐦',twitch:'🎮',reddit:'🤖',github:'🐙',tiktok:'🎭',qwen:'✨',ofertaesperta:'💰',hardmob:'🔥',myinstants:'🔊',whatsmyname:'🔍'};
+        for(const [k,v] of Object.entries(emojis)) if(domain.includes(k)) { img.insertAdjacentHTML('beforebegin', `<span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg);border-radius:4px;font-size:12px">${v}</span>`); break; }
+      };
+    });
+
+    // Busca
+    const search = document.getElementById('search');
+    search.oninput = () => {
+      const q = search.value.toLowerCase();
+      document.querySelectorAll('.link').forEach(a => {
+        const text = a.textContent.toLowerCase();
+        a.parentElement.style.display = text.includes(q) ? '' : 'none';
+      });
+      document.querySelectorAll('.cat').forEach(c => {
+        const hasVisible = [...c.querySelectorAll('.link')].some(l => l.parentElement.style.display !== 'none');
+        c.style.display = (hasVisible || (c.id === 'adultCat' && !c.classList.contains('show'))) ? '' : 'none';
+      });
+    };
+
+    // Conteúdo sensível
+    const adultToggle = document.getElementById('adultToggle');
+    const adultCat = document.getElementById('adultCat');
+    const savedAdult = localStorage.getItem('adult') === 'true';
+    if(savedAdult) adultCat.classList.add('show');
+    adultToggle.onclick = () => {
+      adultCat.classList.toggle('show');
+      localStorage.setItem('adult', adultCat.classList.contains('show'));
+      adultToggle.textContent = adultCat.classList.contains('show') ? '🔒' : '🔞';
+    };
+
+    // Atalhos
+    document.addEventListener('keydown', e => {
+      if(e.target.tagName === 'INPUT') return;
+      if(e.ctrlKey && e.key.toLowerCase() === 'k') { e.preventDefault(); search.focus(); search.select(); }
+      if(e.key.toLowerCase() === 'd' && !e.ctrlKey) { e.preventDefault(); themeBtn.click(); }
+      if(e.key === 'Escape') { let c=0; const esc = setInterval(() => { c++; if(c>=2) window.location.replace('https://google.com'); if(c>=2) clearInterval(esc); }, 200); setTimeout(() => clearInterval(esc), 500); }
+    });
+
+    // Panic Button visual (duplo Esc)
+    let escCount = 0;
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && e.target.tagName !== 'INPUT') {
+        escCount++;
+        if(escCount === 2) window.location.replace('https://www.google.com');
+        setTimeout(() => escCount = 0, 500);
+      }
+    });
+  </script>
+</body>
+</html>
