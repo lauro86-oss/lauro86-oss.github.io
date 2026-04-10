@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -37,8 +37,8 @@
     .header {
       background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(10px);
-      padding: 16px 24px;
-      margin-bottom: 24px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       border-bottom: 1px solid rgba(0,0,0,0.06);
       position: sticky;
@@ -54,7 +54,7 @@
     .category-card {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
-      padding: 14px;
+      padding: 12px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
       border: 1px solid rgba(0, 0, 0, 0.05);
       transition: all 0.2s ease;
@@ -78,6 +78,7 @@
       margin-bottom: 10px;
       padding-bottom: 8px;
       border-bottom: 2px solid #e2e8f0;
+      flex-wrap: wrap;
     }
     
     body.dark .category-header {
@@ -85,12 +86,13 @@
     }
     
     .category-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #1e293b;
       display: flex;
       align-items: center;
       gap: 6px;
+      flex: 1;
     }
     
     body.dark .category-title {
@@ -98,7 +100,7 @@
     }
     
     .category-count {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #94a3b8;
       margin-left: auto;
     }
@@ -115,6 +117,7 @@
       cursor: grab;
       transition: all 0.2s ease;
       border: 1px solid transparent;
+      flex-wrap: wrap;
     }
     
     body.dark .link-item {
@@ -137,11 +140,12 @@
       align-items: center;
       gap: 8px;
       min-width: 0;
+      flex-wrap: wrap;
     }
     
     .link-icon {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       flex-shrink: 0;
       border-radius: 4px;
     }
@@ -150,11 +154,13 @@
       color: #3b82f6;
       text-decoration: none;
       font-weight: 500;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       transition: color 0.2s;
+      flex: 1;
+      min-width: 0;
     }
     
     .link-title:hover {
@@ -170,15 +176,24 @@
       color: #93c5fd;
     }
     
+    .link-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+    
     .tags-container {
       display: flex;
       gap: 4px;
-      flex-wrap: nowrap;
-      margin-left: auto;
+      flex-wrap: wrap;
+      flex: 1;
     }
     
     .tag {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       padding: 2px 6px;
       border-radius: 8px;
       background: #dbeafe;
@@ -195,20 +210,15 @@
     .link-actions {
       display: flex;
       gap: 4px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    
-    .link-item:hover .link-actions {
-      opacity: 1;
+      flex-shrink: 0;
     }
     
     .action-btn {
       background: none;
       border: none;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
-      padding: 2px;
+      padding: 2px 4px;
       border-radius: 4px;
       transition: all 0.2s;
       opacity: 0.6;
@@ -224,16 +234,17 @@
     }
     
     .btn {
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 8px;
       border: none;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     
     .btn-primary {
@@ -249,10 +260,6 @@
     .btn-danger {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
-    }
-    
-    .btn-danger:hover {
-      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.4);
     }
     
     .btn-secondary {
@@ -276,8 +283,9 @@
     .btn-add {
       width: 100%;
       margin-top: 8px;
-      padding: 8px;
-      font-size: 0.85rem;
+      padding: 7px;
+      font-size: 0.8rem;
+      justify-content: center;
     }
     
     .modal {
@@ -289,6 +297,7 @@
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(4px);
+      padding: 16px;
     }
     
     .modal.active {
@@ -299,8 +308,10 @@
       background: white;
       padding: 24px;
       border-radius: 16px;
-      width: 90%;
+      width: 100%;
       max-width: 450px;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
@@ -310,14 +321,14 @@
     
     .modal input, .modal select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 12px;
       background: #f8fafc;
       border: 2px solid #e2e8f0;
       border-radius: 8px;
       color: #1e293b;
       margin-top: 4px;
       margin-bottom: 12px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
     
     body.dark .modal input, body.dark .modal select {
@@ -333,17 +344,18 @@
     
     .search-box {
       position: relative;
+      width: 100%;
       max-width: 500px;
-      margin: 12px auto 0;
+      margin: 10px auto 0;
     }
     
     .search-input {
       width: 100%;
-      padding: 10px 16px 10px 40px;
+      padding: 9px 16px 9px 38px;
       background: white;
       border: 2px solid #e2e8f0;
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       transition: all 0.2s;
     }
     
@@ -360,44 +372,74 @@
     
     .search-icon {
       position: absolute;
-      left: 14px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #94a3b8;
     }
     
+    /* Grid Responsivo Dinâmico */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 0 24px 24px;
+      padding: 0 16px 24px;
     }
     
     @media (max-width: 640px) {
       .grid-container {
         grid-template-columns: 1fr;
-        padding: 0 12px 24px;
+        padding: 0 12px 20px;
+      }
+      .header {
+        padding: 10px 12px;
+      }
+      .btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+      .category-card {
+        padding: 10px;
       }
     }
     
-    @media (min-width: 641px) and (max-width: 960px) {
+    @media (min-width: 641px) and (max-width: 900px) {
       .grid-container {
         grid-template-columns: repeat(2, 1fr);
       }
     }
     
-    @media (min-width: 961px) and (max-width: 1280px) {
+    @media (min-width: 901px) and (max-width: 1200px) {
       .grid-container {
         grid-template-columns: repeat(3, 1fr);
       }
     }
     
-    @media (min-width: 1281px) {
+    @media (min-width: 1201px) and (max-width: 1500px) {
       .grid-container {
         grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    @media (min-width: 1501px) {
+      .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+    
+    /* Zoom adjustments */
+    @media (min-resolution: 125dpi) {
+      .grid-container {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+    }
+    
+    @media (min-resolution: 150dpi) {
+      .grid-container {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       }
     }
     
@@ -421,7 +463,8 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 200;
       animation: slideIn 0.3s ease;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      max-width: 90%;
     }
     
     body.dark .toast {
@@ -436,7 +479,7 @@
     .theme-toggle {
       background: none;
       border: 2px solid #e2e8f0;
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 1.1rem;
@@ -457,6 +500,13 @@
       padding: 40px 20px;
       color: #94a3b8;
     }
+    
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -464,16 +514,15 @@
   <!-- Header -->
   <header class="header">
     <div class="max-w-7xl mx-auto">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           ⭐ Meus Favoritos
         </h1>
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="header-actions">
           <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn" title="Alternar tema">🌙</button>
           <button onclick="addCategory()" class="btn btn-primary">✨ Nova Categoria</button>
-          <button onclick="clearAll()" class="btn btn-danger">🗑️ Limpar</button>
-          <button onclick="exportData()" class="btn btn-secondary">💾 Exportar JSON</button>
-          <button onclick="exportHTML()" class="btn btn-secondary">📄 Exp HTML</button>
+          <button onclick="exportData()" class="btn btn-secondary">💾 JSON</button>
+          <button onclick="exportHTML()" class="btn btn-secondary">📄 Salvar HTML</button>
         </div>
       </div>
       
@@ -498,7 +547,7 @@
   <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-content">
-      <h2 class="text-xl font-bold mb-4" id="modalTitle">➕ Adicionar Link</h2>
+      <h2 class="text-lg md:text-xl font-bold mb-4" id="modalTitle">➕ Adicionar Link</h2>
       
       <label class="block text-sm font-medium mb-1">Título *</label>
       <input id="linkTitle" placeholder="Ex: Gmail">
@@ -507,7 +556,7 @@
       <input id="linkUrl" placeholder="https://exemplo.com">
       
       <label class="block text-sm font-medium mb-1">Tags (vírgula)</label>
-      <input id="linkTags" placeholder="Ex: email, google">
+      <input id="linkTags" placeholder="Ex: email, google, trabalho">
       
       <label class="block text-sm font-medium mb-1">Categoria</label>
       <select id="linkCategory"></select>
@@ -534,13 +583,13 @@
     let currentLinkIndex = null;
     let isDark = false;
 
-    // ===== DADOS INICIAIS =====
+    // ===== DADOS INICIAIS COM TAGS =====
     const initialData = {
       categories: [
         {
           name: "🔐 Google & Comunicação",
           links: [
-            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier", tags: ["email", "conta"] },
+            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier", tags: ["email", "conta", "google"] },
             { title: "Slack - Canal", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho", "chat"] },
             { title: "WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["mensagens", "chat"] }
           ]
@@ -548,22 +597,22 @@
         {
           name: "☁️ Armazenamento e Senhas",
           links: [
-            { title: "OneDrive", url: "https://onedrive.live.com/", tags: ["nuvem", "arquivos"] },
-            { title: "Feedly", url: "https://feedly.com/", tags: ["RSS", "leitura"] },
-            { title: "Google Passwords", url: "https://passwords.google.com/", tags: ["segurança", "google"] }
+            { title: "OneDrive", url: "https://onedrive.live.com/", tags: ["nuvem", "arquivos", "microsoft"] },
+            { title: "Feedly", url: "https://feedly.com/", tags: ["RSS", "leitura", "notícias"] },
+            { title: "Google Passwords", url: "https://passwords.google.com/", tags: ["segurança", "google", "senhas"] }
           ]
         },
         {
           name: "🎬 Entretenimento & IA",
           links: [
-            { title: "YouTube", url: "https://www.youtube.com/", tags: ["vídeo"] },
-            { title: "Twitter / X", url: "https://twitter.com/home", tags: ["social"] },
-            { title: "Twitch - Following", url: "https://www.twitch.tv/directory/following", tags: ["lives"] },
-            { title: "Grok", url: "https://grok.com/", tags: ["IA", "chat"] },
-            { title: "ChatGPT", url: "https://chat.openai.com/", tags: ["IA"] },
+            { title: "YouTube", url: "https://www.youtube.com/", tags: ["vídeo", "google"] },
+            { title: "Twitter / X", url: "https://twitter.com/home", tags: ["social", "notícias"] },
+            { title: "Twitch - Following", url: "https://www.twitch.tv/directory/following", tags: ["lives", "games"] },
+            { title: "Grok", url: "https://grok.com/", tags: ["IA", "chat", "xAI"] },
+            { title: "ChatGPT", url: "https://chat.openai.com/", tags: ["IA", "OpenAI", "chat"] },
             { title: "Gemini (Gem)", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA", "google"] },
             { title: "Venice AI", url: "https://venice.ai/", tags: ["IA", "privado"] },
-            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA", "Qwen"] },
+            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA", "Qwen", "Alibaba"] },
             { title: "Chat Z.ai", url: "https://chat.z.ai/", tags: ["IA", "chat"] }
           ]
         },
@@ -571,16 +620,16 @@
           name: "💼 Trabalho e Cursos",
           links: [
             { title: "Smry.ai", url: "https://www.smry.ai/", tags: ["IA", "resumo"] },
-            { title: "Bolha Tools", url: "https://open.bolha.tools/", tags: ["ferramentas"] },
-            { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos"] },
-            { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304", tags: ["negócios"] }
+            { title: "Bolha Tools", url: "https://open.bolha.tools/", tags: ["ferramentas", "IA"] },
+            { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos", "estudos"] },
+            { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304", tags: ["negócios", "cursos"] }
           ]
         },
         {
           name: "🔧 Benchmarks e Tech",
           links: [
-            { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware"] },
-            { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU"] },
+            { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware", "CPU"] },
+            { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU", "hardware"] },
             { title: "ImgBB", url: "https://imgbb.com/", tags: ["imagens", "upload"] },
             { title: "Twitter Video Downloader", url: "https://twittervideodownloader.com/", tags: ["download", "vídeo"] }
           ]
@@ -588,26 +637,26 @@
         {
           name: "📈 Trading e Finanças",
           links: [
-            { title: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025", tags: ["trading"] }
+            { title: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025", tags: ["trading", "bolsa"] }
           ]
         },
         {
           name: "🛒 Compras e Farmácia",
           links: [
-            { title: "Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia"] },
-            { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/", tags: ["médico"] },
-            { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"] }
+            { title: "Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia", "saúde"] },
+            { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/", tags: ["médico", "importados"] },
+            { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/", tags: ["importados", "farmácia"] }
           ]
         },
         {
           name: "🔗 Outros / Wishlist",
           links: [
-            { title: "Wish List", url: "#", tags: [] },
-            { title: "HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports"] },
-            { title: "AES", url: "#", tags: ["segurança"] },
-            { title: "News Google", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["notícias", "feed"] },
-            { title: "OpenRouter - Qwen", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["IA", "modelos"] },
-            { title: "Localhost:3000", url: "http://localhost:3000/", tags: ["dev"] },
+            { title: "Wish List", url: "#", tags: ["compras"] },
+            { title: "HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports", "CS:GO"] },
+            { title: "AES", url: "#", tags: ["segurança", "criptografia"] },
+            { title: "News Google", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["notícias", "feed", "google"] },
+            { title: "OpenRouter - Qwen", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["IA", "modelos", "API"] },
+            { title: "Localhost:3000", url: "http://localhost:3000/", tags: ["dev", "local"] },
             { title: "Grok Tasks", url: "https://grok.com/tasks", tags: ["IA", "tarefas"] }
           ]
         }
@@ -701,7 +750,7 @@
         return;
       }
       try {
-        const { data: existing } = await supabaseClient.from('favoritos').select('id').limit(1);
+        const {  existing } = await supabaseClient.from('favoritos').select('id').limit(1);
         if (existing && existing.length > 0) {
           await supabaseClient.from('favoritos').update({ categories: data.categories }).eq('id', existing[0].id);
         } else {
@@ -718,15 +767,16 @@
 
     // ===== EXPORT HTML =====
     function exportHTML() {
-      const htmlContent = document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html' });
+      // Get current HTML and update with current data
+      const currentHTML = document.documentElement.outerHTML;
+      const blob = new Blob([currentHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `favoritos-${new Date().toISOString().split('T')[0]}.html`;
+      a.download = `meus-favoritos-${new Date().toISOString().split('T')[0]}.html`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('📄 HTML exportado!', 'success');
+      showToast('📄 HTML salvo com sucesso!', 'success');
     }
 
     // ===== RENDERIZAÇÃO =====
@@ -780,14 +830,16 @@
               ${escapeHtml(link.title)}
             </a>
           </div>
-          ${link.tags && link.tags.length ? `
-            <div class="tags-container">
-              ${link.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+          <div class="link-footer">
+            ${link.tags && link.tags.length ? `
+              <div class="tags-container">
+                ${link.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+              </div>
+            ` : '<div style="flex:1;"></div>'}
+            <div class="link-actions">
+              <button class="action-btn" onclick="editLink(${catIndex}, ${linkIndex})" title="Editar">✏️</button>
+              <button class="action-btn" onclick="deleteLink(${catIndex}, ${linkIndex})" title="Excluir">🗑️</button>
             </div>
-          ` : '<div style="width: 60px;"></div>'}
-          <div class="link-actions">
-            <button class="action-btn" onclick="editLink(${catIndex}, ${linkIndex})" title="Editar">✏️</button>
-            <button class="action-btn" onclick="deleteLink(${catIndex}, ${linkIndex})" title="Excluir">🗑️</button>
           </div>
         `;
         
@@ -904,15 +956,6 @@
       }
     });
 
-    function clearAll() {
-      if (confirm('🚨 Apagar TUDO?') && confirm('✅ Confirmar?')) {
-        data = { categories: [] };
-        render();
-        saveToSupabase();
-        showToast('🗑️ Tudo limpo', 'success');
-      }
-    }
-
     function filterLinks() {
       const term = document.getElementById('searchInput').value.toLowerCase().trim();
       let hasResults = false;
@@ -959,7 +1002,7 @@
       a.download = `favoritos-backup-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('💾 Backup exportado!', 'success');
+      showToast('💾 JSON exportado!', 'success');
     }
 
     // ===== INICIALIZAÇÃO =====
