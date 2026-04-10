@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⭐ favQWEN3 - Meus Favoritos Inteligentes</title>
+  <meta name="description" content="Gerenciador de favoritos com sincronização GitHub e Supabase">
+  
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #0f172a, #1e3a8a);
+      --card-bg: rgba(255,255,255,0.09);
+      --card-hover: rgba(255,255,255,0.20);
+      --text: #e0f2fe;
+      --accent: #60a5fa;
+      --accent-hover: #3b82f6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --shadow: rgba(0,0,0,0.45);
+      --border: rgba(255,255,255,0.18);
+    }
+    [data-theme="light"] {
+      --bg: linear-gradient(135deg, #f8fafc, #e0f2fe);
+      --card-bg: rgba(255,255,255,0.92);
+      --card-hover: rgba(255,255,255,0.98);
+      --text: #0f172a;
+      --accent: #1e40af;
+      --accent-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --warning: #d97706;
+      --shadow: rgba(0,0,0,0.12);
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px 15px;
+      min-height: 100vh;
+      transition: background 0.5s ease;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1280px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 { 
+      margin: 0; 
+      font-size: 2.2em; 
+      font-weight: 700; 
+      text-shadow: 0 4px 20px var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    h1 .subtitle {
+      font-size: 0.5em;
+      font-weight: 400;
+      opacity: 0.8;
+      display: block;
+    }
+
+    .info-bar { 
+      font-size: 1em; 
+      opacity: 0.95;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+    }
+    
+    .status-online { color: var(--success); }
+    .status-offline { color: var(--warning); }
+
+    .controls { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      padding: 10px 18px;
+      width: 280px;
+      max-width: 100%;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 0.95em;
+      outline: none;
+      transition: all 0.2s;
+    }
+    
+    .search-bar:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+
+    [data-theme="light"] .search-bar {
+      background: rgba(255,255,255,0.95);
+      color: #0f172a;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.95em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--card-hover);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      font-size: 1.3em;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .theme-toggle:hover {
+      background: var(--card-hover);
+      transform: rotate(15deg);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      min-height: 100px;
+      position: relative;
+    }
+    
+    .card.drag-over {
+      border-color: var(--accent);
+      background: var(--card-hover);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(96,165,250,0.3);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.3em;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .card-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      opacity: 0.7;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 1.1em;
+      transition: all 0.2s;
+    }
+    
+    .card-btn:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .link-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      font-size: 0.95em;
+      cursor: grab;
+    }
+    
+    .link-item:active { cursor: grabbing; }
+
+    .link-item:hover {
+      background: rgba(255,255,255,0.12);
+      padding-left: 14px;
+    }
+    
+    .link-item.dragging {
+      opacity: 0.6;
+      transform: scale(1.02);
+    }
+
+    .link-item a {
+      color: var(--text);
+      text-decoration: none;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+    
+    .link-item a span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .link-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .link-item:hover .link-actions { opacity: 1; }
+    
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 1em;
+      transition: all 0.2s;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .link-btn.edit:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .link-btn.delete:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .card a img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Floating Action Buttons */
+    .fab-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 100;
+      align-items: flex-end;
+    }
+    
+    .fab {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    
+    .fab:hover {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+    }
+    
+    .fab:active { transform: scale(0.98); }
+    
+    .fab-add {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .fab-save {
+      background: var(--success);
+      color: white;
+    }
+    
+    .fab-sync {
+      background: #8b5cf6;
+      color: white;
+    }
+    
+    .fab-settings {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+    
+    .fab-tooltip {
+      position: absolute;
+      right: 65px;
+      background: var(--card-bg);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    
+    .fab:hover .fab-tooltip { opacity: 1; }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 480px;
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalSlide 0.3s ease;
+    }
+    
+    @keyframes modalSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.4em;
+      color: var(--accent);
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      color: var(--text);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .modal-close:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 0.95em;
+      opacity: 0.9;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 1em;
+      outline: none;
+      transition: all 0.2s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    [data-theme="light"] input,
+    [data-theme="light"] select,
+    [data-theme="light"] textarea {
+      background: white;
+      color: #0f172a;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+    
+    .modal-buttons button {
+      min-width: 100px;
+      padding: 11px 18px;
+    }
+
+    /* Settings Modal Specific */
+    .settings-section {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .settings-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .settings-section h4 {
+      margin: 0 0 12px 0;
+      color: var(--accent);
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .hint {
+      font-size: 0.85em;
+      opacity: 0.8;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    
+    .token-input {
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 350px;
+    }
+    
+    .toast {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      padding: 14px 18px;
+      border-radius: 10px;
+      box-shadow: 0 8px 25px var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastSlide 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--warning); }
+    
+    @keyframes toastSlide {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .toast-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      opacity: 0.7;
+      font-size: 1.2em;
+    }
+    
+    .toast-close:hover { opacity: 1; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+      opacity: 0.85;
+      font-size: 0.9em;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer strong { color: var(--accent); }
+    
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 10px;
+      font-size: 0.9em;
+    }
+    
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      animation: pulse 2s infinite;
+    }
+    
+    .sync-dot.synced {
+      background: var(--success);
+      animation: none;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      opacity: 0.7;
+      grid-column: 1 / -1;
+    }
+    
+    .empty-state .icon {
+      font-size: 3em;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .search-bar {
+        width: 100%;
+        max-width: none;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .fab-container {
+        bottom: 15px;
+        right: 15px;
+      }
+      
+      .fab {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+      
+      .fab-tooltip {
+        display: none;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .btn.loading .spinner {
+      margin-right: 6px;
+    }
+    
+    .btn.loading span {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>⭐ favQWEN3 <span class="subtitle">Meus Favoritos Inteligentes</span></h1>
+      </div>
+      <div class="info-bar">
+        <span id="clock">--:--</span>
+        <span id="weather">🌡️ --°C</span>
+        <span class="status-badge" id="connectionStatus">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="connectionText">Verificando...</span>
+        </span>
+      </div>
+      <div class="controls">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔎 Buscar links..." autocomplete="off">
+        <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema" title="Alternar tema">🌙</button>
+      </div>
+    </header>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- Floating Action Buttons -->
+  <div class="fab-container">
+    <button class="fab fab-settings" id="settingsBtn" title="Configurações">
+      ⚙️
+      <span class="fab-tooltip">Configurações</span>
+    </button>
+    <button class="fab fab-sync" id="syncBtn" title="Sincronizar com GitHub">
+      🔄
+      <span class="fab-tooltip">Sincronizar GitHub</span>
+    </button>
+    <button class="fab fab-save" id="saveHtmlBtn" title="Salvar HTML">
+      💾
+      <span class="fab-tooltip">Salvar HTML</span>
+    </button>
+    <button class="fab fab-add" id="addBtn" title="Adicionar novo link">
+      +
+      <span class="fab-tooltip">Adicionar Link</span>
+    </button>
+  </div>
+
+  <!-- Link Modal -->
+  <div class="modal" id="linkModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Adicionar Novo Link</h2>
+        <button class="modal-close" onclick="closeModal('linkModal')">&times;</button>
+      </div>
+      <input type="hidden" id="editCatIndex">
+      <input type="hidden" id="editLinkIndex">
+      
+      <div class="form-group">
+        <label for="newName">Nome do Link *</label>
+        <input type="text" id="newName" placeholder="Ex: Google, YouTube..." required>
+      </div>
+      
+      <div class="form-group">
+        <label for="newUrl">URL *</label>
+        <div style="position: relative;">
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9em;">https://</span>
+          <input type="text" id="newUrl" placeholder="exemplo.com/pagina" style="padding-left: 70px;" required>
+        </div>
+        <div class="hint">Digite a URL sem https:// no início</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="newCategory">Categoria</label>
+        <select id="newCategory"></select>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" onclick="closeModal('linkModal')">Cancelar</button>
+        <button class="btn btn-primary" id="saveLinkBtn" onclick="saveLink()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ Configurações</h2>
+        <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
+      </div>
+      
+      <!-- GitHub Settings -->
+      <div class="settings-section">
+        <h4>🐙 GitHub Sync</h4>
+        <div class="form-group">
+          <label for="ghUser">Usuário/Organização</label>
+          <input type="text" id="ghUser" placeholder="seu-usuario">
+        </div>
+        <div class="form-group">
+          <label for="ghRepo">Repositório</label>
+          <input type="text" id="ghRepo" placeholder="favQWEN3-main">
+        </div>
+        <div class="form-group">
+          <label for="ghBranch">Branch</label>
+          <input type="text" id="ghBranch" placeholder="main" value="main">
+        </div>
+        <div class="form-group">
+          <label for="ghToken">Personal Access Token</label>
+          <input type="password" id="ghToken" class="token-input" placeholder="ghp_xxxxxxxxxxxx">
+          <div class="hint">Crie um token em: github.com/settings/tokens com escopo <code>repo</code></div>
+        </div>
+        <button class="btn btn-secondary" onclick="testGitHubConnection()" style="width: 100%; margin-top: 8px;">
+          🔗 Testar Conexão
+        </button>
+      </div>
+      
+      <!-- Supabase Settings -->
+      <div class="settings-section">
+        <h4>☁️ Supabase Cloud</h4>
+        <div class="form-group">
+          <label for="sbUrl">Supabase URL</label>
+          <input type="text" id="sbUrl" placeholder="https://xxxxxx.supabase.co">
+        </div>
+        <div class="form-group">
+          <label for="sbKey">Supabase Anon Key</label>
+          <input type="password" id="sbKey" class="token-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          <div class="hint">Encontre em: supabase.com/project/settings/api</div>
+        </div>
+        <div class="form-group">
+          <label for="sbTable">Nome da Tabela</label>
+          <input type="text" id="sbTable" placeholder="favorites" value="favorites">
+        </div>
+        <button class="btn btn-secondary" onclick="testSupabaseConnection()" style="width: 100%; margin-top: 8px;">
+          🔗 Testar Conexão
+        </button>
+      </div>
+      
+      <!-- Data Management -->
+      <div class="settings-section">
+        <h4>📦 Gerenciamento de Dados</h4>
+        <div style="display: grid; gap: 10px;">
+          <button class="btn btn-secondary" onclick="exportData()">📤 Exportar Dados (JSON)</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📥 Importar Dados (JSON)</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+          <button class="btn btn-danger" onclick="clearAllData()" style="margin-top: 8px;">🗑️ Limpar Todos os Dados</button>
+        </div>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Salvar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div style="font-size: 3em; margin-bottom: 10px;">⚠️</div>
+      <h3 id="confirmTitle" style="margin: 0 0 12px 0; color: var(--accent);">Confirmar Ação</h3>
+      <p id="confirmMessage" style="margin-bottom: 24px; opacity: 0.9;"></p>
+      <div class="modal-buttons" style="justify-content: center;">
+        <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Cancelar</button>
+        <button class="btn btn-danger" id="confirmAction">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="footer">
+    <p>⭐ favQWEN3 • <a href="https://lauro86-oss.github.io/favQWEN3-main/" target="_blank" style="color: var(--accent); text-decoration: none;">lauro86-oss.github.io/favQWEN3-main/</a></p>
+    <p>Total de links: <strong id="totalLinks">0</strong> • Categorias: <strong id="totalCategories">0</strong></p>
+    <p style="margin-top: 8px; font-size: 0.85em; opacity: 0.7;">
+      Dados salvos localmente • <span id="lastSync">Última sync: --</span>
+    </p>
+  </div>
+
+  <script>
+    // ==================== CONFIGURAÇÃO INICIAL ====================
+    const CONFIG = {
+      github: {
+        user: '',
+        repo: 'favQWEN3-main',
+        branch: 'main',
+        token: '',
+        filePath: 'data/links.json'
+      },
+      supabase: {
+        url: '',
+        key: '',
+        table: 'favorites'
+      },
+      sync: {
+        autoSync: false,
+        lastSync: null
+      }
+    };
+
+    // ==================== DADOS PRINCIPAIS ====================
+    let categories = [];
+    let supabaseClient = null;
+    let isOffline = !navigator.onLine;
+
+    // ==================== DADOS DE EXEMPLO (Fallback) ====================
+    const DEFAULT_DATA = [
+      { title: "📧 Comunicação", links: [
+        { name: "Gmail", url: "https://mail.google.com" },
+        { name: "Google Account", url: "https://accounts.google.com" },
+        { name: "WhatsApp Web", url: "https://web.whatsapp.com/" }
+      ]},
+      { title: "☁️ Armazenamento", links: [
+        { name: "OneDrive", url: "https://onedrive.live.com" },
+        { name: "Google Drive", url: "https://drive.google.com" }
+      ]},
+      { title: "🎥 Entretenimento & IA", links: [
+        { name: "YouTube", url: "https://www.youtube.com/" },
+        { name: "ChatGPT", url: "https://chat.openai.com/" },
+        { name: "Gemini", url: "https://gemini.google.com/" }
+      ]},
+      { title: "💼 Trabalho", links: [
+        { name: "GitHub", url: "https://github.com" },
+        { name: "Notion", url: "https://notion.so" }
+      ]},
+      { title: "🔧 Ferramentas", links: [
+        { name: "ImgBB", url: "https://imgbb.com/" },
+        { name: "Canva", url: "https://canva.com" }
+      ]}
+    ];
+
+    // ==================== INICIALIZAÇÃO ====================
+    async function init() {
+      loadConfig();
+      await loadData();
+      renderCards();
+      setupEventListeners();
+      setupSearch();
+      setupTheme();
+      setupConnectionListener();
+      updateClock();
+      updateInfoBar();
+      
+      // Auto-sync if configured
+      if (CONFIG.sync.autoSync && CONFIG.github.token) {
+        setTimeout(syncToGitHub, 3000);
+      }
+      
+      // Register service worker for offline support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('Service Worker não registrado (esperado em GitHub Pages sem HTTPS local):', err);
+        });
+      }
+      
+      setInterval(updateClock, 60000);
+      setInterval(updateInfoBar, 300000); // 5 min
+    }
+
+    // ==================== CONFIGURAÇÃO ====================
+    function loadConfig() {
+      const saved = localStorage.getItem('favQWEN3_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        CONFIG.github = { ...CONFIG.github, ...parsed.github };
+        CONFIG.supabase = { ...CONFIG.supabase, ...parsed.supabase };
+        CONFIG.sync = { ...CONFIG.sync, ...parsed.sync };
+      }
+      
+      // Preencher campos do modal de settings
+      document.getElementById('ghUser').value = CONFIG.github.user;
+      document.getElementById('ghRepo').value = CONFIG.github.repo;
+      document.getElementById('ghBranch').value = CONFIG.github.branch;
+      document.getElementById('ghToken').value = CONFIG.github.token;
+      document.getElementById('sbUrl').value = CONFIG.supabase.url;
+      document.getElementById('sbKey').value = CONFIG.supabase.key;
+      document.getElementById('sbTable').value = CONFIG.supabase.table;
+    }
+
+    function saveConfig() {
+      CONFIG.github.user = document.getElementById('ghUser').value.trim();
+      CONFIG.github.repo = document.getElementById('ghRepo').value.trim() || 'favQWEN3-main';
+      CONFIG.github.branch = document.getElementById('ghBranch').value.trim() || 'main';
+      CONFIG.github.token = document.getElementById('ghToken').value.trim();
+      CONFIG.supabase.url = document.getElementById('sbUrl').value.trim();
+      CONFIG.supabase.key = document.getElementById('sbKey').value.trim();
+      CONFIG.supabase.table = document.getElementById('sbTable').value.trim() || 'favorites';
+      
+      localStorage.setItem('favQWEN3_config', JSON.stringify({
+        github: CONFIG.github,
+        supabase: CONFIG.supabase,
+        sync: CONFIG.sync
+      }));
+      
+      // Reinitialize Supabase client if config changed
+      if (CONFIG.supabase.url && CONFIG.supabase.key) {
+        try {
+          supabaseClient = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.key);
+          showToast('Supabase configurado!', 'success');
+        } catch (e) {
+          console.error('Erro ao configurar Supabase:', e);
+        }
+      }
+    }
+
+    function saveSettings() {
+      saveConfig();
+      closeModal('settingsModal');
+      showToast('Configurações salvas! 🎉', 'success');
+      updateConnectionStatus();
+    }
+
+    // ==================== CARREGAMENTO DE DADOS ====================
+    async function loadData() {
+      // 1. Tentar carregar do localStorage
+      const localData = localStorage.getItem('favQWEN3_data');
+      
+      if (localData) {
+        categories = JSON.parse(localData);
+        updateLastSyncDisplay();
+        return;
+      }
+      
+      // 2. Tentar carregar do Supabase se configurado
+      if (CONFIG.supabase.url && CONFIG.supabase.key && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from(CONFIG.supabase.table)
+            .select('data')
+            .eq('user_id', 'default')
+            .single();
+          
+          if (data?.data) {
+            categories = data.data;
+            saveToLocal();
+            showToast('Dados carregados da nuvem ☁️', 'success');
+            return;
+          }
+        } catch (e) {
+          console.log('Supabase não disponível ou sem dados:', e);
+        }
+      }
+      
+      // 3. Tentar carregar do GitHub se configurado
+      if (CONFIG.github.token && CONFIG.github.user && CONFIG.github.repo) {
+        try {
+          await loadFromGitHub();
+          return;
+        } catch (e) {
+          console.log('GitHub não disponível:', e);
+        }
+      }
+      
+      // 4. Fallback: dados padrão
+      categories = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      saveToLocal();
+      showToast('Usando dados padrão (modo offline)', 'warning');
+    }
+
+    function saveToLocal() {
+      localStorage.setItem('favQWEN3_data', JSON.stringify(categories));
+      updateStats();
+    }
+
+    // ==================== RENDERIZAÇÃO ====================
+    function renderCards(filter = '') {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      
+      const searchTerm = filter.toLowerCase().trim();
+      let hasVisibleCards = false;
+      let totalLinks = 0;
+
+      categories.forEach((category, catIndex) => {
+        // Filtrar links por busca
+        const filteredLinks = category.links.filter(link => 
+          !searchTerm || 
+          link.name.toLowerCase().includes(searchTerm) || 
+          link.url.toLowerCase().includes(searchTerm) ||
+          category.title.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filteredLinks.length === 0 && searchTerm) return;
+        
+        hasVisibleCards = true;
+        totalLinks += filteredLinks.length;
+
+        let html = `
+          <div class="card" data-category="${catIndex}" 
+               ondrop="drop(event)" 
+               ondragover="allowDrop(event)"
+               ondragleave="this.classList.remove('drag-over')">
+            <div class="card-header">
+              <h3>${category.title}</h3>
+              <div class="card-actions">
+                <button class="card-btn" onclick="addLinkToCategory(${catIndex})" title="Adicionar link">➕</button>
+                <button class="card-btn" onclick="editCategory(${catIndex})" title="Editar categoria">✏️</button>
+              </div>
+            </div>`;
+
+        filteredLinks.forEach((link, linkIndex) => {
+          // Encontrar índice original no array não filtrado
+          const originalIndex = category.links.indexOf(link);
+          const favicon = getFaviconUrl(link.url);
+          
+          html += `
+            <div class="link-item" 
+                 draggable="true" 
+                 ondragstart="drag(event)" 
+                 data-cat="${catIndex}" 
+                 data-link="${originalIndex}">
+              <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+                <img src="${favicon}" alt="" onerror="this.style.display='none'; this.parentElement.parentElement.style.paddingLeft='10px'">
+                <span>${escapeHtml(link.name)}</span>
+              </a>
+              <div class="link-actions">
+                <button class="link-btn edit" onclick="editLink(${catIndex}, ${originalIndex}); event.stopPropagation()" title="Editar">✏️</button>
+                <button class="link-btn delete" onclick="confirmDeleteLink(${catIndex}, ${originalIndex}); event.stopPropagation()" title="Excluir">🗑️</button>
+              </div>
+            </div>`;
+        });
+
+        html += `</div>`;
+        grid.innerHTML += html;
+      });
+
+      if (!hasVisibleCards && searchTerm) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <span class="icon">🔍</span>
+            <p>Nenhum link encontrado para "<strong>${escapeHtml(searchTerm)}</strong>"</p>
+            <button class="btn btn-secondary" onclick="document.getElementById('searchInput').value=''; renderCards();">Limpar busca</button>
+          </div>`;
+      } else if (categories.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <span class="icon">📭</span>
+            <p>Sem favoritos ainda!</p>
+            <button class="btn btn-primary" onclick="openAddModal()">➕ Adicionar primeiro link</button>
+          </div>`;
+      }
+
+      // Atualizar estatísticas
+      document.getElementById('totalLinks').textContent = categories.reduce((acc, cat) => acc + cat.links.length, 0);
+      document.getElementById('totalCategories').textContent = categories.length;
+    }
+
+    function getFaviconUrl(url) {
+      try {
+        const domain = new URL(url.startsWith('http') ? url : 'https://' + url).hostname;
+        return `https://www.google.com/s2/favicons?sz=32&domain=${domain}&fallback=true`;
+      } catch (e) { 
+        return 'image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23888"><circle cx="12" cy="12" r="10"/></svg>'; 
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ==================== DRAG AND DROP ====================
+    function allowDrop(ev) {
+      ev.preventDefault();
+      ev.currentTarget.classList.add('drag-over');
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text/plain", JSON.stringify({
+        cat: ev.target.getAttribute("data-cat"),
+        link: ev.target.getAttribute("data-link")
+      }));
+      ev.target.classList.add('dragging');
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      ev.currentTarget.classList.remove('drag-over');
+      
+      try {
+        const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+        const fromCat = parseInt(data.cat);
+        const fromLink = parseInt(data.link);
+        const toCat = parseInt(ev.currentTarget.getAttribute("data-category"));
+
+        if (!isNaN(fromCat) && !isNaN(fromLink) && !isNaN(toCat) && fromCat !== toCat) {
+          const linkToMove = categories[fromCat].links.splice(fromLink, 1)[0];
+          categories[toCat].links.push(linkToMove);
+          
+          saveToLocal();
+          syncToCloud(); // Tentar sincronizar
+          renderCards(document.getElementById('searchInput').value);
+          showToast('Link movido! 🔄', 'success');
+        }
+      } catch (e) {
+        console.error('Erro no drag-drop:', e);
+      }
+      
+      document.querySelectorAll('.link-item').forEach(el => el.classList.remove('dragging'));
+    }
+
+    // ==================== OPERAÇÕES COM LINKS ====================
+    function openAddModal(catIndex = null) {
+      document.getElementById('modalTitle').textContent = 'Adicionar Novo Link';
+      document.getElementById('editCatIndex').value = '';
+      document.getElementById('editLinkIndex').value = '';
+      
+      populateCategorySelect(catIndex);
+      
+      document.getElementById('newName').value = '';
+      document.getElementById('newUrl').value = '';
+      
+      openModal('linkModal');
+      document.getElementById('newName').focus();
+    }
+
+    function editLink(catIndex, linkIndex) {
+      const link = categories[catIndex].links[linkIndex];
+      
+      document.getElementById('modalTitle').textContent = 'Editar Link';
+      document.getElementById('editCatIndex').value = catIndex;
+      document.getElementById('editLinkIndex').value = linkIndex;
+      
+      populateCategorySelect(catIndex);
+      
+      document.getElementById('newName').value = link.name;
+      document.getElementById('newUrl').value = link.url.replace(/^https?:\/\//, '');
+      
+      openModal('linkModal');
+      document.getElementById('newName').focus();
+    }
+
+    function populateCategorySelect(selectedIndex = null) {
+      const select = document.getElementById('newCategory');
+      select.innerHTML = '';
+      
+      categories.forEach((cat, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = cat.title;
+        if (i === selectedIndex) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function saveLink() {
+      const name = document.getElementById('newName').value.trim();
+      let url = document.getElementById('newUrl').value.trim();
+      const catIndex = parseInt(document.getElementById('newCategory').value);
+      const editCat = document.getElementById('editCatIndex').value;
+      const editLink = document.getElementById('editLinkIndex').value;
+
+      if (!name || !url) {
+        showToast('Preencha nome e URL!', 'error');
+        return;
+      }
+
+      // Normalizar URL
+      if (!url.match(/^https?:\/\//i)) {
+        url = 'https://' + url;
+      }
+
+      try {
+        new URL(url); // Validar URL
+      } catch (e) {
+        showToast('URL inválida!', 'error');
+        return;
+      }
+
+      if (editCat !== '' && editLink !== '') {
+        // Editar link existente
+        const cIdx = parseInt(editCat);
+        const lIdx = parseInt(editLink);
+        categories[cIdx].links[lIdx] = { name, url };
+        showToast('Link atualizado! ✅', 'success');
+      } else {
+        // Adicionar novo link
+        if (!categories[catIndex]) {
+          showToast('Categoria inválida!', 'error');
+          return;
+        }
+        categories[catIndex].links.push({ name, url });
+        showToast('Link adicionado! 🎉', 'success');
+      }
+
+      saveToLocal();
+      syncToCloud();
+      renderCards();
+      closeModal('linkModal');
+    }
+
+    function confirmDeleteLink(catIndex, linkIndex) {
+      const link = categories[catIndex].links[linkIndex];
+      showConfirmModal(
+        'Excluir Link',
+        `Tem certeza que deseja excluir "<strong>${escapeHtml(link.name)}</strong>"?`,
+        () => {
+          categories[catIndex].links.splice(linkIndex, 1);
+          // Remover categoria se vazia
+          if (categories[catIndex].links.length === 0) {
+            categories.splice(catIndex, 1);
+          }
+          saveToLocal();
+          syncToCloud();
+          renderCards();
+          showToast('Link excluído! 🗑️', 'success');
+        }
+      );
+    }
+
+    function addLinkToCategory(catIndex) {
+      openAddModal(catIndex);
+    }
+
+    function editCategory(catIndex) {
+      const newTitle = prompt('Novo nome da categoria:', categories[catIndex].title);
+      if (newTitle && newTitle.trim()) {
+        categories[catIndex].title = newTitle.trim();
+        saveToLocal();
+        syncToCloud();
+        renderCards();
+        showToast('Categoria atualizada! ✏️', 'success');
+      }
+    }
+
+    // ==================== MODAIS ====================
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+      // Fechar ao clicar fora
+      setTimeout(() => {
+        document.getElementById(modalId).onclick = (e) => {
+          if (e.target.id === modalId) closeModal(modalId);
+        };
+      }, 100);
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      document.getElementById(modalId).onclick = null;
+    }
+
+    function showConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirmTitle').innerHTML = title;
+      document.getElementById('confirmMessage').innerHTML = message;
+      document.getElementById('confirmAction').onclick = () => {
+        onConfirm();
+        closeModal('confirmModal');
+      };
+      openModal('confirmModal');
+    }
+
+    // ==================== BUSCA ====================
+    function setupSearch() {
+      const input = document.getElementById('searchInput');
+      let timeout;
+      
+      input.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          renderCards(e.target.value);
+        }, 200);
+      });
+      
+      // Enter para focar
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== input) {
+          e.preventDefault();
+          input.focus();
+        }
+        if (e.key === 'Escape') {
+          input.blur();
+          document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
+        }
+      });
+    }
+
+    // ==================== TEMA ====================
+    function setupTheme() {
+      const btn = document.getElementById('themeToggle');
+      let theme = localStorage.getItem('favQWEN3_theme') || 
+                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      
+      applyTheme(theme);
+      
+      btn.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        applyTheme(theme);
+        localStorage.setItem('favQWEN3_theme', theme);
+      });
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // ==================== CONEXÃO / OFFLINE ====================
+    function setupConnectionListener() {
+      updateConnectionStatus();
+      
+      window.addEventListener('online', () => {
+        isOffline = false;
+        updateConnectionStatus();
+        showToast('🟢 Conexão restaurada!', 'success');
+        syncToCloud(); // Tentar sincronizar ao reconectar
+      });
+      
+      window.addEventListener('offline', () => {
+        isOffline = true;
+        updateConnectionStatus();
+        showToast('🔴 Modo offline ativado', 'warning');
+      });
+    }
+
+    function updateConnectionStatus() {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('connectionText');
+      
+      if (isOffline) {
+        dot.className = 'sync-dot';
+        text.textContent = 'Offline';
+        text.parentElement.className = 'status-badge status-offline';
+      } else if (CONFIG.github.token || CONFIG.supabase.key) {
+        dot.className = 'sync-dot synced';
+        text.textContent = 'Online • Sync pronto';
+        text.parentElement.className = 'status-badge status-online';
+      } else {
+        dot.className = 'sync-dot';
+        text.textContent = 'Online • Sem sync';
+        text.parentElement.className = 'status-badge';
+      }
+    }
+
+    function updateLastSyncDisplay() {
+      const lastSync = CONFIG.sync.lastSync;
+      const el = document.getElementById('lastSync');
+      
+      if (lastSync) {
+        const date = new Date(lastSync);
+        el.textContent = `Última sync: ${date.toLocaleTimeString('pt-BR')}`;
+      } else {
+        el.textContent = 'Última sync: Nunca';
+      }
+    }
+
+    // ==================== GITHUB API ====================
+    async function syncToGitHub() {
+      if (!CONFIG.github.token || !CONFIG.github.user || !CONFIG.github.repo) {
+        showToast('Configure o GitHub nas configurações ⚙️', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('syncBtn');
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span><span>Sincronizando...</span>';
+      btn.disabled = true;
+
+      try {
+        const content = JSON.stringify({
+          categories,
+          timestamp: new Date().toISOString(),
+          version: '1.0'
+        }, null, 2);
+
+        // 1. Obter SHA atual do arquivo
+        let sha = null;
+        try {
+          const getFileRes = await fetch(
+            `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.filePath}?ref=${CONFIG.github.branch}`,
+            {
+              headers: {
+                'Authorization': `token ${CONFIG.github.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            }
+          );
+          
+          if (getFileRes.ok) {
+            const fileData = await getFileRes.json();
+            sha = fileData.sha;
+          }
+        } catch (e) {
+          console.log('Arquivo não existe ainda, será criado');
+        }
+
+        // 2. Criar/Atualizar arquivo
+        const payload = {
+          message: `🔄 Auto-sync: ${new Date().toLocaleString('pt-BR')}`,
+          content: btoa(unescape(encodeURIComponent(content))),
+          branch: CONFIG.github.branch
+        };
+        
+        if (sha) payload.sha = sha;
+
+        const res = await fetch(
+          `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.filePath}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${CONFIG.github.token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          }
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || `HTTP ${res.status}`);
+        }
+
+        CONFIG.sync.lastSync = new Date().toISOString();
+        saveConfig();
+        updateLastSyncDisplay();
+        showToast('✅ Sincronizado com GitHub!', 'success');
+        
+      } catch (error) {
+        console.error('GitHub sync error:', error);
+        showToast(`❌ Erro no GitHub: ${error.message}`, 'error');
+      } finally {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+      }
+    }
+
+    async function loadFromGitHub() {
+      if (!CONFIG.github.token || !CONFIG.github.user || !CONFIG.github.repo) return;
+
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.filePath}?ref=${CONFIG.github.branch}`,
+          {
+            headers: {
+              'Authorization': `token ${CONFIG.github.token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        const content = decodeURIComponent(escape(atob(data.content)));
+        const parsed = JSON.parse(content);
+        
+        if (parsed.categories) {
+          categories = parsed.categories;
+          saveToLocal();
+          CONFIG.sync.lastSync = parsed.timestamp || new Date().toISOString();
+          saveConfig();
+          updateLastSyncDisplay();
+          showToast('📥 Dados carregados do GitHub', 'success');
+          return true;
+        }
+      } catch (error) {
+        console.error('GitHub load error:', error);
+        throw error;
+      }
+    }
+
+    async function testGitHubConnection() {
+      if (!CONFIG.github.token || !CONFIG.github.user || !CONFIG.github.repo) {
+        showToast('Preencha usuário, repo e token!', 'warning');
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Testando...';
+
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}`,
+          {
+            headers: {
+              'Authorization': `token ${CONFIG.github.token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+
+        if (res.ok) {
+          showToast('✅ Conexão com GitHub OK!', 'success');
+        } else {
+          const err = await res.json();
+          throw new Error(err.message || `HTTP ${res.status}`);
+        }
+      } catch (error) {
+        showToast(`❌ Erro: ${error.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔗 Testar Conexão';
+      }
+    }
+
+    // ==================== SUPABASE ====================
+    async function syncToSupabase() {
+      if (!supabaseClient) {
+        showToast('Configure o Supabase nas configurações ⚙️', 'warning');
+        return;
+      }
+
+      try {
+        const { error } = await supabaseClient
+          .from(CONFIG.supabase.table)
+          .upsert({
+            user_id: 'default',
+             categories,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+        
+        CONFIG.sync.lastSync = new Date().toISOString();
+        saveConfig();
+        updateLastSyncDisplay();
+        showToast('✅ Sincronizado com Supabase!', 'success');
+        return true;
+      } catch (error) {
+        console.error('Supabase sync error:', error);
+        showToast(`❌ Erro Supabase: ${error.message}`, 'error');
+        return false;
+      }
+    }
+
+    async function testSupabaseConnection() {
+      if (!CONFIG.supabase.url || !CONFIG.supabase.key) {
+        showToast('Preencha URL e Anon Key!', 'warning');
+        return;
+      }
+
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Testando...';
+
+      try {
+        const testClient = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.key);
+        const { error } = await testClient.from(CONFIG.supabase.table).select('count', { count: 'exact', head: true });
+        
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = tabela vazia, ok
+        
+        showToast('✅ Conexão com Supabase OK!', 'success');
+      } catch (error) {
+        showToast(`❌ Erro: ${error.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔗 Testar Conexão';
+      }
+    }
+
+    // ==================== SYNC CLOUD (Orquestrador) ====================
+    async function syncToCloud() {
+      if (isOffline) return;
+      
+      let synced = false;
+      
+      // Tentar Supabase primeiro (se configurado)
+      if (CONFIG.supabase.url && CONFIG.supabase.key && supabaseClient) {
+        if (await syncToSupabase()) synced = true;
+      }
+      
+      // Tentar GitHub (se configurado)
+      if (CONFIG.github.token && CONFIG.github.user && CONFIG.github.repo) {
+        if (await syncToGitHub()) synced = true;
+      }
+      
+      if (!synced && (CONFIG.supabase.url || CONFIG.github.token)) {
+        console.log('Nenhum método de sync disponível');
+      }
+    }
+
+    // ==================== DOWNLOAD HTML ====================
+    function saveAsHTML() {
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favQWEN3-backup-${new Date().toISOString().slice(0,10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('📥 HTML baixado com sucesso!', 'success');
+    }
+
+    // ==================== EXPORTAR/IMPORTAR DADOS ====================
+    function exportData() {
+      const data = {
+        categories,
+        config: { github: CONFIG.github, supabase: CONFIG.supabase },
+        exportedAt: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favQWEN3-data-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('📤 Dados exportados!', 'success');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (data.categories) {
+            showConfirmModal(
+              'Importar Dados',
+              'Isso substituirá seus dados atuais. Continuar?',
+              () => {
+                categories = data.categories;
+                if (data.config) {
+                  if (data.config.github) CONFIG.github = { ...CONFIG.github, ...data.config.github };
+                  if (data.config.supabase) CONFIG.supabase = { ...CONFIG.supabase, ...data.config.supabase };
+                  saveConfig();
+                }
+                saveToLocal();
+                renderCards();
+                showToast('📥 Dados importados com sucesso!', 'success');
+              }
+            );
+          } else {
+            throw new Error('Formato inválido');
+          }
+        } catch (err) {
+          showToast('❌ Erro ao importar: ' + err.message, 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllData() {
+      showConfirmModal(
+        '⚠️ Limpar Tudo',
+        'Isso apagará TODOS os seus links e configurações locais. Esta ação NÃO pode ser desfeita!<br><br>Tem certeza absoluta?',
+        () => {
+          localStorage.removeItem('favQWEN3_data');
+          localStorage.removeItem('favQWEN3_config');
+          categories = JSON.parse(JSON.stringify(DEFAULT_DATA));
+          loadConfig(); // Reset config
+          saveToLocal();
+          renderCards();
+          showToast('🗑️ Dados limpos! Recarregando...', 'success');
+          setTimeout(() => location.reload(), 1500);
+        }
+      );
+    }
+
+    // ==================== UTILITÁRIOS ====================
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = 
+        now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function updateInfoBar() {
+      const weatherEl = document.getElementById('weather');
+      
+      // Coordenadas de Indaiatuba/SP (ajuste conforme necessário)
+      const lat = -23.09;
+      const lon = -47.21;
+      
+      try {
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&timezone=America/Sao_Paulo`,
+          { cache: 'no-store' }
+        );
+        
+        if (res.ok) {
+          const data = await res.json();
+          const temp = Math.round(data.current.temperature_2m);
+          weatherEl.innerHTML = `🌡️ ${temp}°C`;
+        }
+      } catch (e) {
+        // Silencioso - não mostrar erro ao usuário
+        console.log('Weather API indisponível');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Auto-remove após 5 segundos
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100px)';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    function updateStats() {
+      document.getElementById('totalLinks').textContent = 
+        categories.reduce((acc, cat) => acc + cat.links.length, 0);
+      document.getElementById('totalCategories').textContent = categories.length;
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    function setupEventListeners() {
+      // Botões FAB
+      document.getElementById('addBtn').addEventListener('click', () => openAddModal());
+      document.getElementById('saveHtmlBtn').addEventListener('click', saveAsHTML);
+      document.getElementById('syncBtn').addEventListener('click', syncToGitHub);
+      document.getElementById('settingsBtn').addEventListener('click', () => openModal('settingsModal'));
+      
+      // Fechar modais com ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.active').forEach(modal => {
+            closeModal(modal.id);
+          });
+        }
+      });
+      
+      // Prevenir arrastar links para fora da página
+      document.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('link-item')) {
+          e.dataTransfer.effectAllowed = 'move';
+        }
+      });
+    }
+
+    // ==================== SERVICE WORKER (Inline para GitHub Pages) ====================
+    // Nota: Em produção, crie um arquivo sw.js separado
+    // Este código é apenas informativo - GitHub Pages requer HTTPS para SW
+    
+    // ==================== INICIAR APP ====================
+    window.addEventListener('DOMContentLoaded', init);
+    
+    // Expor funções globais para handlers inline
+    window.allowDrop = allowDrop;
+    window.drag = drag;
+    window.drop = drop;
+    window.closeModal = closeModal;
+    window.saveLink = saveLink;
+    window.openAddModal = openAddModal;
+    window.editLink = editLink;
+    window.confirmDeleteLink = confirmDeleteLink;
+    window.addLinkToCategory = addLinkToCategory;
+    window.editCategory = editCategory;
+    window.saveSettings = saveSettings;
+    window.testGitHubConnection = testGitHubConnection;
+    window.testSupabaseConnection = testSupabaseConnection;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.clearAllData = clearAllData;
+  </script>
+</body>
+</html>
