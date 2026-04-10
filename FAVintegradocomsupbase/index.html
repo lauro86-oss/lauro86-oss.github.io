@@ -12,25 +12,26 @@
     .card { background-color: #1e2937; border-radius: 16px; padding: 20px; }
     .link-item:hover { background-color: #334155; }
     .modal-enter { animation: modalEnter 0.2s ease-out; }
-    @keyframes modalEnter {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
+    @keyframes modalEnter { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .adult-warning { border: 2px solid #dc2626; }
+    .adult-warning::before { content: "🔞 18+"; position: absolute; top: -10px; right: -10px; background: #dc2626; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
   </style>
 </head>
 <body class="text-zinc-200 min-h-screen pb-12">
 
-  <div class="max-w-6xl mx-auto p-6">
+  <div class="max-w-7xl mx-auto p-6">
     <div class="text-center mb-10">
       <h1 class="text-5xl font-bold flex items-center justify-center gap-3">⭐ Meus Favoritos Rápidos</h1>
+      <p class="text-zinc-400 mt-2">Organize, busque e acesse seus links favoritos instantaneamente</p>
     </div>
 
     <div class="flex flex-wrap gap-4 justify-center mb-10">
-      <button onclick="addCategory()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-medium transition">Nova Categoria</button>
+      <button onclick="addCategory()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-medium transition">✨ Nova Categoria</button>
       <button onclick="clearAll()" class="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-2xl font-medium transition">🗑️ Limpar Tudo</button>
+      <button onclick="exportData()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-medium transition">💾 Exportar Backup</button>
     </div>
 
-    <input id="search" type="text" placeholder="🔎 Buscar links ou categorias..." 
+    <input id="search" type="text" placeholder="🔎 Buscar links, categorias ou tags..." 
            class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl px-6 py-4 mb-12 text-lg focus:outline-none focus:border-blue-500 transition"
            onkeyup="filterLinks()">
 
@@ -63,124 +64,190 @@
     // ===== CONFIGURAÇÃO SUPABASE =====
     const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
-
-    // ✅ CORREÇÃO #1: Inicialização correta do cliente Supabase
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Estrutura de dados principal
     let data = { categories: [] };
     let currentCatIndex = null;
     let currentLinkIndex = null;
 
-    // ✅ CORREÇÃO #4: Função para prevenir XSS (escapar HTML)
+    // ===== FUNÇÕES UTILITÁRIAS =====
     function escapeHtml(text) {
       if (!text) return '';
-      const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-      };
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
       return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    // ✅ CORREÇÃO #5: Validação de URL
     function isValidUrl(string) {
-      try {
-        const url = new URL(string);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-      } catch (_) {
-        return false;
-      }
+      try { const url = new URL(string); return url.protocol === 'http:' || url.protocol === 'https:'; } 
+      catch (_) { return false; }
     }
 
-    // Sistema de notificações (toast)
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
       toast.className = `fixed bottom-6 right-6 px-6 py-4 rounded-2xl shadow-lg transition-all duration-300 z-50 border ${
         type === 'success' ? 'bg-green-600 border-green-500' :
-        type === 'error' ? 'bg-red-600 border-red-500' :
-        'bg-zinc-800 border-zinc-700'
+        type === 'error' ? 'bg-red-600 border-red-500' : 'bg-zinc-800 border-zinc-700'
       } text-white transform translate-y-0 opacity-100`;
-      
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+      setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
     }
 
-    // ===== FUNÇÕES DE DADOS =====
+    // ===== DADOS COMPLETOS - TODOS OS SEUS LINKS =====
+    data = {
+      categories: [
+        {
+          name: "Google & Comunicação",
+          emoji: "📧",
+          links: [
+            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w" },
+            { title: "WhatsApp Web", url: "https://web.whatsapp.com/" },
+            { title: "Slack - Canal", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
+          ]
+        },
+        {
+          name: "Armazenamento e Senhas",
+          emoji: "☁️",
+          links: [
+            { title: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" },
+            { title: "Google Passwords", url: "https://passwords.google.com/" },
+            { title: "Feedly", url: "https://feedly.com/" }
+          ]
+        },
+        {
+          name: "Entretenimento & IA",
+          emoji: "🎥",
+          links: [
+            { title: "YouTube", url: "https://www.youtube.com/" },
+            { title: "Twitter / X", url: "https://twitter.com/home" },
+            { title: "Twitch - Following", url: "https://www.twitch.tv/directory/following" },
+            { title: "Grok", url: "https://grok.com/" },
+            { title: "ChatGPT", url: "https://chat.openai.com/" },
+            { title: "Gemini (Gem)", url: "https://gemini.google.com/gem/361063ffb92e" },
+            { title: "Venice AI", url: "https://venice.ai/" },
+            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d" },
+            { title: "Chat Z.ai", url: "https://chat.z.ai/" }
+          ]
+        },
+        {
+          name: "Trabalho e Cursos",
+          emoji: "💼",
+          links: [
+            { title: "Smry.ai", url: "https://www.smry.ai/" },
+            { title: "Bolha Tools", url: "https://open.bolha.tools/" },
+            { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
+            { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user" }
+          ]
+        },
+        {
+          name: "Benchmarks e Tech",
+          emoji: "🔧",
+          links: [
+            { title: "CPU Benchmark (Compare)", url: "https://www.cpubenchmark.net/singleCompare.php" },
+            { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
+            { title: "CPU Compare - 4 Processadores", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" },
+            { title: "ImgBB", url: "https://imgbb.com/" },
+            { title: "Twitter Video Downloader", url: "https://twittervideodownloader.com/" }
+          ]
+        },
+        {
+          name: "Trading e Finanças",
+          emoji: "📈",
+          links: [
+            { title: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
+          ]
+        },
+        {
+          name: "Compras e Farmácia",
+          emoji: "🛒",
+          links: [
+            { title: "Drogasil", url: "https://www.drogasil.com.br/" },
+            { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/" },
+            { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/" }
+          ]
+        },
+        {
+          name: "Adulto / Fetish 🔞",
+          emoji: "🔞",
+          links: [
+            { title: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
+            { title: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
+            { title: "Pirataria - Explícito", url: "https://pirataria.link/explicito" },
+            { title: "Reddit - Armpit Fetish Search", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all" },
+            { title: "🔍 Google: Stubble/Prickly Reddit", url: "https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble" },
+            { title: "🔍 Google: Orgasm Reddit", url: "https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt" },
+            { title: "🔍 Google: Contractions Reddit", url: "https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1" }
+          ]
+        },
+        {
+          name: "Outros / Wishlist",
+          emoji: "🔗",
+          links: [
+            { title: "📋 Wish List", url: "#" },
+            { title: "HLTV - Matches", url: "https://www.hltv.org/matches" },
+            { title: "⚙️ AES", url: "#" },
+            { title: "Google News", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" },
+            { title: "OpenRouter - Qwen", url: "https://openrouter.ai/models?max_price=0&q=qwen" },
+            { title: "🖥️ Localhost:3000", url: "http://localhost:3000/" },
+            { title: "Grok - Tasks", url: "https://grok.com/tasks" }
+          ]
+        }
+      ]
+    };
 
+    // ===== FUNÇÕES DE DADOS =====
     async function loadData() {
       try {
-        const { data: result, error } = await supabaseClient
-          .from('favoritos')
-          .select('categories')
-          .limit(1)
-          .order('created_at', { ascending: false });
-        
+        const {  result, error } = await supabaseClient.from('favoritos').select('categories').limit(1).order('created_at', { ascending: false });
         if (error) throw error;
-        
-        // ✅ CORREÇÃO #2: Mantém estrutura { categories: [...] } correta
-        if (result && result.length > 0 && result[0].categories) {
-          data = { categories: result[0].categories };
-        }
+        if (result && result.length > 0 && result[0].categories) { data = { categories: result[0].categories }; }
         render();
       } catch (e) {
         console.error("Erro ao carregar do Supabase:", e);
-        showToast("⚠️ Usando dados locais (offline)", "info");
-        render(); // Renderiza dados locais mesmo se falhar
+        showToast("⚠️ Usando dados locais", "info");
+        render();
       }
     }
 
     async function saveToSupabase() {
       try {
-        const { data: existing, error: fetchError } = await supabaseClient
-          .from('favoritos')
-          .select('id')
-          .limit(1);
-        
-        if (fetchError) throw fetchError;
-        
+        const {  existing } = await supabaseClient.from('favoritos').select('id').limit(1);
         if (existing && existing.length > 0) {
-          const { error: updateError } = await supabaseClient
-            .from('favoritos')
-            .update({ categories: data.categories }) // ✅ Usa data.categories
-            .eq('id', existing[0].id);
-          if (updateError) throw updateError;
+          await supabaseClient.from('favoritos').update({ categories: data.categories }).eq('id', existing[0].id);
         } else {
-          const { error: insertError } = await supabaseClient
-            .from('favoritos')
-            .insert([{ categories: data.categories }]); // ✅ Usa data.categories
-          if (insertError) throw insertError;
+          await supabaseClient.from('favoritos').insert([{ categories: data.categories }]);
         }
         showToast("✅ Salvo na nuvem!", "success");
       } catch (e) {
-        console.error("Erro ao salvar no Supabase:", e);
+        console.error("Erro ao salvar:", e);
         showToast("⚠️ Salvo apenas localmente", "error");
-        // Salva no localStorage como fallback
         localStorage.setItem('favorites_backup', JSON.stringify(data));
       }
     }
 
-    // ===== RENDERIZAÇÃO =====
+    function exportData() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favoritos-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("💾 Backup exportado!", "success");
+    }
 
+    // ===== RENDERIZAÇÃO =====
     function render() {
       const container = document.getElementById("categories");
       const emptyState = document.getElementById("emptyState");
       container.innerHTML = "";
 
-      // Mostra estado vazio se não houver categorias
-      if (!data.categories || data.categories.length === 0) {
-        emptyState.classList.remove("hidden");
-        return;
-      }
+      if (!data.categories || data.categories.length === 0) { emptyState.classList.remove("hidden"); return; }
       emptyState.classList.add("hidden");
 
       data.categories.forEach((cat, catIndex) => {
+        const isAdult = cat.name.toLowerCase().includes('adult') || cat.name.includes('🔞');
         const card = document.createElement("div");
-        card.className = "card hover:shadow-xl transition-shadow duration-300";
+        card.className = `card hover:shadow-xl transition-shadow duration-300 ${isAdult ? 'adult-warning relative' : ''}`;
         card.innerHTML = `
           <div class="flex justify-between items-center mb-4 cursor-default">
             <h2 class="text-xl font-semibold truncate">${escapeHtml(cat.emoji || '📁')} ${escapeHtml(cat.name)}</h2>
@@ -195,12 +262,9 @@
         container.appendChild(card);
 
         const ul = card.querySelector(`#list-${catIndex}`);
-        
         cat.links.forEach((link, linkIndex) => {
           const li = document.createElement("li");
           li.className = "link-item px-4 py-3 rounded-xl flex justify-between items-center group cursor-grab active:cursor-grabbing transition";
-          li.draggable = true;
-          // ✅ CORREÇÃO #4: Usa escapeHtml para prevenir XSS
           li.innerHTML = `
             <div class="flex-1 min-w-0">
               <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-300 font-medium truncate block" title="${escapeHtml(link.title)}">
@@ -216,230 +280,107 @@
           ul.appendChild(li);
         });
 
-        // Inicializa Sortable para drag-and-drop
         new Sortable(ul, {
-          group: "shared-links",
-          animation: 150,
-          ghostClass: "opacity-50",
-          dragClass: "bg-zinc-700 rounded-xl",
+          group: "shared-links", animation: 150, ghostClass: "opacity-50", dragClass: "bg-zinc-700 rounded-xl",
           onEnd: async (evt) => {
             const fromCatIndex = parseInt(evt.from.dataset.catIndex);
             const toCatIndex = parseInt(evt.to.dataset.catIndex);
-            
-            // Move o link entre categorias ou dentro da mesma
             const movedLink = data.categories[fromCatIndex].links.splice(evt.oldIndex, 1)[0];
             data.categories[toCatIndex].links.splice(evt.newIndex, 0, movedLink);
-            
-            render();
-            await saveToSupabase();
-            showToast("🔄 Link movido!", "success");
+            render(); await saveToSupabase(); showToast("🔄 Link movido!", "success");
           }
         });
       });
     }
 
     // ===== FUNÇÕES CRUD =====
-
     function addCategory() {
-      const name = prompt("✨ Nome da nova categoria:");
-      if (!name || !name.trim()) return;
-      
+      const name = prompt("✨ Nome da nova categoria:"); if (!name || !name.trim()) return;
       const emoji = prompt("🎨 Emoji (opcional):", "📁");
-      data.categories.push({ 
-        name: name.trim(), 
-        emoji: emoji?.trim() || "📁", 
-        links: [] 
-      });
-      render();
-      saveToSupabase();
-      showToast("📁 Categoria criada!", "success");
+      data.categories.push({ name: name.trim(), emoji: emoji?.trim() || "📁", links: [] });
+      render(); saveToSupabase(); showToast("📁 Categoria criada!", "success");
     }
 
     function deleteCategory(index) {
       const catName = data.categories[index]?.name;
       if (confirm(`⚠️ Excluir categoria "${catName}" e todos os seus links?`)) {
-        data.categories.splice(index, 1);
-        render();
-        saveToSupabase();
-        showToast("🗑️ Categoria excluída", "success");
+        data.categories.splice(index, 1); render(); saveToSupabase(); showToast("🗑️ Categoria excluída", "success");
       }
     }
 
     function addLink(catIndex) {
-      currentCatIndex = catIndex;
-      currentLinkIndex = null;
+      currentCatIndex = catIndex; currentLinkIndex = null;
       document.getElementById("modalTitle").textContent = "➕ Novo Link";
-      document.getElementById("linkTitle").value = "";
-      document.getElementById("linkUrl").value = "";
-      document.getElementById("linkTag").value = "";
-      document.getElementById("modal").classList.remove("hidden");
-      document.getElementById("linkTitle").focus();
+      document.getElementById("linkTitle").value = ""; document.getElementById("linkUrl").value = ""; document.getElementById("linkTag").value = "";
+      document.getElementById("modal").classList.remove("hidden"); document.getElementById("linkTitle").focus();
     }
 
     function editLink(catIndex, linkIndex) {
-      currentCatIndex = catIndex;
-      currentLinkIndex = linkIndex;
+      currentCatIndex = catIndex; currentLinkIndex = linkIndex;
       const link = data.categories[catIndex].links[linkIndex];
       document.getElementById("modalTitle").textContent = "✏️ Editar Link";
-      document.getElementById("linkTitle").value = link.title || "";
-      document.getElementById("linkUrl").value = link.url || "";
-      document.getElementById("linkTag").value = link.tag || "";
-      document.getElementById("modal").classList.remove("hidden");
-      document.getElementById("linkTitle").focus();
+      document.getElementById("linkTitle").value = link.title || ""; document.getElementById("linkUrl").value = link.url || ""; document.getElementById("linkTag").value = link.tag || "";
+      document.getElementById("modal").classList.remove("hidden"); document.getElementById("linkTitle").focus();
     }
 
-    // ✅ CORREÇÃO #3 + #5: Validação e escape em saveLink
     async function saveLink() {
       const title = document.getElementById("linkTitle").value.trim();
       let url = document.getElementById("linkUrl").value.trim();
       const tag = document.getElementById("linkTag").value.trim();
-      
-      if (!title || !url) {
-        showToast("⚠️ Título e URL são obrigatórios!", "error");
-        return;
-      }
-      
-      // Normaliza URL: adiciona https:// se necessário
-      if (!/^https?:\/\//i.test(url)) {
-        url = 'https://' + url;
-      }
-      
-      if (!isValidUrl(url)) {
-        showToast("⚠️ URL inválida! Ex: https://exemplo.com", "error");
-        return;
-      }
-      
-      if (currentLinkIndex === null) {
-        // Novo link
-        data.categories[currentCatIndex].links.push({ title, url, tag });
-        showToast("✅ Link adicionado!", "success");
-      } else {
-        // Editar link existente
-        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag };
-        showToast("✅ Link atualizado!", "success");
-      }
-      
-      hideModal();
-      render();
-      await saveToSupabase();
+      if (!title || !url) { showToast("⚠️ Título e URL são obrigatórios!", "error"); return; }
+      if (!/^https?:\/\//i.test(url)) { url = 'https://' + url; }
+      if (!isValidUrl(url)) { showToast("⚠️ URL inválida!", "error"); return; }
+      if (currentLinkIndex === null) { data.categories[currentCatIndex].links.push({ title, url, tag }); showToast("✅ Link adicionado!", "success"); }
+      else { data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag }; showToast("✅ Link atualizado!", "success"); }
+      hideModal(); render(); await saveToSupabase();
     }
 
     function deleteLink(catIndex, linkIndex) {
       const linkTitle = data.categories[catIndex].links[linkIndex]?.title;
-      if (confirm(`🗑️ Excluir o link "${linkTitle}"?`)) {
-        data.categories[catIndex].links.splice(linkIndex, 1);
-        render();
-        saveToSupabase();
-        showToast("🗑️ Link excluído", "success");
-      }
+      if (confirm(`🗑️ Excluir o link "${linkTitle}"?`)) { data.categories[catIndex].links.splice(linkIndex, 1); render(); saveToSupabase(); showToast("🗑️ Link excluído", "success"); }
     }
 
-    function hideModal() {
-      document.getElementById("modal").classList.add("hidden");
-      currentCatIndex = null;
-      currentLinkIndex = null;
-    }
-
-    // Fecha modal ao clicar fora
-    document.getElementById("modal").addEventListener("click", (e) => {
-      if (e.target.id === "modal") hideModal();
-    });
-
-    // Fecha modal com tecla ESC
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") hideModal();
-    });
+    function hideModal() { document.getElementById("modal").classList.add("hidden"); currentCatIndex = null; currentLinkIndex = null; }
+    document.getElementById("modal").addEventListener("click", (e) => { if (e.target.id === "modal") hideModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideModal(); });
 
     function clearAll() {
       if (confirm("🚨 ATENÇÃO: Isso apagará TODOS os seus favoritos permanentemente. Continuar?")) {
-        if (confirm("✅ Confirmar exclusão total?")) {
-          data = { categories: [] };
-          render();
-          saveToSupabase();
-          showToast("🗑️ Todos os dados foram limpos", "success");
-        }
+        if (confirm("✅ Confirmar exclusão total?")) { data = { categories: [] }; render(); saveToSupabase(); showToast("🗑️ Todos os dados foram limpos", "success"); }
       }
     }
 
     function filterLinks() {
       const term = document.getElementById("search").value.toLowerCase().trim();
       let hasResults = false;
-      
       document.querySelectorAll(".card").forEach(card => {
         const title = card.querySelector("h2")?.textContent.toLowerCase() || "";
         const items = card.querySelectorAll(".link-item");
-        let categoryVisible = title.includes(term);
-        let hasVisibleItems = false;
-        
+        let categoryVisible = title.includes(term), hasVisibleItems = false;
         items.forEach(item => {
           const text = item.textContent.toLowerCase();
-          if (term === "" || text.includes(term)) {
-            item.style.display = "flex";
-            hasVisibleItems = true;
-            categoryVisible = true;
-          } else {
-            item.style.display = "none";
-          }
+          if (term === "" || text.includes(term)) { item.style.display = "flex"; hasVisibleItems = true; categoryVisible = true; }
+          else { item.style.display = "none"; }
         });
-        
-        if (categoryVisible) {
-          card.style.display = "block";
-          hasResults = true;
-          // Atualiza contador de links visíveis
-          const count = Array.from(items).filter(i => i.style.display !== "none").length;
-          const info = card.querySelector("p.text-zinc-500");
-          if (info && term !== "") {
-            info.textContent = `${count} resultado(s)`;
-            info.classList.remove("hidden");
-          } else if (info) {
-            info.classList.add("hidden");
-          }
-        } else {
-          card.style.display = "none";
-        }
+        if (categoryVisible) { card.style.display = "block"; hasResults = true; }
+        else { card.style.display = "none"; }
       });
-      
-      // Mostra estado vazio se busca não retornar resultados
       const emptyState = document.getElementById("emptyState");
-      if (term !== "" && !hasResults) {
-        emptyState.classList.remove("hidden");
-        emptyState.querySelector("p.text-2xl").textContent = "🔍 Nenhum resultado";
-        emptyState.querySelector("p:last-child").textContent = `Tente buscar por outro termo`;
-      } else if (term === "") {
-        emptyState.classList.add("hidden");
-      }
+      if (term !== "" && !hasResults) { emptyState.classList.remove("hidden"); emptyState.querySelector("p.text-2xl").textContent = "🔍 Nenhum resultado"; }
+      else if (term === "") { emptyState.classList.add("hidden"); }
     }
 
     // ===== INICIALIZAÇÃO =====
-    
-    // Carrega backup do localStorage se existir (fallback offline)
     function loadLocalBackup() {
       try {
         const backup = localStorage.getItem('favorites_backup');
-        if (backup) {
-          const parsed = JSON.parse(backup);
-          if (parsed.categories && parsed.categories.length > 0) {
-            data = parsed;
-            console.log("✅ Dados locais carregados como fallback");
-          }
-        }
-      } catch (e) {
-        console.warn("⚠️ Não foi possível carregar backup local:", e);
-      }
+        if (backup) { const parsed = JSON.parse(backup); if (parsed.categories && parsed.categories.length > 0) { data = parsed; console.log("✅ Dados locais carregados"); } }
+      } catch (e) { console.warn("⚠️ Erro ao carregar backup:", e); }
     }
 
-    // Inicializa aplicação
     window.addEventListener("DOMContentLoaded", () => {
-      loadLocalBackup();
-      loadData();
-      
-      // Foco no campo de busca com Ctrl+K ou Cmd+K
-      document.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-          e.preventDefault();
-          document.getElementById("search").focus();
-        }
-      });
+      loadLocalBackup(); loadData();
+      document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "k") { e.preventDefault(); document.getElementById("search").focus(); } });
     });
   </script>
 </body>
