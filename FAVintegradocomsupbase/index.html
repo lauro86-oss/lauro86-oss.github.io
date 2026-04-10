@@ -4,712 +4,795 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Favoritos Rápidos</title>
-  
-  <!-- Tailwind CSS Otimizado -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            primary: '#3b82f6',
-            secondary: '#64748b',
-            dark: '#0f172a',
-            card: '#1e293b'
+            bg: { DEFAULT: '#0f172a', card: '#1e293b', hover: '#334155' },
+            text: { DEFAULT: '#e2e8f0', muted: '#94a3b8' },
+            accent: { blue: '#3b82f6', green: '#22c55e', red: '#ef4444', amber: '#f59e0b' }
           }
         }
       }
     }
   </script>
-  
-  <!-- SortableJS para Drag & Drop -->
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    * {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    * { box-sizing: border-box; }
+    body { 
+      background: #0f172a; 
+      color: #e2e8f0; 
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      line-height: 1.5;
     }
-    
-    body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      min-height: 100vh;
+    .category { 
+      background: #1e293b; 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin-bottom: 16px;
+      border: 1px solid #334155;
     }
-    
-    .card {
-      background: rgba(30, 41, 59, 0.8);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 20px;
-      transition: all 0.3s ease;
+    .category-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      cursor: pointer;
+      padding: 4px 0;
     }
-    
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      border-color: rgba(59, 130, 246, 0.3);
+    .category-title { 
+      font-size: 1.1rem; 
+      font-weight: 600; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px;
     }
-    
+    .category-toggle { 
+      font-size: 1.2rem; 
+      color: #94a3b8; 
+      transition: transform 0.2s;
+      background: none; 
+      border: none; 
+      cursor: pointer;
+    }
+    .category-toggle.collapsed { transform: rotate(-90deg); }
+    .links-list { 
+      margin-top: 12px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px;
+    }
     .link-item {
-      transition: all 0.2s ease;
-      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .link-item:hover { background: #334155; }
+    .link-content { 
+      flex: 1; 
+      min-width: 0; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+    }
+    .link-title { 
+      color: #60a5fa; 
+      text-decoration: none; 
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .link-title:hover { text-decoration: underline; }
+    .link-tags { 
+      display: flex; 
+      gap: 6px; 
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .tag { 
+      font-size: 0.75rem; 
+      color: #94a3b8; 
+      background: #334155; 
+      padding: 2px 8px; 
+      border-radius: 10px;
+    }
+    .pin-counter { 
+      font-size: 0.85rem; 
+      color: #94a3b8; 
+      display: flex; 
+      align-items: center; 
+      gap: 2px;
+      white-space: nowrap;
+    }
+    .link-actions { 
+      display: none; 
+      gap: 8px; 
+      margin-left: 8px;
+    }
+    .link-item:hover .link-actions { display: flex; }
+    .action-btn { 
+      background: none; 
+      border: none; 
+      font-size: 1.1rem; 
+      cursor: pointer; 
+      padding: 4px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .action-btn:hover { opacity: 1; }
+    .action-btn.edit { color: #f59e0b; }
+    .action-btn.delete { color: #ef4444; }
+    
+    /* Modal */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.8); 
+      z-index: 100;
+      align-items: center; 
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal.active { display: flex; }
+    .modal-content { 
+      background: #1e293b; 
+      padding: 24px; 
+      border-radius: 16px; 
+      width: 90%; 
+      max-width: 480px;
+      border: 1px solid #334155;
+    }
+    .modal input, .modal select {
+      width: 100%;
       padding: 12px 16px;
-      margin-bottom: 8px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      margin-top: 4px;
+      margin-bottom: 16px;
+    }
+    .modal input:focus, .modal select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
     
-    .link-item:hover {
-      background: rgba(51, 65, 85, 0.8);
-      transform: translateX(4px);
+    /* Header */
+    .header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 16px 24px;
+      border-bottom: 1px solid #334155;
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      z-index: 50;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-title { font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .header-actions { display: flex; gap: 8px; }
+    .header-btn { 
+      background: #1e293b; 
+      border: 1px solid #334155; 
+      padding: 8px 16px; 
+      border-radius: 8px;
+      color: #e2e8f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .header-btn:hover { background: #334155; }
+    .header-btn.danger { border-color: #ef4444; color: #fca5a5; }
+    .header-btn.danger:hover { background: #451a1a; }
+    
+    /* Settings Panel */
+    .settings-panel {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 24px;
+      border: 1px solid #334155;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .settings-row:last-child { margin-bottom: 0; }
+    .settings-label { color: #94a3b8; font-size: 0.9rem; }
+    .settings-select, .settings-input {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
     }
     
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      transition: all 0.3s ease;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-    }
-    
-    .btn-danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      transition: all 0.3s ease;
-    }
-    
-    .btn-danger:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-    }
-    
-    .modal-enter {
-      animation: modalEnter 0.3s ease-out;
-    }
-    
-    @keyframes modalEnter {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    
-    .adult-category {
-      border: 2px solid #dc2626;
+    /* Search */
+    .search-box {
+      margin: 0 24px 24px;
       position: relative;
     }
-    
-    .adult-badge {
+    .search-input {
+      width: 100%;
+      padding: 14px 20px 14px 48px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 1rem;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .search-icon {
       position: absolute;
-      top: -10px;
-      right: 10px;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 1.2rem;
+    }
+    
+    /* Adult content warning */
+    .adult-category { border-color: #dc2626 !important; }
+    .adult-badge {
+      display: inline-block;
       background: #dc2626;
       color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
-      box-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
     }
     
-    .search-input:focus {
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-    }
-    
-    .sortable-ghost {
-      opacity: 0.5;
-      background: rgba(59, 130, 246, 0.2);
-    }
-    
+    /* Toast */
     .toast {
-      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 14px 20px;
+      border-radius: 12px;
+      z-index: 200;
+      animation: slideIn 0.3s ease;
+      max-width: 320px;
     }
-    
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
     
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
+    /* Pinned section */
+    .pinned-section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 24px;
+      border: 1px solid #334155;
+    }
+    .pinned-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f59e0b;
+    }
+    .pinned-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .pinned-item {
+      background: #0f172a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .pinned-item:hover { background: #334155; }
+    .pinned-item .link-title { font-size: 0.95rem; }
+    
+    /* Container */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header { flex-wrap: wrap; gap: 12px; }
+      .settings-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .pinned-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body class="text-zinc-100 min-h-screen pb-12">
+<body>
 
-  <div class="max-w-7xl mx-auto p-6">
-    <!-- Header -->
-    <div class="text-center mb-12 pt-8">
-      <h1 class="text-6xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-        ⭐ Meus Favoritos Rápidos
-      </h1>
-      <p class="text-zinc-400 text-lg">Organize e acesse seus links favoritos instantaneamente</p>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button id="themeToggle" class="header-btn" title="Alternar tema">🌙</button>
+      <span class="header-title">⭐ Meus Favoritos Rápidos</span>
     </div>
-
-    <!-- Controles -->
-    <div class="flex flex-wrap gap-4 justify-center mb-10">
-      <button onclick="addCategory()" class="btn-primary px-8 py-4 rounded-2xl font-semibold text-white shadow-lg">
-        ✨ Nova Categoria
-      </button>
-      <button onclick="clearAll()" class="btn-danger px-8 py-4 rounded-2xl font-semibold text-white shadow-lg">
-        🗑️ Limpar Tudo
-      </button>
-      <button onclick="exportData()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-semibold text-white shadow-lg transition-all hover:scale-105">
-        💾 Exportar Backup
-      </button>
+    <div class="header-actions">
+      <button onclick="openSettings()" class="header-btn">⚙️ Config</button>
+      <button onclick="exportData()" class="header-btn">💾 Exportar</button>
+      <button onclick="importData()" class="header-btn">📁 Importar</button>
+      <button onclick="toggleAdult()" id="adultToggle" class="header-btn">🔞 Conteúdo</button>
     </div>
+  </header>
 
-    <!-- Busca -->
-    <div class="max-w-3xl mx-auto mb-12">
-      <div class="relative">
-        <span class="absolute left-6 top-1/2 transform -translate-y-1/2 text-2xl">🔍</span>
-        <input 
-          id="search" 
-          type="text" 
-          placeholder="Buscar links, categorias ou tags..." 
-          class="search-input w-full bg-zinc-900/80 border border-zinc-700 rounded-3xl pl-16 pr-6 py-5 text-lg focus:outline-none focus:border-blue-500 transition-all placeholder-zinc-500"
-          onkeyup="filterLinks()"
-        >
+  <div class="container">
+    
+    <!-- Settings Panel (hidden by default) -->
+    <div id="settingsPanel" class="settings-panel hidden">
+      <h3 class="font-semibold mb-4">⚙️ Preferências</h3>
+      <div class="settings-row">
+        <span class="settings-label">Tema</span>
+        <select id="themeSelect" class="settings-select" onchange="setTheme(this.value)">
+          <option value="system">🔄 Automático (sistema)</option>
+          <option value="light">☀️ Claro</option>
+          <option value="dark" selected>🌙 Escuro</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Ordenar por</span>
+        <select id="sortSelect" class="settings-select" onchange="applySort()">
+          <option value="original">📋 Original</option>
+          <option value="accessed">📊 Mais acessados</option>
+          <option value="name">🔤 Nome (A-Z)</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <button onclick="resetCounters()" class="header-btn">🗑️ Resetar contadores</button>
+        <button onclick="clearAll()" class="header-btn danger">🗑️ Limpar Tudo</button>
       </div>
     </div>
 
-    <!-- Categorias -->
-    <div id="categories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    <!-- Search -->
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
+    </div>
+
+    <!-- Pinned Section -->
+    <div id="pinnedSection" class="pinned-section hidden">
+      <div class="pinned-title">📌 Fixados <span class="text-zinc-500 text-sm font-normal">(atalhos Ctrl+1 a Ctrl+5)</span></div>
+      <div id="pinnedGrid" class="pinned-grid"></div>
+    </div>
+
+    <!-- Categories -->
+    <div id="categories"></div>
     
-    <!-- Estado Vazio -->
+    <!-- Empty State -->
     <div id="emptyState" class="text-center text-zinc-500 py-20 hidden">
-      <div class="text-6xl mb-4">📭</div>
-      <p class="text-2xl font-semibold mb-2">Nenhum favorito ainda</p>
-      <p>Clique em "Nova Categoria" para começar!</p>
+      <div class="text-4xl mb-4">📭</div>
+      <p class="text-lg">Nenhum favorito ainda</p>
+      <button onclick="addCategory()" class="header-btn mt-4 mx-auto">✨ Nova Categoria</button>
     </div>
   </div>
 
   <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-zinc-900 rounded-3xl p-8 w-full max-w-md modal-enter border border-zinc-700 shadow-2xl">
-      <h2 class="text-2xl font-bold mb-6" id="modalTitle">Adicionar Link</h2>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-zinc-400 mb-2">Título *</label>
-          <input id="linkTitle" placeholder="Ex: Google" class="w-full px-5 py-4 bg-zinc-800 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-zinc-400 mb-2">URL *</label>
-          <input id="linkUrl" placeholder="https://exemplo.com" class="w-full px-5 py-4 bg-zinc-800 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-zinc-400 mb-2">Tag (opcional)</label>
-          <input id="linkTag" placeholder="Ex: trabalho, pessoal" class="w-full px-5 py-4 bg-zinc-800 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-        </div>
-      </div>
-      <div class="flex gap-3 mt-8">
-        <button onclick="hideModal()" class="flex-1 py-4 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-semibold transition-all">Cancelar</button>
-        <button onclick="saveLink()" class="flex-1 py-4 btn-primary rounded-2xl font-semibold">Salvar</button>
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 class="text-xl font-bold mb-6" id="modalTitle">Adicionar Link</h2>
+      <label class="text-sm text-zinc-400">Título *</label>
+      <input id="linkTitle" placeholder="Ex: Gmail">
+      <label class="text-sm text-zinc-400">URL *</label>
+      <input id="linkUrl" placeholder="https://exemplo.com">
+      <label class="text-sm text-zinc-400">Tags (separadas por vírgula)</label>
+      <input id="linkTags" placeholder="Ex: trabalho, google, email">
+      <label class="text-sm text-zinc-400">Categoria</label>
+      <select id="linkCategory"></select>
+      <div class="flex gap-3 mt-6">
+        <button onclick="hideModal()" class="flex-1 header-btn">Cancelar</button>
+        <button onclick="saveLink()" class="flex-1 header-btn" style="background:#3b82f6;border-color:#2563eb">Salvar</button>
       </div>
     </div>
   </div>
 
   <!-- Toast -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50"></div>
+  <div id="toast" class="toast hidden"></div>
 
   <script>
-    // ===== CONFIGURAÇÃO =====
+    // ===== CONFIG =====
     const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
-    
     let supabaseClient = null;
-    try {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (e) {
-      console.warn('Supabase não inicializado:', e);
-    }
+    try { supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
 
     let data = { categories: [] };
     let currentCatIndex = null;
     let currentLinkIndex = null;
+    let showAdult = false;
+    let pinnedLinks = [];
 
-    // ===== DADOS INICIAIS - TODOS OS SEUS LINKS =====
+    // ===== DADOS INICIAIS =====
     const initialData = {
       categories: [
-        {
-          name: "Google & Comunicação",
-          emoji: "📧",
-          links: [
-            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w" },
-            { title: "WhatsApp Web", url: "https://web.whatsapp.com/" },
-            { title: "Slack - Canal", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" }
-          ]
-        },
-        {
-          name: "Armazenamento e Senhas",
-          emoji: "☁️",
-          links: [
-            { title: "OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" },
-            { title: "Google Passwords", url: "https://passwords.google.com/" },
-            { title: "Feedly", url: "https://feedly.com/" }
-          ]
-        },
-        {
-          name: "Entretenimento & IA",
-          emoji: "🎥",
-          links: [
-            { title: "YouTube", url: "https://www.youtube.com/" },
-            { title: "Twitter / X", url: "https://twitter.com/home" },
-            { title: "Twitch - Following", url: "https://www.twitch.tv/directory/following" },
-            { title: "Grok", url: "https://grok.com/" },
-            { title: "ChatGPT", url: "https://chat.openai.com/" },
-            { title: "Gemini (Gem)", url: "https://gemini.google.com/gem/361063ffb92e" },
-            { title: "Venice AI", url: "https://venice.ai/" },
-            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d" },
-            { title: "Chat Z.ai", url: "https://chat.z.ai/" }
-          ]
-        },
-        {
-          name: "Trabalho e Cursos",
-          emoji: "💼",
-          links: [
-            { title: "Smry.ai", url: "https://www.smry.ai/" },
-            { title: "Bolha Tools", url: "https://open.bolha.tools/" },
-            { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" },
-            { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user" }
-          ]
-        },
-        {
-          name: "Benchmarks e Tech",
-          emoji: "🔧",
-          links: [
-            { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php" },
-            { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php" },
-            { title: "CPU Compare - 4 Processadores", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" },
-            { title: "ImgBB", url: "https://imgbb.com/" },
-            { title: "Twitter Video Downloader", url: "https://twittervideodownloader.com/" }
-          ]
-        },
-        {
-          name: "Trading e Finanças",
-          emoji: "📈",
-          links: [
-            { title: "TradingView - MINDOLQ2025", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" }
-          ]
-        },
-        {
-          name: "Compras e Farmácia",
-          emoji: "🛒",
-          links: [
-            { title: "Drogasil", url: "https://www.drogasil.com.br/" },
-            { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/" },
-            { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/" }
-          ]
-        },
-        {
-          name: "Adulto / Fetish 🔞",
-          emoji: "🔞",
-          links: [
-            { title: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba" },
-            { title: "Coomer - Erikasbulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur" },
-            { title: "Pirataria - Explícito", url: "https://pirataria.link/explicito" },
-            { title: "Reddit - Armpit Fetish", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all" },
-            { title: "🔍 Google: Stubble/Prickly Reddit", url: "https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble" },
-            { title: "🔍 Google: Orgasm Reddit", url: "https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt" },
-            { title: "🔍 Google: Contractions", url: "https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1" }
-          ]
-        },
-        {
-          name: "Outros / Wishlist",
-          emoji: "🔗",
-          links: [
-            { title: "📋 Wish List", url: "#" },
-            { title: "HLTV - Matches", url: "https://www.hltv.org/matches" },
-            { title: "⚙️ AES", url: "#" },
-            { title: "Google News", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" },
-            { title: "OpenRouter - Qwen", url: "https://openrouter.ai/models?max_price=0&q=qwen" },
-            { title: "🖥️ Localhost:3000", url: "http://localhost:3000/" },
-            { title: "Grok - Tasks", url: "https://grok.com/tasks" }
-          ]
-        }
+        { name: "🔐 Google & Conta", emoji: "🔐", links: [
+          { title: "🔍 Gmail / Conta Google", url: "https://accounts.google.com/v3/signin/identifier?dsh=S1577976611%3A1671105421272219&continue=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&emr=1&followup=https%3A%2F%2Fmail.google.com%2Fmail%2Fu%2F0%2F&osid=1&passive=1209600&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&ifkv=AeAAQh51NzZak5mzdsfHEhyL4vQ7dBOVlE2JDYvoSohLCRd4UxnW456QzWSVOEY1rU9nGyjixYv47w", tags: ["email","google"], accesses: 0 },
+          { title: "🔍 Google Passwords", url: "https://passwords.google.com/", tags: ["senhas"], accesses: 0 },
+          { title: "🔍 Google Notícias", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["notícias"], accesses: 0 },
+          { title: "🔍 Gemini AI", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA"], accesses: 0 }
+        ]},
+        { name: "💬 Comunicação", emoji: "💬", links: [
+          { title: "💬 Slack", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho"], accesses: 0 },
+          { title: "💚 WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["mensagens"], accesses: 0 }
+        ]},
+        { name: "☁️ Nuvem & Ferramentas", emoji: "☁️", links: [
+          { title: "🌐 OneDrive", url: "https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC", tags: ["nuvem"], accesses: 0 },
+          { title: "🌐 Feedly", url: "https://feedly.com/", tags: ["RSS"], accesses: 0 },
+          { title: "🌐 ImgBB", url: "https://imgbb.com/", tags: ["imagens"], accesses: 0 },
+          { title: "🐦 Twitter Video Downloader", url: "https://twittervideodownloader.com/", tags: ["download"], accesses: 0 }
+        ]},
+        { name: "🤖 IA & Chatbots", emoji: "🤖", links: [
+          { title: "🌐 Grok", url: "https://grok.com/", tags: ["IA","chat"], accesses: 0 },
+          { title: "🌐 Grok Tasks", url: "https://grok.com/tasks", tags: ["tarefas"], accesses: 0 },
+          { title: "🌐 ChatGPT", url: "https://chat.openai.com/", tags: ["IA"], accesses: 0 },
+          { title: "🌐 Venice.ai", url: "https://venice.ai/", tags: ["privado"], accesses: 0 },
+          { title: "🌐 OpenRouter", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["modelos"], accesses: 0 },
+          { title: "🌐 Chat Z.ai", url: "https://chat.z.ai/", tags: [], accesses: 0 },
+          { title: "🌐 SMRY.ai", url: "https://www.smry.ai/", tags: ["resumos"], accesses: 0 },
+          { title: "✨ Chat Qwen ✨", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA","Qwen"], accesses: 0 }
+        ]},
+        { name: "🎬 Entretenimento", emoji: "🎬", links: [
+          { title: "🎬 YouTube", url: "https://www.youtube.com/", tags: ["vídeo"], accesses: 0 },
+          { title: "🐦 X (Twitter)", url: "https://twitter.com/home", tags: ["social"], accesses: 0 },
+          { title: "🎮 Twitch", url: "https://www.twitch.tv/directory/following", tags: ["lives"], accesses: 0 },
+          { title: "🌐 HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports"], accesses: 0 }
+        ]},
+        { name: "💻 Tech & Benchmarks", emoji: "💻", links: [
+          { title: "🌐 CPU Benchmark (Single)", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware"], accesses: 0 },
+          { title: "🌐 CPU Benchmark (Compare)", url: "https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H", tags: ["comparar"], accesses: 0 },
+          { title: "🌐 VideoCard Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU"], accesses: 0 },
+          { title: "🔧 localhost:3000", url: "http://localhost:3000/", tags: ["dev"], accesses: 0 }
+        ]},
+        { name: "🎓 Estudos & Cursos", emoji: "🎓", links: [
+          { title: "🌐 Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos"], accesses: 0 },
+          { title: "🌐 Hotmart - Excelência", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304?utm_medium=email&utm_source=platform&utm_campaign=all_journey_access-after-purchase_hiperlink_club-old-user", tags: ["negócios"], accesses: 0 },
+          { title: "🌐 Medical Brasil Catalog", url: "https://medical-brasil.catalog.kyte.site/", tags: ["médico"], accesses: 0 }
+        ]},
+        { name: "💰 Finanças & Trading", emoji: "💰", links: [
+          { title: "🌐 TradingView", url: "https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025", tags: ["trading"], accesses: 0 }
+        ]},
+        { name: "🛒 Compras", emoji: "🛒", links: [
+          { title: "🌐 Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia"], accesses: 0 },
+          { title: "🌐 Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"], accesses: 0 }
+        ]},
+        { name: "🔧 Utilitários", emoji: "🔧", links: [
+          { title: "🌐 Bolha Tools", url: "https://open.bolha.tools/", tags: ["ferramentas"], accesses: 0 },
+          { title: "🔐 AES", url: "#", tags: ["segurança"], accesses: 0 },
+          { title: "🎁 Wish List", url: "#", tags: [], accesses: 0 }
+        ]},
+        { name: "🔞 Conteúdo Sensível", emoji: "🔞", adult: true, links: [
+          { title: "🌐 PhotoAcompanhantes - Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba", tags: ["busca"], accesses: 0 },
+          { title: "🌐 Coomer - Erika's Bulbasaur", url: "https://coomer.st/onlyfans/user/erikasbulbasaur", tags: ["archive"], accesses: 0 },
+          { title: "🌐 Pirataria.link - Explícito", url: "https://pirataria.link/explicito", tags: [], accesses: 0 },
+          { title: "🤖 Reddit - Armpit Fetish (Stubble)", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all", tags: ["Reddit"], accesses: 0 },
+          { title: "🔍 Google - Reddit Armpit Search", url: "https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble", tags: ["busca"], accesses: 0 },
+          { title: "🔍 Google - Reddit Orgasm Search", url: "https://www.google.com/search?q=(orgasm+OR+cumming+OR+climax+OR+contractions+OR+squirting+OR+%22real+orgasm%22+OR+%22female+orgasm%22+OR+edging+OR+denial+OR+ruined+OR+grool+OR+quiver+OR+pulsing+OR+shecame+OR+shesgonnacum+OR+%22orgasm+control%22+OR+%22ruined+orgasm%22)+site%3Areddit.com%2Fr%2FOrgasms+OR+site%3Areddit.com%2Fr%2Forgasmiccontractions+OR+site%3Areddit.com%2Fr%2Fgettingherselfoff+OR+site%3Areddit.com%2Fr%2FFemaleorgasmdenial+OR+site%3Areddit.com%2Fr%2FRuinedOrgasms+OR+site%3Areddit.com%2Fr%2Fshesgonnacum+OR+site%3Areddit.com%2Fr%2Fshesstillcumming+OR+site%3Areddit.com%2Fr%2F2for1+OR+site%3Areddit.com%2Fr%2FCockMilking+OR+site%3Areddit.com%2Fr%2FCreaming+OR+site%3Areddit.com%2Fr%2Fcreampiesurprise+OR+site%3Areddit.com%2Fr%2Fcumontongue+OR+site%3Areddit.com%2Fr%2Fedging+OR+site%3Areddit.com%2Fr%2Ffemaleruinedorgasm+OR+site%3Areddit.com%2Fr%2FFemdomCreampie+OR+site%3Areddit.com%2Fr%2Fforcedcreampie+OR+site%3Areddit.com%2Fr%2FGirlsFinishingTheJob+OR+site%3Areddit.com%2Fr%2Fgrool+OR+site%3Areddit.com%2Fr%2FHoldingIt+OR+site%3Areddit.com%2Fr%2FHystericalLiterature+OR+site%3Areddit.com%2Fr%2FOralPleasure+OR+site%3Areddit.com%2Fr%2Forgasmcontrol+OR+site%3Areddit.com%2Fr%2FOrgasmDenial+OR+site%3Areddit.com%2Fr%2FOrgasmFeet+OR+site%3Areddit.com%2Fr%2FOrgasmTorture+OR+site%3Areddit.com%2Fr%2Fprostatemassage+OR+site%3Areddit.com%2Fr%2Fpulsing+OR+site%3Areddit.com%2Fr%2Fquiver+OR+site%3Areddit.com%2Fr%2Frearvieworgasms+OR+site%3Areddit.com%2Fr%2Fshecame+OR+site%3Areddit.com%2Fr%2Fsuctionvibrators+OR+site%3Areddit.com%2Fr%2FThrobbingCIM+OR+site%3Areddit.com%2Fr%2FtsCantHoldHerCum+OR+site%3Areddit.com%2Fr%2FWatchHerMelt", tags: ["busca"], accesses: 0 },
+          { title: "🔍 Google - Contractions Search", url: "https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt&ved=2ahUKEwiQiojZ1oaTAxU7D7kGHRrOGIIQtKgLegQIDRAB&biw=1745&bih=834&dpr=1.1", tags: ["busca"], accesses: 0 }
+        ]}
       ]
     };
 
-    // ===== FUNÇÕES UTILITÁRIAS =====
-    function escapeHtml(text) {
-      if (!text) return '';
-      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-      return String(text).replace(/[&<>"']/g, m => map[m]);
-    }
-
-    function isValidUrl(string) {
-      try { const url = new URL(string); return url.protocol === 'http:' || url.protocol === 'https:'; } 
-      catch (_) { return false; }
-    }
-
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const colors = {
-        success: 'bg-emerald-600 border-emerald-500',
-        error: 'bg-red-600 border-red-500',
-        info: 'bg-zinc-800 border-zinc-700'
-      };
-      toast.className = `toast border ${colors[type]} text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3`;
-      toast.innerHTML = `<span>${message}</span>`;
-      setTimeout(() => { toast.className = 'hidden'; }, 3000);
-    }
-
-    // ===== INICIALIZAÇÃO DOS DADOS =====
-    function initializeData() {
-      // 1. Tenta carregar do localStorage primeiro
-      const localBackup = localStorage.getItem('favorites_backup');
-      if (localBackup) {
-        try {
-          const parsed = JSON.parse(localBackup);
-          if (parsed.categories && parsed.categories.length > 0) {
-            data = parsed;
-            console.log('✅ Dados carregados do localStorage');
-            return;
-          }
-        } catch (e) {
-          console.warn('Erro ao parsear localStorage:', e);
-        }
-      }
-
-      // 2. Se não tem localStorage, usa dados iniciais
-      data = JSON.parse(JSON.stringify(initialData));
-      console.log('✅ Dados iniciais carregados');
-      
-      // 3. Salva no localStorage para próxima vez
-      localStorage.setItem('favorites_backup', JSON.stringify(data));
-    }
-
-    // ===== SUPABASE =====
-    async function loadData() {
-      if (!supabaseClient) {
-        console.warn('Supabase não disponível, usando dados locais');
-        render();
-        return;
-      }
-
-      try {
-        const {  result, error } = await supabaseClient
-          .from('favoritos')
-          .select('categories')
-          .limit(1)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        if (result && result.length > 0 && result[0].categories) {
-          data = { categories: result[0].categories };
-          localStorage.setItem('favorites_backup', JSON.stringify(data));
-          console.log('✅ Dados carregados do Supabase');
-        }
-      } catch (e) {
-        console.warn('⚠️ Erro ao carregar do Supabase:', e.message);
-        showToast('Modo offline ativado', 'info');
-      }
-      
-      render();
-    }
-
-    async function saveToSupabase() {
-      if (!supabaseClient) {
-        localStorage.setItem('favorites_backup', JSON.stringify(data));
-        return;
-      }
-
-      try {
-        const {  existing } = await supabaseClient
-          .from('favoritos')
-          .select('id')
-          .limit(1);
-        
-        if (existing && existing.length > 0) {
-          await supabaseClient
-            .from('favoritos')
-            .update({ categories: data.categories })
-            .eq('id', existing[0].id);
-        } else {
-          await supabaseClient
-            .from('favoritos')
-            .insert([{ categories: data.categories }]);
-        }
-        
-        localStorage.setItem('favorites_backup', JSON.stringify(data));
-        showToast('✅ Salvo na nuvem!', 'success');
-      } catch (e) {
-        console.warn('⚠️ Erro ao salvar no Supabase:', e.message);
-        localStorage.setItem('favorites_backup', JSON.stringify(data));
-        showToast('💾 Salvo localmente', 'info');
-      }
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `favoritos-backup-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('💾 Backup exportado!', 'success');
-    }
-
-    // ===== RENDERIZAÇÃO =====
-    function render() {
-      const container = document.getElementById("categories");
-      const emptyState = document.getElementById("emptyState");
-      container.innerHTML = "";
-
-      if (!data.categories || data.categories.length === 0) { 
-        emptyState.classList.remove("hidden"); 
-        return; 
-      }
-      emptyState.classList.add("hidden");
-
-      data.categories.forEach((cat, catIndex) => {
-        const isAdult = cat.name.toLowerCase().includes('adult') || cat.name.includes('🔞');
-        const card = document.createElement("div");
-        card.className = `card ${isAdult ? 'adult-category' : ''}`;
-        
-        let cardHTML = `
-          <div class="flex justify-between items-center mb-4 cursor-default">
-            <h2 class="text-xl font-semibold truncate flex items-center gap-2">
-              <span>${escapeHtml(cat.emoji || '📁')}</span>
-              <span>${escapeHtml(cat.name)}</span>
-            </h2>
-            <div class="flex items-center gap-2">
-              <button onclick="event.stopPropagation(); addLink(${catIndex})" class="text-blue-400 hover:text-blue-300 text-xl transition p-1" title="Adicionar link">➕</button>
-              <button onclick="event.stopPropagation(); deleteCategory(${catIndex})" class="text-red-400 hover:text-red-300 text-xl transition p-1" title="Excluir categoria">🗑️</button>
-            </div>
-          </div>
-          <ul id="list-${catIndex}" data-cat-index="${catIndex}" class="space-y-1 min-h-[50px]"></ul>
-        `;
-        
-        if (cat.links.length === 0) {
-          cardHTML += '<p class="text-zinc-500 text-sm text-center py-4 italic">Nenhum link nesta categoria</p>';
-        }
-        
-        if (isAdult) {
-          cardHTML += '<div class="adult-badge">🔞 18+</div>';
-        }
-        
-        card.innerHTML = cardHTML;
-        container.appendChild(card);
-
-        const ul = card.querySelector(`#list-${catIndex}`);
-        
-        cat.links.forEach((link, linkIndex) => {
-          const li = document.createElement("li");
-          li.className = "link-item flex justify-between items-center group cursor-grab active:cursor-grabbing";
-          li.innerHTML = `
-            <div class="flex-1 min-w-0">
-              <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-300 font-medium truncate block" title="${escapeHtml(link.title)}">
-                ${escapeHtml(link.title)}
-              </a>
-              ${link.tag ? `<span class="text-xs text-zinc-500 mt-1 block">#${escapeHtml(link.tag)}</span>` : ''}
-            </div>
-            <div class="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
-              <button onclick="event.stopPropagation(); editLink(${catIndex}, ${linkIndex})" class="text-amber-400 hover:text-amber-300 transition p-1" title="Editar">✏️</button>
-              <button onclick="event.stopPropagation(); deleteLink(${catIndex}, ${linkIndex})" class="text-red-400 hover:text-red-300 transition p-1" title="Excluir">🗑️</button>
-            </div>
-          `;
-          ul.appendChild(li);
-        });
-
-        new Sortable(ul, {
-          group: "shared-links", 
-          animation: 150, 
-          ghostClass: "sortable-ghost",
-          onEnd: async (evt) => {
-            const fromCatIndex = parseInt(evt.from.dataset.catIndex);
-            const toCatIndex = parseInt(evt.to.dataset.catIndex);
-            const movedLink = data.categories[fromCatIndex].links.splice(evt.oldIndex, 1)[0];
-            data.categories[toCatIndex].links.splice(evt.newIndex, 0, movedLink);
-            render(); 
-            await saveToSupabase(); 
-            showToast('🔄 Link movido!', 'success');
-          }
-        });
-      });
-    }
-
-    // ===== CRUD =====
-    function addCategory() {
-      const name = prompt("✨ Nome da nova categoria:"); 
-      if (!name || !name.trim()) return;
-      const emoji = prompt("🎨 Emoji (opcional):", "📁");
-      data.categories.push({ 
-        name: name.trim(), 
-        emoji: emoji?.trim() || "📁", 
-        links: [] 
-      });
-      render(); 
-      saveToSupabase(); 
-      showToast('📁 Categoria criada!', 'success');
-    }
-
-    function deleteCategory(index) {
-      const catName = data.categories[index]?.name;
-      if (confirm(`⚠️ Excluir categoria "${catName}" e todos os seus links?`)) {
-        data.categories.splice(index, 1); 
-        render(); 
-        saveToSupabase(); 
-        showToast('🗑️ Categoria excluída', 'success');
-      }
-    }
-
-    function addLink(catIndex) {
-      currentCatIndex = catIndex; 
-      currentLinkIndex = null;
-      document.getElementById("modalTitle").textContent = "➕ Novo Link";
-      document.getElementById("linkTitle").value = ""; 
-      document.getElementById("linkUrl").value = ""; 
-      document.getElementById("linkTag").value = "";
-      document.getElementById("modal").classList.remove("hidden"); 
-      document.getElementById("linkTitle").focus();
-    }
-
-    function editLink(catIndex, linkIndex) {
-      currentCatIndex = catIndex; 
-      currentLinkIndex = linkIndex;
-      const link = data.categories[catIndex].links[linkIndex];
-      document.getElementById("modalTitle").textContent = "✏️ Editar Link";
-      document.getElementById("linkTitle").value = link.title || ""; 
-      document.getElementById("linkUrl").value = link.url || ""; 
-      document.getElementById("linkTag").value = link.tag || "";
-      document.getElementById("modal").classList.remove("hidden"); 
-      document.getElementById("linkTitle").focus();
-    }
-
-    async function saveLink() {
-      const title = document.getElementById("linkTitle").value.trim();
-      let url = document.getElementById("linkUrl").value.trim();
-      const tag = document.getElementById("linkTag").value.trim();
-      
-      if (!title || !url) { 
-        showToast("⚠️ Título e URL são obrigatórios!", "error"); 
-        return; 
-      }
-      
-      if (!/^https?:\/\//i.test(url)) { 
-        url = 'https://' + url; 
-      }
-      
-      if (!isValidUrl(url)) { 
-        showToast("⚠️ URL inválida!", "error"); 
-        return; 
-      }
-      
-      if (currentLinkIndex === null) { 
-        data.categories[currentCatIndex].links.push({ title, url, tag }); 
-        showToast("✅ Link adicionado!", "success"); 
-      } else { 
-        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tag }; 
-        showToast("✅ Link atualizado!", "success"); 
-      }
-      
-      hideModal(); 
-      render(); 
-      await saveToSupabase();
-    }
-
-    function deleteLink(catIndex, linkIndex) {
-      const linkTitle = data.categories[catIndex].links[linkIndex]?.title;
-      if (confirm(`🗑️ Excluir o link "${linkTitle}"?`)) { 
-        data.categories[catIndex].links.splice(linkIndex, 1); 
-        render(); 
-        saveToSupabase(); 
-        showToast('🗑️ Link excluído', 'success'); 
-      }
-    }
-
-    function hideModal() { 
-      document.getElementById("modal").classList.add("hidden"); 
-      currentCatIndex = null; 
-      currentLinkIndex = null; 
-    }
+    // ===== UTILS =====
+    function escapeHtml(t){if(!t)return'';const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};return String(t).replace(/[&<>"']/g,s=>m[s])}
+    function isValidUrl(s){try{const u=new URL(s);return u.protocol==='http:'||u.protocol==='https:'}catch{_}return false}
+    function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast';t.style.borderColor=type==='error'?'#ef4444':type==='success'?'#22c55e':'#334155';setTimeout(()=>t.classList.add('hidden'),3000)}
     
-    document.getElementById("modal").addEventListener("click", (e) => { 
-      if (e.target.id === "modal") hideModal(); 
-    });
-    
-    document.addEventListener("keydown", (e) => { 
-      if (e.key === "Escape") hideModal(); 
-    });
-
-    function clearAll() {
-      if (confirm("🚨 ATENÇÃO: Isso apagará TODOS os seus favoritos permanentemente. Continuar?")) {
-        if (confirm("✅ Confirmar exclusão total?")) { 
-          data = { categories: [] }; 
-          render(); 
-          saveToSupabase(); 
-          showToast('🗑️ Todos os dados foram limpos', 'success'); 
-        }
-      }
-    }
-
-    function filterLinks() {
-      const term = document.getElementById("search").value.toLowerCase().trim();
-      let hasResults = false;
-      
-      document.querySelectorAll(".card").forEach(card => {
-        const title = card.querySelector("h2")?.textContent.toLowerCase() || "";
-        const items = card.querySelectorAll(".link-item");
-        let categoryVisible = title.includes(term), hasVisibleItems = false;
-        
-        items.forEach(item => {
-          const text = item.textContent.toLowerCase();
-          if (term === "" || text.includes(term)) { 
-            item.style.display = "flex"; 
-            hasVisibleItems = true; 
-            categoryVisible = true; 
-          } else { 
-            item.style.display = "none"; 
-          }
-        });
-        
-        if (categoryVisible) { 
-          card.style.display = "block"; 
-          hasResults = true; 
-        } else { 
-          card.style.display = "none"; 
-        }
-      });
-      
-      const emptyState = document.getElementById("emptyState");
-      if (term !== "" && !hasResults) { 
-        emptyState.classList.remove("hidden"); 
-        emptyState.querySelector("p.text-2xl").textContent = "🔍 Nenhum resultado encontrado"; 
-        emptyState.querySelector("p:last-child").textContent = "Tente buscar por outro termo";
-      } else if (term === "") { 
-        emptyState.classList.add("hidden"); 
-      }
-    }
-
-    // ===== INICIALIZAÇÃO =====
-    window.addEventListener("DOMContentLoaded", () => {
-      // 1. Inicializa dados (localStorage ou dados iniciais)
+    // ===== INIT =====
+    function init(){
+      loadTheme();
       initializeData();
-      
-      // 2. Renderiza imediatamente
+      populateCategorySelect();
       render();
+      setTimeout(loadFromSupabase,200);
       
-      // 3. Tenta carregar do Supabase (se disponível)
-      setTimeout(() => loadData(), 100);
-      
-      // 4. Atalho de teclado Ctrl+K para busca
-      document.addEventListener("keydown", (e) => { 
-        if ((e.ctrlKey || e.metaKey) && e.key === "k") { 
-          e.preventDefault(); 
-          document.getElementById("search").focus(); 
-        } 
+      // Keyboard shortcuts
+      document.addEventListener('keydown',e=>{
+        if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('searchInput').focus();}
+        if(e.key==='Escape')hideModal();
       });
       
-      console.log('✅ Aplicação inicializada com sucesso!');
-      console.log(`📊 Total de categorias: ${data.categories.length}`);
-      console.log(`📊 Total de links: ${data.categories.reduce((acc, cat) => acc + cat.links.length, 0)}`);
-    });
+      // Theme toggle
+      document.getElementById('themeToggle').onclick=()=>{
+        const themes=['system','light','dark'];
+        const current=document.getElementById('themeSelect').value;
+        const next=themes[(themes.indexOf(current)+1)%themes.length];
+        document.getElementById('themeSelect').value=next;
+        setTheme(next);
+      };
+    }
+
+    function initializeData(){
+      const local=localStorage.getItem('favorites_data');
+      if(local){try{const p=JSON.parse(local);if(p.categories?.length)data=p;else throw 0}catch(e){data=JSON.parse(JSON.stringify(initialData))}}
+      else{data=JSON.parse(JSON.stringify(initialData))}
+      saveLocal();
+    }
+
+    function saveLocal(){localStorage.setItem('favorites_data',JSON.stringify(data))}
+
+    async function loadFromSupabase(){
+      if(!supabaseClient)return;
+      try{
+        const{data:r,error}=await supabaseClient.from('favoritos').select('categories').limit(1).order('created_at',{ascending:false});
+        if(error)throw error;
+        if(r?.[0]?.categories){data={categories:r[0].categories};saveLocal();render();showToast('✅ Dados sincronizados','success')}
+      }catch(e){console.warn('⚠️ Supabase offline:',e.message)}
+    }
+
+    async function saveToSupabase(){
+      if(!supabaseClient){saveLocal();return}
+      try{
+        const{data:ex}=await supabaseClient.from('favoritos').select('id').limit(1);
+        if(ex?.[0]?.id)await supabaseClient.from('favoritos').update({categories:data.categories}).eq('id',ex[0].id)
+        else await supabaseClient.from('favoritos').insert([{categories:data.categories}])
+        saveLocal();showToast('✅ Salvo na nuvem','success')
+      }catch(e){console.warn('⚠️ Erro ao salvar:',e.message);saveLocal();showToast('💾 Salvo localmente','info')}
+    }
+
+    // ===== THEME =====
+    function loadTheme(){
+      const saved=localStorage.getItem('theme')||'dark';
+      document.getElementById('themeSelect').value=saved;
+      setTheme(saved);
+    }
+    function setTheme(val){
+      localStorage.setItem('theme',val);
+      const isDark=val==='dark'||(val==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+      document.documentElement.classList.toggle('dark',isDark);
+      document.getElementById('themeToggle').textContent=isDark?'🌙':'☀️';
+    }
+
+    // ===== RENDER =====
+    function render(){
+      const catEl=document.getElementById('categories');
+      const empty=document.getElementById('emptyState');
+      catEl.innerHTML='';
+      
+      const cats=data.categories.filter(c=>!c.adult||showAdult);
+      if(!cats.length){empty.classList.remove('hidden');return}
+      empty.classList.add('hidden');
+      
+      cats.forEach((cat,catIdx)=>{
+        const realIdx=data.categories.indexOf(cat);
+        const card=document.createElement('div');
+        card.className='category'+(cat.adult?' adult-category':'');
+        card.innerHTML=`
+          <div class="category-header" onclick="toggleCategory(${realIdx})">
+            <div class="category-title">${cat.emoji||'📁'} ${escapeHtml(cat.name)}${cat.adult?'<span class="adult-badge">18+</span>':''}</div>
+            <button class="category-toggle" id="toggle-${realIdx}">▼</button>
+          </div>
+          <ul class="links-list" id="links-${realIdx}"></ul>
+        `;
+        catEl.appendChild(card);
+        renderLinks(cat.links,realIdx,document.getElementById(`links-${realIdx}`));
+      });
+      renderPinned();
+    }
+
+    function renderLinks(links,catIdx,container){
+      container.innerHTML='';
+      const sorted=[...links].sort((a,b)=>{
+        const s=document.getElementById('sortSelect')?.value||'original';
+        if(s==='name')return a.title.localeCompare(b.title);
+        if(s==='accessed')return(b.accesses||0)-(a.accesses||0);
+        return 0;
+      });
+      sorted.forEach((link,linkIdx)=>{
+        const realIdx=links.indexOf(link);
+        const li=document.createElement('li');
+        li.className='link-item';
+        li.innerHTML=`
+          <div class="link-content" onclick="openLink('${escapeHtml(link.url)}',${catIdx},${realIdx})">
+            <span class="link-title">${escapeHtml(link.title)}</span>
+          </div>
+          <div class="pin-counter">${link.accesses||0}📌</div>
+          <div class="link-actions">
+            <button class="action-btn edit" onclick="event.stopPropagation();editLink(${catIdx},${realIdx})">✏️</button>
+            <button class="action-btn delete" onclick="event.stopPropagation();deleteLink(${catIdx},${realIdx})">🗑️</button>
+          </div>
+          ${link.tags?.length?`<div class="link-tags">${link.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>`:''}
+        `;
+        container.appendChild(li);
+      });
+    }
+
+    function renderPinned(){
+      const section=document.getElementById('pinnedSection');
+      const grid=document.getElementById('pinnedGrid');
+      if(!pinnedLinks.length){section.classList.add('hidden');return}
+      section.classList.remove('hidden');
+      grid.innerHTML=pinnedLinks.map((p,i)=>`
+        <div class="pinned-item" onclick="openLink('${escapeHtml(p.url)}',${p.cat},${p.idx})" title="Ctrl+${i+1}">
+          <span class="text-amber-400">${i+1}.</span>
+          <span class="link-title">${escapeHtml(p.title)}</span>
+        </div>
+      `).join('');
+    }
+
+    // ===== ACTIONS =====
+    function openLink(url,catIdx,linkIdx){
+      const cat=data.categories[catIdx];
+      if(!cat)return;
+      const link=cat.links[linkIdx];
+      if(!link)return;
+      link.accesses=(link.accesses||0)+1;
+      saveToSupabase();
+      render();
+      window.open(url,'_blank','noopener,noreferrer');
+    }
+
+    function toggleCategory(idx){
+      const toggle=document.getElementById(`toggle-${idx}`);
+      const list=document.getElementById(`links-${idx}`);
+      if(toggle&&list){
+        const collapsed=toggle.classList.toggle('collapsed');
+        list.style.display=collapsed?'none':'flex';
+      }
+    }
+
+    function toggleAdult(){
+      showAdult=!showAdult;
+      document.getElementById('adultToggle').style.borderColor=showAdult?'#ef4444':'#334155';
+      render();
+      showToast(showAdult?'🔞 Conteúdo sensível visível':'🔞 Conteúdo oculto','info');
+    }
+
+    function openSettings(){document.getElementById('settingsPanel').classList.toggle('hidden')}
+
+    function addCategory(){
+      const name=prompt('✨ Nome da categoria:');if(!name?.trim())return;
+      const emoji=prompt('🎨 Emoji (opcional):','📁');
+      data.categories.push({name:name.trim(),emoji:emoji?.trim()||'📁',links:[]});
+      populateCategorySelect();render();saveToSupabase();showToast('📁 Categoria criada','success');
+    }
+
+    function deleteCategory(idx){
+      if(confirm(`Excluir "${data.categories[idx].name}"?`)){
+        data.categories.splice(idx,1);populateCategorySelect();render();saveToSupabase();showToast('🗑️ Excluída','success');
+      }
+    }
+
+    function addLink(catIdx){
+      currentCatIndex=catIdx;currentLinkIndex=null;
+      document.getElementById('modalTitle').textContent='➕ Novo Link';
+      document.getElementById('linkTitle').value='';document.getElementById('linkUrl').value='';document.getElementById('linkTags').value='';
+      document.getElementById('linkCategory').value=catIdx;
+      document.getElementById('modal').classList.add('active');
+      document.getElementById('linkTitle').focus();
+    }
+
+    function editLink(catIdx,linkIdx){
+      currentCatIndex=catIdx;currentLinkIndex=linkIdx;
+      const link=data.categories[catIdx].links[linkIdx];
+      document.getElementById('modalTitle').textContent='✏️ Editar Link';
+      document.getElementById('linkTitle').value=link.title||'';document.getElementById('linkUrl').value=link.url||'';document.getElementById('linkTags').value=link.tags?.join(', ')||'';
+      document.getElementById('linkCategory').value=catIdx;
+      document.getElementById('modal').classList.add('active');
+    }
+
+    async function saveLink(){
+      const title=document.getElementById('linkTitle').value.trim();
+      let url=document.getElementById('linkUrl').value.trim();
+      const tags=document.getElementById('linkTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+      if(!title||!url){showToast('⚠️ Título e URL obrigatórios','error');return}
+      if(!/^https?:\/\//i.test(url))url='https://'+url;
+      if(!isValidUrl(url)){showToast('⚠️ URL inválida','error');return}
+      
+      const linkData={title,url,tags,accesses:currentLinkIndex!==null?data.categories[currentCatIndex].links[currentLinkIndex].accesses:0};
+      if(currentLinkIndex===null)data.categories[currentCatIndex].links.push(linkData)
+      else data.categories[currentCatIndex].links[currentLinkIndex]=linkData;
+      
+      hideModal();populateCategorySelect();render();await saveToSupabase();
+      showToast(currentLinkIndex===null?'✅ Link adicionado':'✅ Link atualizado','success');
+    }
+
+    function deleteLink(catIdx,linkIdx){
+      if(confirm('Excluir este link?')){
+        data.categories[catIdx].links.splice(linkIdx,1);render();saveToSupabase();showToast('🗑️ Excluído','success');
+      }
+    }
+
+    function hideModal(){document.getElementById('modal').classList.remove('active');currentCatIndex=currentLinkIndex=null}
+    document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')hideModal()};
+
+    function clearAll(){
+      if(confirm('🚨 Apagar TUDO?')&&confirm('✅ Confirmar?')){
+        data={categories:[]};pinnedLinks=[];render();saveToSupabase();showToast('🗑️ Tudo limpo','success');
+      }
+    }
+
+    function filterLinks(){
+      const term=document.getElementById('searchInput').value.toLowerCase().trim();
+      document.querySelectorAll('.category').forEach(card=>{
+        const title=card.querySelector('.category-title')?.textContent.toLowerCase()||'';
+        const items=card.querySelectorAll('.link-item');
+        let visible=title.includes(term);
+        items.forEach(item=>{
+          const text=item.textContent.toLowerCase();
+          const match=term===''||text.includes(term);
+          item.style.display=match?'flex':'none';
+          if(match)visible=true;
+        });
+        card.style.display=visible?'block':'none';
+      });
+    }
+
+    function applySort(){render()}
+    function resetCounters(){
+      if(confirm('Resetar contadores de acesso?')){
+        data.categories.forEach(c=>c.links.forEach(l=>l.accesses=0));
+        render();saveToSupabase();showToast('🔄 Contadores zerados','success');
+      }
+    }
+
+    function populateCategorySelect(){
+      const sel=document.getElementById('linkCategory');
+      sel.innerHTML=data.categories.map((c,i)=>`<option value="${i}">${c.emoji||'📁'} ${escapeHtml(c.name)}</option>`).join('');
+    }
+
+    // ===== EXPORT/IMPORT =====
+    function exportData(){
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+      a.download=`favoritos-${new Date().toISOString().split('T')[0]}.json`;a.click();
+      showToast('💾 Backup exportado','success');
+    }
+
+    function importData(){
+      const input=document.createElement('input');input.type='file';input.accept='.json';
+      input.onchange=e=>{
+        const file=e.target.files[0];if(!file)return;
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          try{
+            const imported=JSON.parse(ev.target.result);
+            if(imported.categories){data=imported;populateCategorySelect();render();saveToSupabase();showToast('📁 Dados importados','success')}
+            else showToast('⚠️ Arquivo inválido','error');
+          }catch{showToast('⚠️ Erro ao importar','error')}
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    // ===== PINNED =====
+    function togglePin(catIdx,linkIdx){
+      const link=data.categories[catIdx].links[linkIdx];
+      const existing=pinnedLinks.findIndex(p=>p.url===link.url);
+      if(existing>=0)pinnedLinks.splice(existing,1)
+      else if(pinnedLinks.length<5)pinnedLinks.push({title:link.title,url:link.url,cat:catIdx,idx:linkIdx})
+      else showToast('⚠️ Máximo 5 fixados','error');
+      renderPinned();saveLocal();
+    }
+
+    // ===== START =====
+    window.addEventListener('DOMContentLoaded',init);
   </script>
 </body>
 </html>
