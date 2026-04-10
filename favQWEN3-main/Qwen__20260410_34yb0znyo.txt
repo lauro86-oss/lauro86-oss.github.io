@@ -1,0 +1,6 @@
+favQWEN3-main/
+├── index.html          ← Código acima
+├── sw.js              ← Service Worker (opcional)
+├── data/
+│   └── links.json     ← Criado automaticamente pelo sync
+└── .gitignore
