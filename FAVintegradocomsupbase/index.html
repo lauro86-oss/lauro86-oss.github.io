@@ -2,278 +2,81 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: '#3b82f6',
-            secondary: '#64748b'
-          }
-        }
-      }
-    }
-  </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    * { font-family: 'Inter', system-ui, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
     
     body {
-      background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
+      padding: 20px;
     }
     
     body.dark {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     }
     
     .header {
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      max-width: 1400px;
+      margin: 0 auto 30px;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
     body.dark .header {
-      background: rgba(30, 41, 59, 0.98);
-      border-bottom-color: rgba(255,255,255,0.08);
+      background: rgba(30,41,59,0.95);
     }
     
-    .category-card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      padding: 14px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
-      height: fit-content;
-    }
-    
-    body.dark .category-card {
-      background: rgba(30, 41, 59, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    }
-    
-    .category-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    .category-header {
+    .header-top {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e2e8f0;
-      flex-wrap: wrap;
-    }
-    
-    body.dark .category-header {
-      border-bottom-color: #334155;
-    }
-    
-    .category-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #1e293b;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-    }
-    
-    body.dark .category-title {
-      color: #f1f5f9;
-    }
-    
-    .category-count {
-      font-size: 0.75rem;
-      color: #94a3b8;
-    }
-    
-    /* Grid de 2 colunas dentro da categoria */
-    .links-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-    
-    @media (max-width: 480px) {
-      .links-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .link-item {
-      background: #f8fafc;
-      border-radius: 8px;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      cursor: grab;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      min-width: 0;
-    }
-    
-    body.dark .link-item {
-      background: #334155;
-    }
-    
-    .link-item:hover {
-      background: #e0f2fe;
-      border-color: #3b82f6;
-      transform: translateX(2px);
-    }
-    
-    body.dark .link-item:hover {
-      background: #475569;
-    }
-    
-    .link-content {
-      flex: 1;
-      display: flex;
       align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-    
-    .link-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      border-radius: 4px;
-    }
-    
-    .link-title {
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: color 0.2s;
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .link-title:hover {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-    
-    body.dark .link-title {
-      color: #60a5fa;
-    }
-    
-    body.dark .link-title:hover {
-      color: #93c5fd;
-    }
-    
-    .link-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      width: 100%;
-      margin-top: 4px;
-    }
-    
-    .tags-container {
-      display: flex;
-      gap: 3px;
       flex-wrap: wrap;
-      flex: 1;
+      gap: 15px;
+      margin-bottom: 15px;
     }
     
-    .tag {
-      font-size: 0.6rem;
-      padding: 1px 5px;
-      border-radius: 6px;
-      background: #dbeafe;
-      color: #1e40af;
-      font-weight: 500;
-      white-space: nowrap;
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     
-    body.dark .tag {
-      background: #1e40af;
-      color: #dbeafe;
-    }
-    
-    .link-actions {
+    .buttons {
       display: flex;
-      gap: 3px;
-      flex-shrink: 0;
-    }
-    
-    .action-btn {
-      background: none;
-      border: none;
-      font-size: 0.8rem;
-      cursor: pointer;
-      padding: 2px;
-      border-radius: 4px;
-      transition: all 0.2s;
-      opacity: 0.6;
-    }
-    
-    .action-btn:hover {
-      opacity: 1;
-      background: rgba(0,0,0,0.05);
-    }
-    
-    body.dark .action-btn:hover {
-      background: rgba(255,255,255,0.1);
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
     }
     
     .btn {
-      padding: 7px 12px;
-      border-radius: 8px;
+      padding: 10px 18px;
       border: none;
-      font-weight: 600;
-      font-size: 0.8rem;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      font-weight: 600;
+      transition: all 0.3s;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      white-space: nowrap;
+      gap: 6px;
+      font-size: 0.9rem;
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
     }
     
     .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
-    }
-    
-    .btn-success {
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-      color: white;
-    }
-    
-    .btn-success:hover {
-      box-shadow: 0 3px 8px rgba(34, 197, 94, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
     }
     
     .btn-secondary {
@@ -290,15 +93,231 @@
       background: #cbd5e1;
     }
     
-    body.dark .btn-secondary:hover {
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      box-shadow: 0 4px 12px rgba(34,197,94,0.4);
+    }
+    
+    .search-box {
+      position: relative;
+      max-width: 600px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 20px 12px 45px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    body.dark .search-box input {
+      background: #334155;
+      border-color: #475569;
+      color: white;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 640px) {
+      .grid-container { grid-template-columns: 1fr; }
+    }
+    
+    @media (min-width: 641px) and (max-width: 960px) {
+      .grid-container { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (min-width: 961px) and (max-width: 1280px) {
+      .grid-container { grid-template-columns: repeat(3, 1fr); }
+    }
+    
+    .category-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s;
+    }
+    
+    body.dark .category-card {
+      background: rgba(30,41,59,0.95);
+    }
+    
+    .category-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    body.dark .category-header {
+      border-bottom-color: #334155;
+    }
+    
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    
+    body.dark .category-title {
+      color: #f1f5f9;
+    }
+    
+    .category-count {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    @media (max-width: 480px) {
+      .links-grid { grid-template-columns: 1fr; }
+    }
+    
+    .link-item {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: grab;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    
+    body.dark .link-item {
+      background: #334155;
+    }
+    
+    .link-item:hover {
+      background: #e0f2fe;
+      border-color: #667eea;
+      transform: translateX(3px);
+    }
+    
+    body.dark .link-item:hover {
       background: #475569;
+    }
+    
+    .link-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .link-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    
+    .link-title {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    
+    .link-title:hover {
+      text-decoration: underline;
+    }
+    
+    body.dark .link-title {
+      color: #60a5fa;
+    }
+    
+    .link-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .tags-container {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    
+    .tag {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #dbeafe;
+      color: #1e40af;
+      font-weight: 500;
+    }
+    
+    body.dark .tag {
+      background: #1e40af;
+      color: #dbeafe;
+    }
+    
+    .link-actions {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .action-btn:hover {
+      opacity: 1;
     }
     
     .btn-add {
       width: 100%;
       margin-top: 12px;
-      padding: 8px;
-      font-size: 0.8rem;
+      padding: 10px;
       justify-content: center;
     }
     
@@ -310,8 +329,7 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(4px);
-      padding: 16px;
+      padding: 20px;
     }
     
     .modal.active {
@@ -320,13 +338,12 @@
     
     .modal-content {
       background: white;
-      padding: 24px;
+      padding: 30px;
       border-radius: 16px;
       width: 100%;
-      max-width: 450px;
+      max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
     body.dark .modal-content {
@@ -335,121 +352,32 @@
     
     .modal input, .modal select {
       width: 100%;
-      padding: 9px 12px;
-      background: #f8fafc;
+      padding: 12px;
       border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      color: #1e293b;
-      margin-top: 4px;
-      margin-bottom: 12px;
-      font-size: 0.85rem;
+      border-radius: 10px;
+      margin: 8px 0 16px;
+      font-size: 0.95rem;
     }
     
     body.dark .modal input, body.dark .modal select {
       background: #334155;
       border-color: #475569;
-      color: #f1f5f9;
+      color: white;
     }
     
     .modal input:focus, .modal select:focus {
       outline: none;
-      border-color: #3b82f6;
+      border-color: #667eea;
     }
     
-    .search-box {
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-      margin: 10px auto 0;
+    .modal label {
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.9rem;
     }
     
-    .search-input {
-      width: 100%;
-      padding: 9px 16px 9px 38px;
-      background: white;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-    
-    body.dark .search-input {
-      background: #334155;
-      border-color: #475569;
-      color: #f1f5f9;
-    }
-    
-    .search-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 0.95rem;
-      color: #94a3b8;
-    }
-    
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 0 16px 24px;
-    }
-    
-    @media (max-width: 640px) {
-      .grid-container {
-        grid-template-columns: 1fr;
-        padding: 0 12px 20px;
-      }
-      .header {
-        padding: 10px 12px;
-      }
-      .btn {
-        padding: 6px 9px;
-        font-size: 0.75rem;
-      }
-      .category-card {
-        padding: 12px;
-      }
-    }
-    
-    @media (min-width: 641px) and (max-width: 900px) {
-      .grid-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    @media (min-width: 901px) and (max-width: 1200px) {
-      .grid-container {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    
-    @media (min-width: 1201px) and (max-width: 1500px) {
-      .grid-container {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-    
-    @media (min-width: 1501px) {
-      .grid-container {
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-    
-    .sortable-ghost {
-      opacity: 0.4;
-      background: #bfdbfe !important;
-    }
-    
-    body.dark .sortable-ghost {
-      background: #1e40af !important;
+    body.dark .modal label {
+      color: #cbd5e1;
     }
     
     .toast {
@@ -457,14 +385,12 @@
       bottom: 20px;
       right: 20px;
       background: white;
-      border-left: 4px solid #3b82f6;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 14px 24px;
+      border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       z-index: 200;
       animation: slideIn 0.3s ease;
-      font-size: 0.85rem;
-      max-width: 90%;
+      border-left: 4px solid #667eea;
     }
     
     body.dark .toast {
@@ -472,17 +398,17 @@
     }
     
     @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
+      from { transform: translateX(400px); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
     
     .theme-toggle {
       background: none;
       border: 2px solid #e2e8f0;
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       transition: all 0.2s;
     }
     
@@ -491,38 +417,18 @@
       background: #334155;
     }
     
-    .theme-toggle:hover {
-      border-color: #3b82f6;
-    }
-    
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: #94a3b8;
-    }
-    
-    .header-actions {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    
-    .config-section {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #e2e8f0;
-    }
-    
-    body.dark .config-section {
-      border-top-color: #475569;
+      padding: 60px 20px;
+      color: white;
+      grid-column: 1 / -1;
     }
     
     .loading {
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid #ffffff;
+      border: 2px solid white;
       border-radius: 50%;
       border-top-color: transparent;
       animation: spin 0.8s linear infinite;
@@ -535,130 +441,91 @@
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          ⭐ Meus Favoritos
-        </h1>
-        <div class="header-actions">
-          <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn" title="Alternar tema">🌙</button>
-          <button onclick="addCategory()" class="btn btn-primary">✨ Nova Categoria</button>
-          <button onclick="exportData()" class="btn btn-secondary">💾 JSON</button>
-          <button onclick="exportHTML()" class="btn btn-secondary">📄 Salvar HTML</button>
-          <button onclick="syncToGitHub()" class="btn btn-success" id="syncBtn">🔄 Sincronizar GitHub</button>
-          <button onclick="openGitHubConfig()" class="btn btn-secondary" title="Configurar GitHub">⚙️</button>
-        </div>
-      </div>
-      
-      <!-- Search -->
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
+  <div class="header">
+    <div class="header-top">
+      <h1 class="title">⭐ Meus Favoritos</h1>
+      <div class="buttons">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        <button class="btn btn-primary" onclick="addCategory()">✨ Nova Categoria</button>
+        <button class="btn btn-secondary" onclick="exportJSON()">💾 JSON</button>
+        <button class="btn btn-secondary" onclick="saveHTML()">📄 Salvar HTML</button>
+        <button class="btn btn-success" onclick="syncGitHub()" id="syncBtn">🔄 Sincronizar GitHub</button>
+        <button class="btn btn-secondary" onclick="openGitHubConfig()">⚙️</button>
       </div>
     </div>
-  </header>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
+    </div>
+  </div>
 
-  <!-- Main Content -->
   <div id="categories" class="grid-container"></div>
   
-  <!-- Empty State -->
-  <div id="emptyState" class="empty-state hidden">
-    <div class="text-5xl mb-3">📭</div>
-    <p class="text-lg mb-4">Nenhum favorito ainda</p>
-    <button onclick="addCategory()" class="btn btn-primary">✨ Criar Categoria</button>
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div style="font-size:4rem;margin-bottom:15px;">📭</div>
+    <p style="font-size:1.3rem;margin-bottom:15px;">Nenhum favorito ainda</p>
+    <button class="btn btn-primary" onclick="addCategory()">✨ Criar Primeira Categoria</button>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal Adicionar/Editar Link -->
   <div id="modal" class="modal">
     <div class="modal-content">
-      <h2 class="text-lg md:text-xl font-bold mb-4" id="modalTitle">➕ Adicionar Link</h2>
-      
-      <label class="block text-sm font-medium mb-1">Título *</label>
-      <input id="linkTitle" placeholder="Ex: Gmail">
-      
-      <label class="block text-sm font-medium mb-1">URL *</label>
-      <input id="linkUrl" placeholder="https://exemplo.com">
-      
-      <label class="block text-sm font-medium mb-1">Tags (vírgula)</label>
-      <input id="linkTags" placeholder="Ex: email, google, trabalho">
-      
-      <label class="block text-sm font-medium mb-1">Categoria</label>
+      <h2 style="margin-bottom:20px;font-size:1.4rem;" id="modalTitle">➕ Adicionar Link</h2>
+      <label>Título *</label>
+      <input type="text" id="linkTitle" placeholder="Ex: Gmail">
+      <label>URL *</label>
+      <input type="text" id="linkUrl" placeholder="https://exemplo.com">
+      <label>Tags (separadas por vírgula)</label>
+      <input type="text" id="linkTags" placeholder="Ex: email, google, trabalho">
+      <label>Categoria</label>
       <select id="linkCategory"></select>
-      
-      <div class="flex gap-2 mt-6">
-        <button onclick="hideModal()" class="flex-1 btn btn-secondary">Cancelar</button>
-        <button onclick="saveLink()" class="flex-1 btn btn-primary">Salvar</button>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-secondary" onclick="hideModal()" style="flex:1;">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveLink()" style="flex:1;">Salvar</button>
       </div>
     </div>
   </div>
 
-  <!-- GitHub Config Modal -->
+  <!-- Modal Config GitHub -->
   <div id="githubModal" class="modal">
     <div class="modal-content">
-      <h2 class="text-lg font-bold mb-4">⚙️ Configurar GitHub</h2>
-      
-      <label class="block text-sm font-medium mb-1">Token de Acesso (PAT)</label>
-      <input id="githubToken" type="password" placeholder="ghp_xxxxxxxxxxxx">
-      <p class="text-xs text-gray-500 mb-3">Crie em: GitHub → Settings → Developer settings → Personal access tokens</p>
-      
-      <label class="block text-sm font-medium mb-1">Usuário/Organização</label>
-      <input id="githubOwner" placeholder="Ex: lauro86-oss">
-      
-      <label class="block text-sm font-medium mb-1">Repositório</label>
-      <input id="githubRepo" placeholder="Ex: FAVintegradocomsupbase">
-      
-      <label class="block text-sm font-medium mb-1">Branch</label>
-      <input id="githubBranch" placeholder="Ex: main" value="main">
-      
-      <div class="flex gap-2 mt-6">
-        <button onclick="closeGitHubConfig()" class="flex-1 btn btn-secondary">Cancelar</button>
-        <button onclick="saveGitHubConfig()" class="flex-1 btn btn-primary">Salvar Config</button>
+      <h2 style="margin-bottom:20px;font-size:1.4rem;">⚙️ Configurar GitHub</h2>
+      <label>Token de Acesso (PAT)</label>
+      <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx">
+      <p style="font-size:0.75rem;color:#94a3b8;margin-bottom:12px;">Crie em: GitHub → Settings → Developer settings → Personal access tokens</p>
+      <label>Usuário/Organização</label>
+      <input type="text" id="githubOwner" placeholder="Ex: lauro86-oss">
+      <label>Repositório</label>
+      <input type="text" id="githubRepo" placeholder="Ex: FAVintegradocomsupbase">
+      <label>Branch</label>
+      <input type="text" id="githubBranch" placeholder="Ex: main" value="main">
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-secondary" onclick="closeGitHubConfig()" style="flex:1;">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveGitHubConfig()" style="flex:1;">Salvar Config</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" style="display:none;"></div>
 
   <script>
-    // ===== CONFIGURAÇÃO =====
-    const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
-    let supabaseClient = null;
-    try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e){}
-
-    let data = { categories: [] };
-    let currentCatIndex = null;
-    let currentLinkIndex = null;
-    let isDark = false;
-    
-    // GitHub config
-    let githubConfig = {
-      token: '',
-      owner: '',
-      repo: '',
-      branch: 'main'
-    };
-
-    // ===== DADOS INICIAIS COM TAGS =====
+    // ===== DADOS INICIAIS =====
     const initialData = {
       categories: [
         {
           name: "🔐 Google & Comunicação",
           links: [
-            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier", tags: ["email", "conta"] },
-            { title: "Slack - Canal", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho", "chat"] },
-            { title: "WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["mensagens", "chat"] }
+            { title: "Gmail (Login)", url: "https://accounts.google.com/v3/signin/identifier", tags: ["email","conta","google"] },
+            { title: "Slack - Canal", url: "https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8", tags: ["trabalho","chat"] },
+            { title: "WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["mensagens","chat"] }
           ]
         },
         {
           name: "☁️ Armazenamento e Senhas",
           links: [
-            { title: "OneDrive", url: "https://onedrive.live.com/", tags: ["nuvem", "arquivos"] },
-            { title: "Feedly", url: "https://feedly.com/", tags: ["RSS", "leitura"] },
-            { title: "Google Passwords", url: "https://passwords.google.com/", tags: ["segurança", "google"] }
+            { title: "OneDrive", url: "https://onedrive.live.com/", tags: ["nuvem","arquivos"] },
+            { title: "Feedly", url: "https://feedly.com/", tags: ["RSS","leitura"] },
+            { title: "Google Passwords", url: "https://passwords.google.com/", tags: ["segurança","google"] }
           ]
         },
         {
@@ -667,18 +534,18 @@
             { title: "YouTube", url: "https://www.youtube.com/", tags: ["vídeo"] },
             { title: "Twitter / X", url: "https://twitter.com/home", tags: ["social"] },
             { title: "Twitch - Following", url: "https://www.twitch.tv/directory/following", tags: ["lives"] },
-            { title: "Grok", url: "https://grok.com/", tags: ["IA", "chat"] },
+            { title: "Grok", url: "https://grok.com/", tags: ["IA","chat"] },
             { title: "ChatGPT", url: "https://chat.openai.com/", tags: ["IA"] },
-            { title: "Gemini (Gem)", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA", "google"] },
-            { title: "Venice AI", url: "https://venice.ai/", tags: ["IA", "privado"] },
-            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA", "Qwen"] },
-            { title: "Chat Z.ai", url: "https://chat.z.ai/", tags: ["IA", "chat"] }
+            { title: "Gemini (Gem)", url: "https://gemini.google.com/gem/361063ffb92e", tags: ["IA","google"] },
+            { title: "Venice AI", url: "https://venice.ai/", tags: ["IA","privado"] },
+            { title: "Chat Qwen", url: "https://chat.qwen.ai/c/d8b93d57-71cf-4a17-b683-71f3fee75c0d", tags: ["IA","Qwen"] },
+            { title: "Chat Z.ai", url: "https://chat.z.ai/", tags: ["IA","chat"] }
           ]
         },
         {
           name: "💼 Trabalho e Cursos",
           links: [
-            { title: "Smry.ai", url: "https://www.smry.ai/", tags: ["IA", "resumo"] },
+            { title: "Smry.ai", url: "https://www.smry.ai/", tags: ["IA","resumo"] },
             { title: "Bolha Tools", url: "https://open.bolha.tools/", tags: ["ferramentas"] },
             { title: "Estratégia Concursos", url: "https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas", tags: ["concursos"] },
             { title: "Hotmart Club", url: "https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304", tags: ["negócios"] }
@@ -689,8 +556,9 @@
           links: [
             { title: "CPU Benchmark", url: "https://www.cpubenchmark.net/singleCompare.php", tags: ["hardware"] },
             { title: "Video Card Benchmark", url: "https://www.videocardbenchmark.net/singleCompare.php", tags: ["GPU"] },
-            { title: "ImgBB", url: "https://imgbb.com/", tags: ["imagens", "upload"] },
-            { title: "Twitter Video Downloader", url: "https://twittervideodownloader.com/", tags: ["download", "vídeo"] }
+            { title: "ImgBB", url: "https://imgbb.com/", tags: ["imagens","upload"] },
+            { title: "Twitter Video DL", url: "https://twittervideodownloader.com/", tags: ["download","vídeo"] },
+            { title: "Localhost:3000", url: "http://localhost:3000/", tags: ["dev"] }
           ]
         },
         {
@@ -704,7 +572,19 @@
           links: [
             { title: "Drogasil", url: "https://www.drogasil.com.br/", tags: ["farmácia"] },
             { title: "Medical Brasil", url: "https://medical-brasil.catalog.kyte.site/", tags: ["médico"] },
-            { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"] }
+            { title: "Paraguay Pharma", url: "https://paraguaypharmaceuticals.com/", tags: ["importados"] }
+          ]
+        },
+        {
+          name: "🔞 Adulto / Fetish",
+          links: [
+            { title: "Acompanhantes Indaiatuba", url: "https://www.photoacompanhantes.com/acompanhantes/indaiatuba", tags: ["busca"] },
+            { title: "Coomer - Erika", url: "https://coomer.st/onlyfans/user/erikasbulbasaur", tags: ["archive"] },
+            { title: "Pirataria - Explícito", url: "https://pirataria.link/explicito", tags: [] },
+            { title: "Reddit - Armpit", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble", tags: ["Reddit"] },
+            { title: "Google - Reddit Search", url: "https://www.google.com/search?q=stubble+site:reddit.com", tags: ["busca"] },
+            { title: "Google - Orgasm", url: "https://www.google.com/search?q=orgasm+site:reddit.com", tags: ["busca"] },
+            { title: "Google - Contractions", url: "https://www.google.com/search?q=contractions+site:reddit.com", tags: ["busca"] }
           ]
         },
         {
@@ -713,41 +593,40 @@
             { title: "Wish List", url: "#", tags: [] },
             { title: "HLTV", url: "https://www.hltv.org/matches", tags: ["e-sports"] },
             { title: "AES", url: "#", tags: ["segurança"] },
-            { title: "News Google", url: "https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419", tags: ["notícias"] },
-            { title: "OpenRouter - Qwen", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["IA", "modelos"] },
-            { title: "Localhost:3000", url: "http://localhost:3000/", tags: ["dev"] },
-            { title: "Grok Tasks", url: "https://grok.com/tasks", tags: ["IA", "tarefas"] }
+            { title: "News Google", url: "https://news.google.com/", tags: ["notícias"] },
+            { title: "OpenRouter", url: "https://openrouter.ai/models?max_price=0&q=qwen", tags: ["IA","modelos"] },
+            { title: "Grok Tasks", url: "https://grok.com/tasks", tags: ["IA","tarefas"] }
           ]
         }
       ]
     };
 
+    let data = JSON.parse(JSON.stringify(initialData));
+    let currentCatIndex = null;
+    let currentLinkIndex = null;
+    let isDark = false;
+    let githubConfig = { token:'', owner:'', repo:'', branch:'main' };
+
     // ===== FUNÇÕES UTILITÁRIAS =====
     function escapeHtml(text) {
-      if (!text) return '';
-      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      if(!text) return '';
+      const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
       return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    function isValidUrl(string) {
-      try { new URL(string); return true; } catch (_) { return false; }
-    }
-
-    function getFaviconUrl(url) {
+    function getFavicon(url) {
       try {
         const domain = new URL(url).hostname;
         return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-      } catch {
-        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233b82f6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
-      }
+      } catch { return ''; }
     }
 
-    function showToast(message, type = 'info') {
+    function showToast(msg, type='info') {
       const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.style.borderLeftColor = type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6';
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3000);
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      toast.style.borderLeftColor = type==='error'?'#ef4444':type==='success'?'#22c55e':'#667eea';
+      setTimeout(() => toast.style.display = 'none', 3000);
     }
 
     // ===== TEMA =====
@@ -760,21 +639,17 @@
 
     function loadTheme() {
       const saved = localStorage.getItem('theme');
-      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      if(saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme:dark)').matches)) {
         isDark = true;
         document.body.classList.add('dark');
         document.getElementById('themeBtn').textContent = '☀️';
       }
     }
 
-    // ===== GITHUB CONFIG =====
+    // ===== GITHUB =====
     function loadGitHubConfig() {
       const saved = localStorage.getItem('github_config');
-      if (saved) {
-        try {
-          githubConfig = JSON.parse(saved);
-        } catch(e) { console.warn('Erro ao carregar config GitHub', e); }
-      }
+      if(saved) githubConfig = JSON.parse(saved);
     }
 
     function saveGitHubConfig() {
@@ -784,15 +659,13 @@
         repo: document.getElementById('githubRepo').value.trim(),
         branch: document.getElementById('githubBranch').value.trim() || 'main'
       };
-      
-      if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
-        showToast('⚠️ Preencha todos os campos!', 'error');
+      if(!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+        showToast('⚠️ Preencha todos os campos!','error');
         return;
       }
-      
       localStorage.setItem('github_config', JSON.stringify(githubConfig));
       closeGitHubConfig();
-      showToast('✅ Configuração GitHub salva!', 'success');
+      showToast('✅ Configuração GitHub salva!','success');
     }
 
     function openGitHubConfig() {
@@ -807,391 +680,263 @@
       document.getElementById('githubModal').classList.remove('active');
     }
 
-    // ===== GITHUB SYNC =====
-    async function syncToGitHub() {
-      if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
-        showToast('⚠️ Configure o GitHub primeiro!', 'error');
+    async function syncGitHub() {
+      if(!githubConfig.token || !githubConfig.owner || !githubConfig.repo) {
+        showToast('⚠️ Configure o GitHub primeiro!','error');
         openGitHubConfig();
         return;
       }
 
       const btn = document.getElementById('syncBtn');
-      const originalContent = btn.innerHTML;
+      const original = btn.innerHTML;
       btn.innerHTML = '<span class="loading"></span> Sincronizando...';
       btn.disabled = true;
 
       try {
-        // 1. Get current file SHA
-        const shaResponse = await fetch(
-          `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/index.html?ref=${githubConfig.branch}`,
-          {
-            headers: {
-              'Authorization': `token ${githubConfig.token}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          }
-        );
-
+        // Get SHA
+        const shaRes = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/index.html?ref=${githubConfig.branch}`, {
+          headers: { 'Authorization': `token ${githubConfig.token}` }
+        });
+        
         let sha = null;
-        if (shaResponse.ok) {
-          const fileData = await shaResponse.json();
+        if(shaRes.ok) {
+          const fileData = await shaRes.json();
           sha = fileData.sha;
-        } else if (shaResponse.status !== 404) {
-          throw new Error('Erro ao buscar arquivo: ' + shaResponse.statusText);
         }
 
-        // 2. Get current HTML content
-        const currentHTML = document.documentElement.outerHTML;
-
-        // 3. Create/update file
-        const content = btoa(unescape(encodeURIComponent(currentHTML)));
+        // Upload
+        const html = document.documentElement.outerHTML;
+        const content = btoa(unescape(encodeURIComponent(html)));
         
-        const updateResponse = await fetch(
-          `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/index.html`,
-          {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${githubConfig.token}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `🔄 Auto-sync: ${new Date().toLocaleString('pt-BR')}`,
-              content: content,
-              branch: githubConfig.branch,
-              sha: sha || undefined
-            })
-          }
-        );
+        const res = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/index.html`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${githubConfig.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `🔄 Auto-sync: ${new Date().toLocaleString('pt-BR')}`,
+            content: content,
+            branch: githubConfig.branch,
+            sha: sha || undefined
+          })
+        });
 
-        if (!updateResponse.ok) {
-          const error = await updateResponse.json();
-          throw new Error(error.message || 'Erro ao sincronizar');
-        }
-
-        showToast('✅ HTML sincronizado no GitHub!', 'success');
+        if(!res.ok) throw new Error('Erro ao sincronizar');
         
-        // Wait a bit for GitHub Pages to update
-        setTimeout(() => {
-          showToast('🌐 Aguarde 1-2 min para o GitHub Pages atualizar', 'info');
-        }, 1000);
+        showToast('✅ HTML sincronizado no GitHub!','success');
+        setTimeout(() => showToast('🌐 Aguarde 1-2 min para o GitHub Pages atualizar','info'), 1000);
 
-      } catch (error) {
-        console.error('GitHub Sync Error:', error);
-        showToast('❌ Erro: ' + error.message, 'error');
+      } catch(err) {
+        showToast('❌ Erro: '+err.message,'error');
       } finally {
-        btn.innerHTML = originalContent;
+        btn.innerHTML = original;
         btn.disabled = false;
       }
-    }
-
-    // ===== INICIALIZAÇÃO =====
-    function initializeData() {
-      const local = localStorage.getItem('favorites_data');
-      if (local) {
-        try {
-          const parsed = JSON.parse(local);
-          if (parsed.categories && parsed.categories.length > 0) {
-            data = parsed;
-            return;
-          }
-        } catch (e) { console.warn('Erro ao carregar localStorage', e); }
-      }
-      data = JSON.parse(JSON.stringify(initialData));
-      saveLocal();
-    }
-
-    function saveLocal() {
-      localStorage.setItem('favorites_data', JSON.stringify(data));
-    }
-
-    async function loadFromSupabase() {
-      if (!supabaseClient) return;
-      try {
-        const {  result, error } = await supabaseClient.from('favoritos').select('categories').limit(1).order('created_at', { ascending: false });
-        if (error) throw error;
-        if (result && result[0] && result[0].categories) {
-          data = { categories: result[0].categories };
-          saveLocal();
-          render();
-          showToast('✅ Dados sincronizados', 'success');
-        }
-      } catch (e) {
-        console.warn('⚠️ Supabase offline:', e.message);
-      }
-    }
-
-    async function saveToSupabase() {
-      if (!supabaseClient) {
-        saveLocal();
-        return;
-      }
-      try {
-        const {  existing } = await supabaseClient.from('favoritos').select('id').limit(1);
-        if (existing && existing.length > 0) {
-          await supabaseClient.from('favoritos').update({ categories: data.categories }).eq('id', existing[0].id);
-        } else {
-          await supabaseClient.from('favoritos').insert([{ categories: data.categories }]);
-        }
-        saveLocal();
-        showToast('✅ Salvo na nuvem', 'success');
-      } catch (e) {
-        console.warn('⚠️ Erro ao salvar:', e.message);
-        saveLocal();
-        showToast('💾 Salvo localmente', 'info');
-      }
-    }
-
-    // ===== EXPORT HTML =====
-    function exportHTML() {
-      const currentHTML = document.documentElement.outerHTML;
-      const blob = new Blob([currentHTML], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `meus-favoritos-${new Date().toISOString().split('T')[0]}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('📄 HTML salvo!', 'success');
-    }
-
-    // ===== RENDERIZAÇÃO =====
-    function render() {
-      const container = document.getElementById('categories');
-      const emptyState = document.getElementById('emptyState');
-      container.innerHTML = '';
-
-      if (!data.categories || data.categories.length === 0) {
-        emptyState.classList.remove('hidden');
-        return;
-      }
-      emptyState.classList.add('hidden');
-
-      data.categories.forEach((cat, catIndex) => {
-        const card = document.createElement('div');
-        card.className = 'category-card';
-        card.innerHTML = `
-          <div class="category-header">
-            <h2 class="category-title">${escapeHtml(cat.name)}</h2>
-            <span class="category-count">(${cat.links.length})</span>
-          </div>
-          <div id="links-${catIndex}" class="links-grid" data-cat-index="${catIndex}"></div>
-          <button onclick="addLink(${catIndex})" class="btn btn-primary btn-add">
-            ➕ Adicionar Link
-          </button>
-        `;
-        container.appendChild(card);
-
-        const linksContainer = card.querySelector(`#links-${catIndex}`);
-        renderLinks(cat.links, catIndex, linksContainer);
-      });
-
-      populateCategorySelect();
-    }
-
-    function renderLinks(links, catIndex, container) {
-      container.innerHTML = '';
-      
-      links.forEach((link, linkIndex) => {
-        const item = document.createElement('div');
-        item.className = 'link-item';
-        item.draggable = true;
-        
-        const faviconUrl = getFaviconUrl(link.url);
-        
-        item.innerHTML = `
-          <div class="link-content">
-            <img src="${faviconUrl}" alt="" class="link-icon" onerror="this.style.display='none'">
-            <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="link-title" onclick="event.stopPropagation()">
-              ${escapeHtml(link.title)}
-            </a>
-          </div>
-          <div class="link-footer">
-            ${link.tags && link.tags.length ? `
-              <div class="tags-container">
-                ${link.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
-              </div>
-            ` : '<div style="flex:1;"></div>'}
-            <div class="link-actions">
-              <button class="action-btn" onclick="editLink(${catIndex}, ${linkIndex})" title="Editar">✏️</button>
-              <button class="action-btn" onclick="deleteLink(${catIndex}, ${linkIndex})" title="Excluir">🗑️</button>
-            </div>
-          </div>
-        `;
-        
-        container.appendChild(item);
-      });
-
-      new Sortable(container, {
-        group: 'links',
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        onEnd: async (evt) => {
-          const fromCat = parseInt(evt.from.dataset.catIndex);
-          const toCat = parseInt(evt.to.dataset.catIndex);
-          
-          const movedLink = data.categories[fromCat].links.splice(evt.oldIndex, 1)[0];
-          data.categories[toCat].links.splice(evt.newIndex, 0, movedLink);
-          
-          render();
-          await saveToSupabase();
-          showToast('🔄 Link movido!', 'success');
-        }
-      });
     }
 
     // ===== CRUD =====
     function addCategory() {
       const name = prompt('✨ Nome da nova categoria:');
-      if (!name || !name.trim()) return;
+      if(!name || !name.trim()) return;
       data.categories.push({ name: name.trim(), links: [] });
       render();
-      saveToSupabase();
-      showToast('📁 Categoria criada!', 'success');
+      localStorage.setItem('favorites_data', JSON.stringify(data));
+      showToast('📁 Categoria criada!','success');
     }
 
-    function addLink(catIndex) {
-      currentCatIndex = catIndex;
+    function addLink(catIdx) {
+      currentCatIndex = catIdx;
       currentLinkIndex = null;
       document.getElementById('modalTitle').textContent = '➕ Adicionar Link';
       document.getElementById('linkTitle').value = '';
       document.getElementById('linkUrl').value = '';
       document.getElementById('linkTags').value = '';
-      document.getElementById('linkCategory').value = catIndex;
+      populateCategorySelect();
+      document.getElementById('linkCategory').value = catIdx;
       document.getElementById('modal').classList.add('active');
       document.getElementById('linkTitle').focus();
     }
 
-    function editLink(catIndex, linkIndex) {
-      currentCatIndex = catIndex;
-      currentLinkIndex = linkIndex;
-      const link = data.categories[catIndex].links[linkIndex];
+    function editLink(catIdx, linkIdx) {
+      currentCatIndex = catIdx;
+      currentLinkIndex = linkIdx;
+      const link = data.categories[catIdx].links[linkIdx];
       document.getElementById('modalTitle').textContent = '✏️ Editar Link';
       document.getElementById('linkTitle').value = link.title || '';
       document.getElementById('linkUrl').value = link.url || '';
       document.getElementById('linkTags').value = link.tags ? link.tags.join(', ') : '';
-      document.getElementById('linkCategory').value = catIndex;
+      populateCategorySelect();
+      document.getElementById('linkCategory').value = catIdx;
       document.getElementById('modal').classList.add('active');
     }
 
-    async function saveLink() {
+    function saveLink() {
       const title = document.getElementById('linkTitle').value.trim();
       let url = document.getElementById('linkUrl').value.trim();
       const tagsStr = document.getElementById('linkTags').value.trim();
-      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const tags = tagsStr ? tagsStr.split(',').map(t=>t.trim()).filter(Boolean) : [];
 
-      if (!title || !url) {
-        showToast('⚠️ Título e URL obrigatórios!', 'error');
-        return;
-      }
+      if(!title || !url) { showToast('⚠️ Título e URL obrigatórios!','error'); return; }
+      if(!/^https?:\/\//i.test(url)) url = 'https://'+url;
 
-      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      if (!isValidUrl(url)) {
-        showToast('⚠️ URL inválida!', 'error');
-        return;
-      }
-
-      if (currentLinkIndex === null) {
-        data.categories[currentCatIndex].links.push({ title, url, tags });
-        showToast('✅ Link adicionado!', 'success');
+      const linkData = { title, url, tags };
+      
+      if(currentLinkIndex === null) {
+        data.categories[currentCatIndex].links.push(linkData);
+        showToast('✅ Link adicionado!','success');
       } else {
-        data.categories[currentCatIndex].links[currentLinkIndex] = { title, url, tags };
-        showToast('✅ Link atualizado!', 'success');
+        data.categories[currentCatIndex].links[currentLinkIndex] = linkData;
+        showToast('✅ Link atualizado!','success');
       }
 
       hideModal();
       render();
-      await saveToSupabase();
+      localStorage.setItem('favorites_data', JSON.stringify(data));
     }
 
-    function deleteLink(catIndex, linkIndex) {
-      if (confirm('Excluir este link?')) {
-        data.categories[catIndex].links.splice(linkIndex, 1);
+    function deleteLink(catIdx, linkIdx) {
+      if(confirm('Excluir este link?')) {
+        data.categories[catIdx].links.splice(linkIdx, 1);
         render();
-        saveToSupabase();
-        showToast('🗑️ Link excluído', 'success');
+        localStorage.setItem('favorites_data', JSON.stringify(data));
+        showToast('🗑️ Link excluído','success');
       }
     }
 
     function hideModal() {
       document.getElementById('modal').classList.remove('active');
       document.getElementById('githubModal').classList.remove('active');
-      currentCatIndex = null;
-      currentLinkIndex = null;
     }
 
-    document.getElementById('modal').addEventListener('click', (e) => {
-      if (e.target.id === 'modal') hideModal();
-    });
+    // ===== RENDERIZAÇÃO =====
+    function render() {
+      const container = document.getElementById('categories');
+      const empty = document.getElementById('emptyState');
+      container.innerHTML = '';
 
-    document.getElementById('githubModal').addEventListener('click', (e) => {
-      if (e.target.id === 'githubModal') hideModal();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') hideModal();
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        document.getElementById('searchInput').focus();
+      if(!data.categories || data.categories.length === 0) {
+        empty.style.display = 'block';
+        return;
       }
-    });
+      empty.style.display = 'none';
 
-    function filterLinks() {
-      const term = document.getElementById('searchInput').value.toLowerCase().trim();
-      let hasResults = false;
+      data.categories.forEach((cat, catIdx) => {
+        const card = document.createElement('div');
+        card.className = 'category-card';
+        card.innerHTML = `
+          <div class="category-header">
+            <span class="category-title">${escapeHtml(cat.name)}</span>
+            <span class="category-count">(${cat.links.length})</span>
+          </div>
+          <div class="links-grid" id="links-${catIdx}" data-cat="${catIdx}"></div>
+          <button class="btn btn-primary btn-add" onclick="addLink(${catIdx})">➕ Adicionar Link</button>
+        `;
+        container.appendChild(card);
 
-      document.querySelectorAll('.category-card').forEach(card => {
-        const title = card.querySelector('.category-title')?.textContent.toLowerCase() || '';
-        const items = card.querySelectorAll('.link-item');
-        let categoryVisible = title.includes(term);
-
-        items.forEach(item => {
-          const text = item.textContent.toLowerCase();
-          const match = term === '' || text.includes(term);
-          item.style.display = match ? 'flex' : 'none';
-          if (match) {
-            categoryVisible = true;
-            hasResults = true;
-          }
+        const grid = card.querySelector(`#links-${catIdx}`);
+        cat.links.forEach((link, linkIdx) => {
+          const item = document.createElement('div');
+          item.className = 'link-item';
+          item.draggable = true;
+          item.innerHTML = `
+            <div class="link-content">
+              <img src="${getFavicon(link.url)}" class="link-icon" onerror="this.style.display='none'">
+              <a href="${escapeHtml(link.url)}" target="_blank" class="link-title">${escapeHtml(link.title)}</a>
+            </div>
+            <div class="link-footer">
+              <div class="tags-container">
+                ${(link.tags||[]).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+              </div>
+              <div class="link-actions">
+                <button class="action-btn" onclick="editLink(${catIdx},${linkIdx})">✏️</button>
+                <button class="action-btn" onclick="deleteLink(${catIdx},${linkIdx})">🗑️</button>
+              </div>
+            </div>
+          `;
+          
+          item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text', JSON.stringify({cat:catIdx,link:linkIdx}));
+          });
+          
+          grid.appendChild(item);
         });
 
-        card.style.display = categoryVisible ? 'block' : 'none';
+        // Drop zone
+        grid.addEventListener('dragover', e => e.preventDefault());
+        grid.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const from = JSON.parse(e.dataTransfer.getData('text'));
+          const toCat = parseInt(grid.dataset.cat);
+          
+          if(from.cat !== toCat || from.link !== undefined) {
+            const link = data.categories[from.cat].links.splice(from.link, 1)[0];
+            data.categories[toCat].links.push(link);
+            render();
+            localStorage.setItem('favorites_data', JSON.stringify(data));
+            showToast('🔄 Link movido!','success');
+          }
+        });
       });
-
-      const emptyState = document.getElementById('emptyState');
-      if (term !== '' && !hasResults) {
-        emptyState.classList.remove('hidden');
-        emptyState.querySelector('p').textContent = '🔍 Nenhum resultado';
-      } else if (term === '') {
-        emptyState.classList.add('hidden');
-      }
     }
 
     function populateCategorySelect() {
-      const select = document.getElementById('linkCategory');
-      select.innerHTML = data.categories.map((c, i) => 
-        `<option value="${i}">${escapeHtml(c.name)}</option>`
-      ).join('');
+      const sel = document.getElementById('linkCategory');
+      sel.innerHTML = data.categories.map((c,i) => `<option value="${i}">${escapeHtml(c.name)}</option>`).join('');
     }
 
-    function exportData() {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+    function filterLinks() {
+      const term = document.getElementById('searchInput').value.toLowerCase().trim();
+      document.querySelectorAll('.category-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(term) ? 'block' : 'none';
+      });
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `favoritos-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `favoritos-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
-      URL.revokeObjectURL(url);
-      showToast('💾 JSON exportado!', 'success');
+      showToast('💾 JSON exportado!','success');
+    }
+
+    function saveHTML() {
+      const html = document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `meus-favoritos-${new Date().toISOString().split('T')[0]}.html`;
+      a.click();
+      showToast('📄 HTML salvo!','success');
     }
 
     // ===== INICIALIZAÇÃO =====
     window.addEventListener('DOMContentLoaded', () => {
       loadTheme();
       loadGitHubConfig();
-      initializeData();
+      
+      const saved = localStorage.getItem('favorites_data');
+      if(saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if(parsed.categories && parsed.categories.length > 0) data = parsed;
+        } catch(e) { console.warn('Erro ao carregar dados',e); }
+      }
+      
       render();
-      setTimeout(() => loadFromSupabase(), 200);
+      
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Escape') hideModal();
+        if((e.ctrlKey||e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          document.getElementById('searchInput').focus();
+        }
+      });
+      
+      document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') hideModal(); });
+      document.getElementById('githubModal').addEventListener('click', e => { if(e.target.id==='githubModal') hideModal(); });
     });
   </script>
 </body>
