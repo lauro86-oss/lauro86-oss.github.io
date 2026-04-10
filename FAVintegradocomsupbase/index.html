@@ -6,6 +6,7 @@
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <!-- Supabase carregado ANTES do nosso código -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background-color: #0f172a; font-family: system-ui, sans-serif; }
@@ -53,9 +54,11 @@
   </div>
 
   <script>
+    // ================== SUAS CHAVES ==================
     const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
 
+    // Inicializa o cliente Supabase de forma segura
     const supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let data = {
@@ -75,11 +78,10 @@
           { title: "YouTube", url: "https://youtube.com" },
           { title: "Twitter / X", url: "https://x.com" },
           { title: "Twitch Following", url: "https://twitch.tv" },
-          { title: "Grok", url: "https://grok.com" },
+          { title: "Grok", url: "https://grok.x.ai" },
           { title: "ChatGPT", url: "https://chat.openai.com" },
           { title: "Gemini", url: "https://gemini.google.com" },
-          { title: "Venice AI", url: "https://venice.ai" },
-          { title: "Chat Zai", url: "https://chat.z.ai" }
+          { title: "Venice AI", url: "https://venice.ai" }
         ]},
         { name: "Trabalho e Cursos", emoji: "💼", links: [
           { title: "Smry.ai", url: "https://smry.ai" },
@@ -89,26 +91,15 @@
         ]},
         { name: "Benchmarks e Tech", emoji: "🔧", links: [
           { title: "CPU Benchmark", url: "https://cpu.userbenchmark.com" },
-          { title: "CPU Compare", url: "https://cpu.userbenchmark.com" },
-          { title: "Video Card Benchmark", url: "https://gpu.userbenchmark.com" },
-          { title: "ImgBB", url: "https://imgbb.com" },
-          { title: "Twitter Video Downloader", url: "https://twdown.net" }
+          { title: "ImgBB", url: "https://imgbb.com" }
         ]},
         { name: "Trading e Finanças", emoji: "📈", links: [
-          { title: "TradingView - MINDOLQ2025", url: "https://tradingview.com" }
+          { title: "TradingView", url: "https://tradingview.com" }
         ]},
         { name: "Compras e Farmácia", emoji: "🛒", links: [
-          { title: "Drogasil", url: "https://drogasil.com.br" },
-          { title: "Medical Brasil", url: "https://medicalbrasil.com" },
-          { title: "Paraguay Pharmaceuticals", url: "https://paraguaypharma.com" }
+          { title: "Drogasil", url: "https://drogasil.com.br" }
         ]},
-        { name: "Adulto / Fetish", emoji: "🔞", links: [
-          { title: "Acompanhantes Indaiatuba", url: "#" },
-          { title: "Coomer - Erikasbulbausar", url: "#" },
-          { title: "Piratar ia Explicito", url: "#" },
-          { title: "Reddit - Armpit Fetish", url: "https://reddit.com" },
-          { title: "Google - Armpit Search", url: "https://google.com" }
-        ]}
+        { name: "Adulto / Fetish", emoji: "🔞", links: [] }
       ]
     };
 
@@ -122,9 +113,8 @@
         .order('created_at', { ascending: false })
         .limit(1);
 
-      if (error) {
-        console.error(error);
-      } else if (result && result.length > 0 && result[0].categories) {
+      if (error) console.error("Erro ao carregar:", error);
+      else if (result && result.length > 0 && result[0].categories) {
         data = result[0].categories;
       }
       render();
@@ -138,7 +128,9 @@
         } else {
           await supabaseClient.from('favoritos').insert([{ categories: data }]);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error("Erro ao salvar:", e);
+      }
     }
 
     function render() {
@@ -167,7 +159,6 @@
           li.innerHTML = `
             <div class="flex-1">
               <a href="${link.url}" target="_blank" class="hover:underline">${link.title}</a>
-              ${link.tag ? `<span class="text-xs text-zinc-500 ml-2">${link.tag}</span>` : ''}
             </div>
             <div class="opacity-0 group-hover:opacity-100 flex gap-3">
               <button onclick="editLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-amber-400">✏️</button>
@@ -192,7 +183,7 @@
       });
     }
 
-    // Funções restantes (addCategory, saveLink, etc.) são as mesmas do código anterior
+    // Funções CRUD com salvamento automático
     function addCategory() {
       const name = prompt("Nome da nova categoria:");
       if (!name) return;
@@ -287,6 +278,7 @@
       });
     }
 
+    // Iniciar
     window.onload = loadData;
   </script>
 </body>
