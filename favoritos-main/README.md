@@ -1,0 +1,2 @@
+# favoritos
+Meus favoritos rápidos

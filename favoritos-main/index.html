@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Favoritos Rápidos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: white;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin: 30px 0 50px;
+      font-size: 2.8em;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      background: rgba(255,255,255,0.18);
+      box-shadow: 0 20px 35px rgba(0,0,0,0.4);
+    }
+    .card h3 {
+      margin: 0 0 18px 0;
+      font-size: 1.45em;
+      color: #60a5fa;
+      border-bottom: 2px solid rgba(96,165,250,0.3);
+      padding-bottom: 8px;
+    }
+    .card a {
+      color: #e0f2fe;
+      text-decoration: none;
+      display: block;
+      padding: 11px 0;
+      font-size: 1.08em;
+      transition: 0.2s;
+    }
+    .card a:hover {
+      color: #bae6fd;
+      padding-left: 10px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      opacity: 0.75;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⭐ Meus Favoritos Rápidos</h1>
+    
+    <div class="grid">
+
+      <div class="card">
+        <h3>📧 Google & Comunicação</h3>
+        <a href="https://mail.google.com" target="_blank">Gmail</a>
+        <a href="https://accounts.google.com" target="_blank">Google Account</a>
+        <a href="https://web.whatsapp.com/" target="_blank">WhatsApp Web</a>
+        <a href="https://app.slack.com/client/T04MQQC5BFS/C04M3J8JTA8" target="_blank">Slack</a>
+      </div>
+
+      <div class="card">
+        <h3>☁️ Armazenamento e Senhas</h3>
+        <a href="https://onedrive.live.com/?id=root&cid=D86F7DD1A263F7AC" target="_blank">OneDrive</a>
+        <a href="https://passwords.google.com/" target="_blank">Google Passwords</a>
+        <a href="https://feedly.com/" target="_blank">Feedly</a>
+      </div>
+
+      <div class="card">
+        <h3>🎥 Entretenimento</h3>
+        <a href="https://www.youtube.com/" target="_blank">YouTube</a>
+        <a href="https://twitter.com/home" target="_blank">Twitter / X</a>
+        <a href="https://www.twitch.tv/directory/following" target="_blank">Twitch Following</a>
+        <a href="https://grok.com/" target="_blank">Grok</a>
+        <a href="https://chat.openai.com/" target="_blank">ChatGPT</a>
+        <a href="https://gemini.google.com/" target="_blank">Gemini</a>
+        <a href="https://venice.ai/" target="_blank">Venice AI</a>
+        <a href="https://chat.z.ai/" target="_blank">Chat Z.ai</a>
+      </div>
+
+      <div class="card">
+        <h3>💼 Trabalho e Cursos</h3>
+        <a href="https://www.smry.ai/" target="_blank">Smry.ai</a>
+        <a href="https://www.estrategiaconcursos.com.br/app/dashboard/assinaturas" target="_blank">Estratégia Concursos</a>
+        <a href="https://open.bolha.tools/" target="_blank">Bolha Tools</a>
+        <a href="https://hotmart.com/pt-br/club/excelencia-negocios-digitais/products/4254304" target="_blank">Hotmart Club</a>
+      </div>
+
+      <div class="card">
+        <h3>🔧 Benchmarks e Tech</h3>
+        <a href="https://www.cpubenchmark.net/singleCompare.php" target="_blank">CPU Benchmark</a>
+        <a href="https://www.cpubenchmark.net/compare/5238vs5437vs3947vs3425/Intel-i7-13700HX-vs-AMD-Ryzen-7-7745HX-vs-Intel-i7-11700-vs-Intel-i7-9750H" target="_blank">CPU Compare (13700HX vs 7745HX)</a>
+        <a href="https://www.videocardbenchmark.net/singleCompare.php" target="_blank">Video Card Benchmark</a>
+        <a href="https://imgbb.com/" target="_blank">ImgBB (Upload Imagens)</a>
+        <a href="https://twittervideodownloader.com/" target="_blank">Twitter Video Downloader</a>
+      </div>
+
+      <div class="card">
+        <h3>📈 Trading e Finanças</h3>
+        <a href="https://br.tradingview.com/chart/h7SmVyyj/?symbol=ACTIVTRADES%3AMINDOLQ2025" target="_blank">TradingView - MINDOLQ2025</a>
+      </div>
+
+      <div class="card">
+        <h3>🛒 Compras e Farmácia</h3>
+        <a href="https://www.drogasil.com.br/" target="_blank">Drogasil</a>
+        <a href="https://medical-brasil.catalog.kyte.site/" target="_blank">Medical Brasil</a>
+        <a href="https://paraguaypharmaceuticals.com/" target="_blank">Paraguay Pharmaceuticals</a>
+      </div>
+
+      <div class="card">
+        <h3>🔞 Conteúdo Adulto / Fetish</h3>
+        <a href="https://www.photoacompanhantes.com/acompanhantes/indaiatuba" target="_blank">Acompanhantes Indaiatuba</a>
+        <a href="https://coomer.st/onlyfans/user/erikasbulbasaur" target="_blank">Coomer - Erikasbulbasaur</a>
+        <a href="https://pirataria.link/explicito" target="_blank">Pirataria Explicito</a>
+        <a href="https://old.reddit.com/r/armpitfetish/search?q=stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth&restrict_sr=on&include_over_18=on&sort=new&t=all" target="_blank">Reddit - Armpit Fetish</a>
+        <a href="https://www.google.com/search?q=(stubble+OR+prickly+OR+%22stubble+pits%22+OR+%22prickly+pits%22+OR+%22short+stubble%22+OR+regrowth+OR+stubby+OR+%22post+shave%22+OR+%22regrowth+tease%22)+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitCommunity+OR+site%3Areddit.com%2Fr%2Farmpitsforbetas+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Funderarms+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FArmpitworship+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2Farmpitfetish+OR+site%3Areddit.com%2Fr%2FArmpitsGoneWild+OR+site%3Areddit.com%2Fr%2Farmpitvoyeur+OR+site%3Areddit.com%2Fr%2FArmsUp+OR+site%3Areddit.com%2Fr%2FAsianArmpits+OR+site%3Areddit.com%2Fr%2FAthleteArmpits+OR+site%3Areddit.com%2Fr%2Fbollyarm+OR+site%3Areddit.com%2Fr%2FHairyArmpits+OR+site%3Areddit.com%2Fr%2FPricklyPits+OR+site%3Areddit.com%2Fr%2Frazorfree+OR+site%3Areddit.com%2Fr%2FFuzzyPeeks+OR+site%3Areddit.com%2Fr%2FPussyStubble" target="_blank">Google - Armpit Search</a>
+        <a href="https://www.google.com/search?num=12&sa=X&sca_esv=0c0ded2c55dfde36&sxsrf=ANbL-n7xdigbqQiiPD10RSKzDP3jMEjBJg:1772642174638&udm=2&fbs=ADc_l-acAb_3MMOAUx0zmbUpgBqRhoh-GdRq1TXwdBZi-jK_e7MLtGyZplNOanr4pJI6fcRWRflfvA46P24vuvlR5LA4UeDj6cNhVO26hWyYZeoAIkzZwISnjp0_538HOF4re5IpqytNkQFpy-r3ESVBukGj-HtOdwisMAfMwts8HB-BO8OxZmCTo3uXjQs81KFOUQOKxz3RuNMXBRRHwsU5o0jvFi6YMQ&q=(%22orgasmic+contractions%22+OR+%22vaginal+contractions%22+OR+pulsing+OR+quiver+OR+%22contractions+%40%22+OR+%22pulsing+orgasm%22+OR+%22close+up+contractions%22)+site:reddit.com/r/orgasmiccontractions+OR+site:reddit.com/r/pulsing+OR+site:reddit.com/r/quiver+OR+site:reddit.com/r/rearvieworgasms+OR+site:reddit.com/r/Orgasms+OR+site:reddit.com/r/shesstillcumming+OR+site:reddit.com/r/shecame+OR+site:reddit.com/r/gettingherselfoff+OR+site:reddit.com/r/WatchHerMelt" target="_blank">Google - Orgasm Contractions</a>
+      </div>
+
+      <div class="card">
+        <h3>⚽ Outros</h3>
+        <a href="https://www.hltv.org/matches" target="_blank">HLTV - CS Matches</a>
+        <a href="https://news.google.com/home?hl=pt-BR&gl=BR&ceid=BR:pt-419" target="_blank">Google News</a>
+        <a href="https://grok.com/tasks" target="_blank">Grok Tasks</a>
+        <a href="http://localhost:3000/" target="_blank">Localhost:3000</a>
+        <a href="https://wish.com" target="_blank">Wish List</a>
+        <a href="https://www.photoacompanhantes.com/acompanhantes/indaiatuba" target="_blank">Acompanhantes Indaiatuba</a>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <p>Meus Atalhos Rápidos • Hospedado no GitHub Pages</p>
+      <p>Atualize sempre que quiser adicionar ou remover links</p>
+    </div>
+  </div>
+</body>
+</html>
