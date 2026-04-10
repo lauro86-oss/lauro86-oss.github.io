@@ -9,28 +9,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { background-color: #0f172a; font-family: system-ui, sans-serif; }
-    .card { background-color: #1e2937; border-radius: 16px; }
-    .category-title { font-size: 1.25rem; font-weight: 600; }
-    .link-item { transition: background 0.2s; }
+    .card { background-color: #1e2937; border-radius: 16px; padding: 20px; }
     .link-item:hover { background-color: #334155; }
   </style>
 </head>
-<body class="text-zinc-200 min-h-screen pb-12">
+<body class="text-zinc-200 min-h-screen">
   <div class="max-w-6xl mx-auto p-6">
 
-    <!-- Título principal -->
     <div class="text-center mb-10">
       <h1 class="text-5xl font-bold flex items-center justify-center gap-3">
         ⭐ Meus Favoritos Rápidos
       </h1>
     </div>
 
-    <!-- Botões de ação -->
-    <div class="flex flex-wrap gap-4 justify-center mb-12">
-      <button onclick="addCategory()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl flex items-center gap-2 font-medium">
-        <i class="fas fa-plus"></i> Nova Categoria
+    <div class="flex flex-wrap gap-4 justify-center mb-10">
+      <button onclick="addCategory()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-medium flex items-center gap-2">
+        Nova Categoria
       </button>
-      <button onclick="clearAll()" class="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-2xl flex items-center gap-2">
+      <button onclick="clearAll()" class="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-2xl font-medium flex items-center gap-2">
         🗑️ Limpar Tudo
       </button>
     </div>
@@ -57,7 +53,6 @@
   </div>
 
   <script>
-    // Suas chaves
     const SUPABASE_URL = 'https://pdjseeawiwprvdajbvsk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_x6Qj122dzY-CHh1-pOa1rw_JEsMtNux';
 
@@ -68,17 +63,11 @@
     let currentLinkIndex = null;
 
     async function loadData() {
-      const { data: result, error } = await supabase
-        .from('favoritos')
-        .select('categories')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
+      const { data: result, error } = await supabase.from('favoritos').select('categories').limit(1).order('created_at', { ascending: false });
       if (error) {
-        alert("Erro ao carregar do Supabase. Verifique a tabela.");
+        alert("Erro ao conectar com Supabase. Verifique a tabela 'favoritos'.");
         return;
       }
-
       if (result && result.length > 0 && result[0].categories) {
         data = result[0].categories;
       } else {
@@ -105,39 +94,36 @@
 
       data.categories.forEach((cat, catIndex) => {
         const card = document.createElement("div");
-        card.className = "card p-6 h-full flex flex-col";
+        card.className = "card";
         card.innerHTML = `
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="category-title flex items-center gap-2">
-              ${cat.emoji || '📁'} ${cat.name}
-            </h2>
-            <div class="flex gap-2">
-              <button onclick="addLink(${catIndex}); event.stopImmediatePropagation()" class="text-blue-400 hover:text-white text-xl">➕</button>
-              <button onclick="deleteCategory(${catIndex}); event.stopImmediatePropagation()" class="text-red-400 hover:text-white text-xl">🗑️</button>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">${cat.emoji || '📁'} ${cat.name}</h2>
+            <div>
+              <button onclick="addLink(${catIndex}); event.stopImmediatePropagation()" class="text-blue-400 hover:text-white text-2xl mr-2">➕</button>
+              <button onclick="deleteCategory(${catIndex}); event.stopImmediatePropagation()" class="text-red-400 hover:text-white text-2xl">🗑️</button>
             </div>
           </div>
-          <ul id="list-${catIndex}" class="flex-1 space-y-2"></ul>
+          <ul id="list-${catIndex}" class="space-y-1"></ul>
         `;
         container.appendChild(card);
 
         const ul = card.querySelector(`#list-${catIndex}`);
         cat.links.forEach((link, linkIndex) => {
           const li = document.createElement("li");
-          li.className = "link-item flex items-center justify-between px-4 py-3 rounded-xl group cursor-grab";
+          li.className = "link-item px-4 py-3 rounded-xl flex justify-between items-center group cursor-grab";
           li.innerHTML = `
-            <div class="flex-1 min-w-0">
-              <a href="${link.url}" target="_blank" class="hover:underline block truncate">${link.title}</a>
-              ${link.tag ? `<span class="text-xs text-zinc-500 block">${link.tag}</span>` : ''}
+            <div class="flex-1">
+              <a href="${link.url}" target="_blank" class="hover:underline">${link.title}</a>
+              ${link.tag ? `<span class="text-xs text-zinc-500 ml-2">${link.tag}</span>` : ''}
             </div>
-            <div class="flex gap-3 opacity-0 group-hover:opacity-100">
-              <button onclick="editLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-amber-400">✏️</button>
-              <button onclick="deleteLink(${catIndex}, ${linkIndex}); event.stopImmediatePropagation()" class="text-red-400">🗑️</button>
+            <div class="opacity-0 group-hover:opacity-100 flex gap-3">
+              <button onclick="editLink(${catIndex},${linkIndex}); event.stopImmediatePropagation()" class="text-amber-400">✏️</button>
+              <button onclick="deleteLink(${catIndex},${linkIndex}); event.stopImmediatePropagation()" class="text-red-400">🗑️</button>
             </div>
           `;
           ul.appendChild(li);
         });
 
-        // Drag and drop
         new Sortable(ul, {
           group: "links",
           animation: 150,
@@ -153,18 +139,18 @@
       });
     }
 
-    // Funções CRUD com salvamento automático
+    // Funções com salvamento automático
     function addCategory() {
       const name = prompt("Nome da nova categoria:");
       if (!name) return;
-      const emoji = prompt("Emoji da categoria (ex: 🤖):", "📁");
+      const emoji = prompt("Emoji (ex: 🤖):", "📁");
       data.categories.push({ name: name.trim(), emoji: emoji || "📁", links: [] });
       render();
       saveToSupabase();
     }
 
     function deleteCategory(index) {
-      if (confirm("Excluir esta categoria?")) {
+      if (confirm("Excluir categoria e todos os links?")) {
         data.categories.splice(index, 1);
         render();
         saveToSupabase();
@@ -197,7 +183,7 @@
       const url = document.getElementById("linkUrl").value.trim();
       const tag = document.getElementById("linkTag").value.trim();
 
-      if (!title || !url) return alert("Título e URL obrigatórios!");
+      if (!title || !url) return alert("Título e URL são obrigatórios!");
 
       if (currentLinkIndex === null) {
         data.categories[currentCatIndex].links.push({ title, url, tag });
@@ -223,7 +209,7 @@
     }
 
     function clearAll() {
-      if (confirm("Apagar TODOS os favoritos?")) {
+      if (confirm("Apagar TODOS os favoritos permanentemente?")) {
         data = { categories: [] };
         render();
         saveToSupabase();
@@ -233,18 +219,18 @@
     function filterLinks() {
       const term = document.getElementById("search").value.toLowerCase().trim();
       document.querySelectorAll(".card").forEach(card => {
-        const title = card.querySelector(".category-title").textContent.toLowerCase();
-        const links = card.querySelectorAll("li");
-        let visible = title.includes(term);
+        const catTitle = card.querySelector("h2").textContent.toLowerCase();
+        const links = card.querySelectorAll(".link-item");
+        let show = catTitle.includes(term);
         links.forEach(li => {
           if (li.textContent.toLowerCase().includes(term)) {
             li.style.display = "flex";
-            visible = true;
+            show = true;
           } else {
             li.style.display = "none";
           }
         });
-        card.style.display = visible ? "block" : "none";
+        card.style.display = show ? "block" : "none";
       });
     }
 
