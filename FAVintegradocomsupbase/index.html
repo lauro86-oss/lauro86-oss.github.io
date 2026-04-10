@@ -5,26 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meus Favoritos Rápidos</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#7c3aed',
+            secondary: '#a78bfa',
+            bg: '#0f172a',
+            card: '#1e293b',
+            'card-hover': '#334155'
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
     
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 16px;
     }
     
     body.dark {
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     }
     
-    .header {
+    .container {
       max-width: 1400px;
-      margin: 0 auto 30px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
       background: rgba(255,255,255,0.95);
-      padding: 20px;
       border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
@@ -37,36 +64,38 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
     
     .title {
-      font-size: 2rem;
-      font-weight: bold;
+      font-size: clamp(1.25rem, 4vw, 2rem);
+      font-weight: 700;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .buttons {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
     
     .btn {
-      padding: 10px 18px;
+      padding: 8px 14px;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.3s;
+      font-size: 0.85rem;
+      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.9rem;
+      white-space: nowrap;
     }
     
     .btn-primary {
@@ -102,9 +131,15 @@
       box-shadow: 0 4px 12px rgba(34,197,94,0.4);
     }
     
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+    
     .search-box {
       position: relative;
-      max-width: 600px;
+      width: 100%;
+      max-width: 100%;
     }
     
     .search-box input {
@@ -112,7 +147,7 @@
       padding: 12px 20px 12px 45px;
       border: 2px solid #e2e8f0;
       border-radius: 12px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       transition: all 0.3s;
     }
     
@@ -133,34 +168,53 @@
       top: 50%;
       transform: translateY(-50%);
       color: #94a3b8;
+      font-size: 1.1rem;
     }
     
+    /* Grid Responsivo */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-      max-width: 1400px;
-      margin: 0 auto;
+      gap: 16px;
+      /* Padrão mobile: 1 coluna */
+      grid-template-columns: 1fr;
     }
     
-    @media (max-width: 640px) {
-      .grid-container { grid-template-columns: 1fr; }
+    /* Tablet pequeno: 2 colunas */
+    @media (min-width: 640px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
     
-    @media (min-width: 641px) and (max-width: 960px) {
-      .grid-container { grid-template-columns: repeat(2, 1fr); }
+    /* Tablet grande: 3 colunas */
+    @media (min-width: 768px) {
+      .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     
-    @media (min-width: 961px) and (max-width: 1280px) {
-      .grid-container { grid-template-columns: repeat(3, 1fr); }
+    /* Desktop pequeno: 4 colunas */
+    @media (min-width: 1024px) {
+      .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
     
+    /* Desktop grande: 5 colunas */
+    @media (min-width: 1280px) {
+      .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+    
+    /* Card de categoria */
     .category-card {
       background: rgba(255,255,255,0.95);
       border-radius: 16px;
-      padding: 18px;
+      padding: 16px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      transition: transform 0.3s;
+      transition: all 0.3s;
+      overflow: hidden; /* Impede que conteúdo vaze */
     }
     
     body.dark .category-card {
@@ -176,8 +230,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
       border-bottom: 2px solid #e2e8f0;
     }
     
@@ -186,9 +240,11 @@
     }
     
     .category-title {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #1e293b;
+      word-break: break-word;
+      hyphens: auto;
     }
     
     body.dark .category-title {
@@ -196,20 +252,27 @@
     }
     
     .category-count {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #94a3b8;
+      flex-shrink: 0;
+      margin-left: 8px;
     }
     
+    /* Grid de links dentro da categoria */
     .links-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
     
+    /* Em telas muito pequenas, 1 coluna */
     @media (max-width: 480px) {
-      .links-grid { grid-template-columns: 1fr; }
+      .links-grid {
+        grid-template-columns: 1fr;
+      }
     }
     
+    /* Item de link */
     .link-item {
       background: #f8fafc;
       border-radius: 10px;
@@ -220,6 +283,7 @@
       cursor: grab;
       transition: all 0.2s;
       border: 1px solid transparent;
+      overflow: hidden; /* Impede que conteúdo vaze */
     }
     
     body.dark .link-item {
@@ -240,6 +304,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0; /* Permite que o flex filho encolha */
     }
     
     .link-icon {
@@ -253,10 +318,12 @@
       color: #3b82f6;
       text-decoration: none;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      /* Tratamento de texto longo */
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0;
       flex: 1;
     }
     
@@ -280,6 +347,7 @@
       gap: 4px;
       flex-wrap: wrap;
       flex: 1;
+      min-width: 0;
     }
     
     .tag {
@@ -289,6 +357,10 @@
       background: #dbeafe;
       color: #1e40af;
       font-weight: 500;
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     body.dark .tag {
@@ -299,6 +371,7 @@
     .link-actions {
       display: flex;
       gap: 4px;
+      flex-shrink: 0;
     }
     
     .action-btn {
@@ -308,6 +381,7 @@
       font-size: 0.9rem;
       opacity: 0.6;
       transition: opacity 0.2s;
+      padding: 2px;
     }
     
     .action-btn:hover {
@@ -319,8 +393,10 @@
       margin-top: 12px;
       padding: 10px;
       justify-content: center;
+      font-size: 0.85rem;
     }
     
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -338,7 +414,7 @@
     
     .modal-content {
       background: white;
-      padding: 30px;
+      padding: 24px;
       border-radius: 16px;
       width: 100%;
       max-width: 500px;
@@ -380,6 +456,7 @@
       color: #cbd5e1;
     }
     
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -391,6 +468,8 @@
       z-index: 200;
       animation: slideIn 0.3s ease;
       border-left: 4px solid #667eea;
+      max-width: 90vw;
+      word-wrap: break-word;
     }
     
     body.dark .toast {
@@ -424,47 +503,57 @@
       grid-column: 1 / -1;
     }
     
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid white;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 0.8s linear infinite;
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+      width: 8px;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.3);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.5);
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div class="header-top">
-      <h1 class="title">⭐ Meus Favoritos</h1>
-      <div class="buttons">
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-        <button class="btn btn-primary" onclick="addCategory()">✨ Nova Categoria</button>
-        <button class="btn btn-secondary" onclick="exportJSON()">💾 JSON</button>
-        <button class="btn btn-secondary" onclick="saveHTML()">📄 Salvar HTML</button>
-        <button class="btn btn-success" onclick="syncGitHub()" id="syncBtn">🔄 Sincronizar GitHub</button>
-        <button class="btn btn-secondary" onclick="openGitHubConfig()">⚙️</button>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <h1 class="title">⭐ Meus Favoritos Rápidos</h1>
+        <div class="buttons">
+          <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Alternar tema">🌙</button>
+          <button class="btn btn-primary" onclick="addCategory()">✨ Nova Categoria</button>
+          <button class="btn btn-danger" onclick="clearAll()">🗑️ Limpar Tudo</button>
+          <button class="btn btn-secondary" onclick="exportJSON()">💾 JSON</button>
+          <button class="btn btn-secondary" onclick="saveHTML()">📄 Salvar HTML</button>
+          <button class="btn btn-success" onclick="syncGitHub()" id="syncBtn">🔄 GitHub</button>
+          <button class="btn btn-secondary" onclick="openGitHubConfig()">⚙️</button>
+        </div>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
       </div>
     </div>
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Buscar links, categorias ou tags..." onkeyup="filterLinks()">
-    </div>
-  </div>
 
-  <div id="categories" class="grid-container"></div>
-  
-  <div id="emptyState" class="empty-state" style="display:none;">
-    <div style="font-size:4rem;margin-bottom:15px;">📭</div>
-    <p style="font-size:1.3rem;margin-bottom:15px;">Nenhum favorito ainda</p>
-    <button class="btn btn-primary" onclick="addCategory()">✨ Criar Primeira Categoria</button>
+    <!-- Grid de Categorias -->
+    <div id="categories" class="grid-container"></div>
+    
+    <!-- Estado Vazio -->
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <div style="font-size:4rem;margin-bottom:15px;">📭</div>
+      <p style="font-size:1.3rem;margin-bottom:15px;">Nenhum favorito ainda</p>
+      <button class="btn btn-primary" onclick="addCategory()">✨ Criar Primeira Categoria</button>
+    </div>
   </div>
 
   <!-- Modal Adicionar/Editar Link -->
@@ -582,9 +671,9 @@
             { title: "Coomer - Erika", url: "https://coomer.st/onlyfans/user/erikasbulbasaur", tags: ["archive"] },
             { title: "Pirataria - Explícito", url: "https://pirataria.link/explicito", tags: [] },
             { title: "Reddit - Armpit", url: "https://old.reddit.com/r/armpitfetish/search?q=stubble", tags: ["Reddit"] },
-            { title: "Google - Reddit Search", url: "https://www.google.com/search?q=stubble+site:reddit.com", tags: ["busca"] },
-            { title: "Google - Orgasm", url: "https://www.google.com/search?q=orgasm+site:reddit.com", tags: ["busca"] },
-            { title: "Google - Contractions", url: "https://www.google.com/search?q=contractions+site:reddit.com", tags: ["busca"] }
+            { title: "Google: Stubble/Prickly Reddit", url: "https://www.google.com/search?q=stubble+site:reddit.com", tags: ["busca"] },
+            { title: "Google: Orgasm Reddit", url: "https://www.google.com/search?q=orgasm+site:reddit.com", tags: ["busca"] },
+            { title: "Google: Contractions", url: "https://www.google.com/search?q=contractions+site:reddit.com", tags: ["busca"] }
           ]
         },
         {
@@ -693,7 +782,6 @@
       btn.disabled = true;
 
       try {
-        // Get SHA
         const shaRes = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/index.html?ref=${githubConfig.branch}`, {
           headers: { 'Authorization': `token ${githubConfig.token}` }
         });
@@ -704,7 +792,6 @@
           sha = fileData.sha;
         }
 
-        // Upload
         const html = document.documentElement.outerHTML;
         const content = btoa(unescape(encodeURIComponent(html)));
         
@@ -804,6 +891,16 @@
       }
     }
 
+    function clearAll() {
+      if(confirm('🚨 ATENÇÃO: Isso apagará TODOS os favoritos permanentemente. Continuar?') &&
+         confirm('✅ Confirmar exclusão total?')) {
+        data = { categories: [] };
+        render();
+        localStorage.setItem('favorites_data', JSON.stringify(data));
+        showToast('🗑️ Todos os dados foram limpos','success');
+      }
+    }
+
     function hideModal() {
       document.getElementById('modal').classList.remove('active');
       document.getElementById('githubModal').classList.remove('active');
@@ -842,15 +939,15 @@
           item.innerHTML = `
             <div class="link-content">
               <img src="${getFavicon(link.url)}" class="link-icon" onerror="this.style.display='none'">
-              <a href="${escapeHtml(link.url)}" target="_blank" class="link-title">${escapeHtml(link.title)}</a>
+              <a href="${escapeHtml(link.url)}" target="_blank" class="link-title" title="${escapeHtml(link.title)}">${escapeHtml(link.title)}</a>
             </div>
             <div class="link-footer">
               <div class="tags-container">
                 ${(link.tags||[]).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
               </div>
               <div class="link-actions">
-                <button class="action-btn" onclick="editLink(${catIdx},${linkIdx})">✏️</button>
-                <button class="action-btn" onclick="deleteLink(${catIdx},${linkIdx})">🗑️</button>
+                <button class="action-btn" onclick="editLink(${catIdx},${linkIdx})" title="Editar">✏️</button>
+                <button class="action-btn" onclick="deleteLink(${catIdx},${linkIdx})" title="Excluir">🗑️</button>
               </div>
             </div>
           `;
