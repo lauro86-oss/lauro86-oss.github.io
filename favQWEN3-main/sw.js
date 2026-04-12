@@ -1,54 +1,61 @@
-// sw.js - Service Worker para favQWEN3
-const CACHE_NAME = 'favQWEN3-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+// Service Worker para cache offline básico
+const CACHE_NAME = 'favoritos-v1.1';
+const urlsToCache = [
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './manifest.json',
+    'https://www.google.com/s2/favicons?domain=google.com&sz=64'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((names) => 
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
-    )
-  );
-  clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  // Estratégia: Cache-first para assets, Network-first para API
-  if (event.request.url.includes('api.') || event.request.url.includes('supabase')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match('/index.html'))
-    );
-    return;
-  }
-  
-  event.respondWith(
-    caches.match(event.request).then((res) => 
-      res || fetch(event.request).then((fetchRes) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, fetchRes.clone());
-          return fetchRes;
-        });
-      }).catch(() => caches.match('/index.html'))
-    )
-  );
-});
-
-// Background sync para quando voltar online
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-favorites') {
+// Instalar SW
+self.addEventListener('install', event => {
     event.waitUntil(
-      // Lógica de sync seria implementada aqui
-      console.log('Background sync triggered')
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
     );
-  }
+    self.skipWaiting();
+});
+
+// Ativar SW
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
+});
+
+// Interceptar requests
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // Retornar do cache se disponível
+                if (response) {
+                    return response;
+                }
+                // Caso contrário, buscar na rede
+                return fetch(event.request).then(response => {
+                    // Cache apenas requests GET bem-sucedidas
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                        return response;
+                    }
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    return response;
+                });
+            })
+    );
 });
